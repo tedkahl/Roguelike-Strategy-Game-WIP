@@ -36,6 +36,7 @@ WFC<T>::WFC(matrix<T> &input_, size_t oheight, size_t owidth, unsigned n, bool r
 	getPatterns();
 	propagator.initPropagator(options, patterns, pattern_weights, sumofweights);
 	propagator.generate();
+	//printOverlaps(60, propagator, patterns, options);
 	/*for (size_t i = 0; i < patterns.size();i++) {
 		printPattern(patterns[i]);
 		std::cout << "Weight: "<< pattern_weights[i]<<std::endl<<std::endl;

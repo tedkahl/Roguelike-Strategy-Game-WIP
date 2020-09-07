@@ -1,4 +1,4 @@
-#include <SFML/Graphics.hpp>
+﻿#include <SFML/Graphics.hpp>
 #include <iostream>
 #include "WFC.h"
 
@@ -26,7 +26,14 @@ int main()
 		window.draw(shape2);
 		window.display();
 	}*/
-	std::vector<std::vector<int>> input = { { 1,1,1 }, { 2,2,2 }, { 1,1,2 } };
-	WFC<int> w(input, 6, 6, 2);
+	std::vector<std::vector<char>> input = { {'x','x','x','x','x','x','x','x','x','.','.','.'},
+											{ 'x','x','.','.','x','x','x','x','.','.','.','.'},
+											{ 'x','x','.','.','x','x','x','x','.','.','.','.'},
+											{ 'x','x','.','.','.','.','.','.','.','.','.','.'},
+											{ 'x','x','.','.','x','x','x','x','x','x','x','x'},
+											{ 'x','x','x','x','x','x','x','x','x','x','x','x'},
+											{ 'x','x','x','x','x','x','x','x','x','x','x','x'} };
+
+	WFC<char> (input, 20, 20, 3);
 	return 0;
 }
