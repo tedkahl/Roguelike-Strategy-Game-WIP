@@ -48,7 +48,6 @@ WFC<T>::WFC(matrix<T> &input_, size_t oheight, size_t owidth, unsigned n, bool r
 		std::cout << "----------------------------------------------------------------------------" << std::endl;
 
 	}*/
-	//for (auto i : patterns) printOverlaps(i);
 }
 
 /*template <class T>

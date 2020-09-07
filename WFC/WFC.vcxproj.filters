@@ -13,6 +13,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Header Files\WFC">
+      <UniqueIdentifier>{88478a8e-bbb9-4593-879c-e05713892dd6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -20,26 +23,26 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="pch.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="WFCOptions.h">
+      <Filter>Header Files\WFC</Filter>
     </ClInclude>
     <ClInclude Include="Pattern.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\WFC</Filter>
     </ClInclude>
-    <ClInclude Include="WFC.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Wave.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="WFCOptions.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Tests.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="pch.h">
+      <Filter>Header Files\WFC</Filter>
     </ClInclude>
     <ClInclude Include="Propagator.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\WFC</Filter>
+    </ClInclude>
+    <ClInclude Include="Tests.h">
+      <Filter>Header Files\WFC</Filter>
+    </ClInclude>
+    <ClInclude Include="Wave.h">
+      <Filter>Header Files\WFC</Filter>
+    </ClInclude>
+    <ClInclude Include="WFC.h">
+      <Filter>Header Files\WFC</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
