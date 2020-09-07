@@ -21,6 +21,20 @@ namespace std {
 	};
 }
 
+
+/*Returns submatrix of specified height and width, beginning at given offsets*/
+template <typename T>
+matrix<T> subMatrix(const matrix<T> &mat, size_t yoffset, size_t xoffset, size_t height, size_t width) {
+	assert(yoffset + height <= mat.size());
+	assert(xoffset + width <= mat[0].size());
+	matrix<T> submatrix;
+	matrix<T> testmatrix = { {2,2},{2,1} };
+	for (auto i = mat.begin() + yoffset; i != mat.begin() + yoffset + height; i++) {
+		submatrix.push_back(std::vector<T>(i->begin() + xoffset, i->begin() + xoffset + width));
+	}
+	return submatrix;
+}
+
 /*Determines if two patterns can overlap in a given configuration. yoffset and xoffset specify the position of b 
 relative to a*/
 template <typename T>
@@ -29,24 +43,13 @@ bool overlaps(const matrix<T> &a, const matrix<T> &b, const int yoffset, const i
 	size_t n = a.size();
 	size_t overlap_height = n - std::abs(yoffset);
 	size_t overlap_width = n - std::abs(xoffset);
-	assert(std::abs(xoffset) < n);
-	assert(std::abs(yoffset) < n);
+	assert((size_t)std::abs(xoffset) < n);
+	assert((size_t)std::abs(yoffset) < n);
 
 	return (subMatrix(a, std::max(0, yoffset), std::max(0, xoffset), overlap_height, overlap_width) ==
 		subMatrix(b, std::max(0, -yoffset), std::max(0, -xoffset), overlap_height, overlap_width));
 }
 
-/*Returns submatrix of specified height and width, beginning at given offsets*/
-template <typename T>
-matrix<T> subMatrix(const matrix<T> &mat, size_t yoffset, size_t xoffset, size_t height, size_t width) {
-	assert(yoffset + height <= mat.size());
-	assert(xoffset + width <= mat[0].size());
-	matrix<T> submatrix;
-	for (auto i = mat.begin() + yoffset; i != mat.begin() + yoffset + height;i++) {
-		submatrix.push_back(std::vector<T>(i->begin() + xoffset, i->begin() + xoffset + width));
-	}
-	return submatrix;
-}
 
 /*Returns pattern reflected about the x axis*/
 template <typename T>
