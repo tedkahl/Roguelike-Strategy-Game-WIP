@@ -10,34 +10,43 @@ const unsigned default_n = 3;
 template <class T>
 class WFC
 {
+public:
+	void getPatterns();
+	void insertRotations(matrix<T> &pattern);
+	void initOutput();
+	WFC(matrix<T> &input_, size_t oheight, size_t owidth, const unsigned n=default_n, bool rotate=true, bool reflect=true);
 private:
 	matrix<T> input;
 	matrix<T> output;
 	std::vector<matrix<T>> patterns;
 	std::vector<unsigned> pattern_weights;
 	std::unordered_map<matrix<T>, size_t> pmap;
-	//Wave<T> wave;
+
+	Propagator<T> propagator;
+	unsigned sumofweights;
+
 	WFCOptions options;
-public:
-	void getPatterns();
-	void insertRotations(matrix<T> &pattern);
-	void initOutput();
-	WFC(matrix<T> &input_, size_t oheight, size_t owidth, const unsigned n=default_n, bool rotate=true, bool reflect=true);
 };
 
 template <class T>
 WFC<T>::WFC(matrix<T> &input_, size_t oheight, size_t owidth, unsigned n, bool rotate, bool reflect)
-	: input(input_), options(oheight, owidth, n, rotate, reflect)
+	: sumofweights(0), input(input_), options(oheight, owidth, n, rotate, reflect)
 {
 	//input=vector<vector<T>>(owidth,vector<T>(oheight,T()));
-
 	getPatterns();
-	for (size_t i = 0; i < patterns.size();i++) {
+	propagator.initPropagator(options, patterns, pattern_weights, sumofweights);
+	propagator.generate();
+	/*for (size_t i = 0; i < patterns.size();i++) {
 		printPattern(patterns[i]);
 		std::cout << "Weight: "<< pattern_weights[i]<<std::endl<<std::endl;
+	}*/
 
-	}
-	//setOverlapRules(patterns);
+	/*for (size_t i = 0; i < patterns.size(); i++) {
+		printPattern(patterns[i]);
+		printOverlaps<T>(i, propagator, patterns, options);
+		std::cout << "----------------------------------------------------------------------------" << std::endl;
+
+	}*/
 	//for (auto i : patterns) printOverlaps(i);
 }
 
@@ -77,6 +86,7 @@ void WFC<T>::insertRotations(matrix<T> &pattern) {
 		else {
 			pattern_weights[res.first->second]++;
 		}
+		sumofweights++;
 		pattern = rotate90(pattern);
 	}
 }
