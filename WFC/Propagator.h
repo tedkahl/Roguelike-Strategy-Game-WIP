@@ -3,17 +3,22 @@
 #include <cmath>
 #include <limits>
 #include <string>
+#include <windows.h>
 #include "Pattern.h"
 #include "WFCOptions.h"
+
 
 template <typename T>
 class Propagator
 {
 public:
+	//test
+	void printOverlaps(const size_t index);
+
 	std::vector<matrix<std::vector< size_t > > >  rules;	
 	void generate();
 	
-	bool allowed(const size_t patternaindex, const matrix<T> &patternb, const int yoffset, const int xoffset);
+	bool allowed(const size_t patternaindex, const size_t patternbindex, const int yoffset, const int xoffset);
 
 	void initPropagator(const WFCOptions &op, std::vector<matrix<T>> &patterns, 
 		std::vector<unsigned> &pattern_weights_, const int sumofweights_);
@@ -71,8 +76,6 @@ std::pair<size_t, size_t> Propagator<T>::findLowestEntropy()
 	for (size_t i = 0; i < wave.size(); i++) {
 		for (size_t j = 0; j < wave[0].size(); j++) {
 			if (entropy[i][j] == -1) continue; //ignore already collapsed squares
-			if (wave[i][j].size() == 0) assert(wave[i][j].size()!=0); //contradiction, throw an exception or something
-
 			if (entropy[i][j] < lowestEntropy) {
 				squares.clear();
 				squares.push_back(std::make_pair(i, j));
@@ -133,7 +136,7 @@ void Propagator<T>::initEntropy() {
 template <typename T>
 void Propagator<T>::initPropagator(const WFCOptions &options_, std::vector<matrix<T>> &patterns_,
 	std::vector<unsigned> &pattern_weights_, const int sumofweights_) {
-	srand(300);
+	srand(time(NULL));
 
 	options = options_;
 	rule_matrix_size = options.n * 2 - 1;
@@ -141,7 +144,7 @@ void Propagator<T>::initPropagator(const WFCOptions &options_, std::vector<matri
 	pattern_weights = pattern_weights_;
 	sumofweights = sumofweights_;
 
-	output = *new matrix<T>(options.oheight, std::vector<T>(options.owidth, T()));
+	output = *new matrix<T>(options.oheight, std::vector<T>(options.owidth, '_'));
 
 	initWave();
 	initEntropy();
@@ -152,10 +155,13 @@ void Propagator<T>::initPropagator(const WFCOptions &options_, std::vector<matri
 template<typename T>
 void printPattern(matrix<T> &pattern)
 {
+	int count = 0;
 	for (auto i : pattern) {
+		std::cout << count%10;
 		for (auto j : i) {
-			std::cout << j;
+			std::cout<<j;
 		}
+		count++;
 		std::cout << std::endl;
 	}
 }
@@ -163,14 +169,30 @@ void printPattern(matrix<T> &pattern)
 template <typename T>
 void Propagator<T>::generate()
 {
+	HANDLE hConsole;
+	hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+	SetConsoleTextAttribute(hConsole, 7);
+
 	while (!fully_collapsed()) {
 		auto coords = findLowestEntropy();
 		collapse(coords.first, coords.second);
 		updateOutput(coords.first, coords.second);
-		std::cout << std::string(100, '\n');
-		printPattern(output);
+		//std::cout << std::string(20, '\n');
+		
 
 		propagate(coords.first, coords.second);
+	}
+	for (int i = 0; i < output.size(); i++) {
+		for (int j = 0; j < output[0].size(); j++) {
+			/*if (i >= coords.first&&i < coords.first + options.n &&
+				j >= coords.second&&j < coords.second + options.n) {
+				SetConsoleTextAttribute(hConsole, 4);
+				std::cout << output[i][j];
+				SetConsoleTextAttribute(hConsole, 7);
+			}*/
+			std::cout << output[i][j];
+		}
+		std::cout << std::endl;
 	}
 }
 
@@ -178,31 +200,43 @@ void Propagator<T>::generate()
 template <typename T>
 void Propagator<T>::propagate(int y, int x)
 {
+	std::cout << "propagate pattern " << wave[x][y][0] << "at " << y << ", " << x << std::endl;
+	printPattern(patterns[wave[x][y][0]]);
+	int n = options.n;	
 
-	int n = options.n;
-	int height = wave.size();
-	int width = wave[0].size();
-	for (int i = 1 - n; i <= n - 1; i++) {
-		if (y + i < 0 || y + i > height - 1) continue;
-		for (int j = 1 - n; j <= n - 1; j++) {
-			if (x + j < 0 || x + j > width - 1) continue;
-			if (entropy[y + i][x + j] == -1) continue;
-			size_t k = 0;
-			while (k < wave[y + i][x + j].size()) {
-				if (!allowed(wave[y][x][0], patterns[wave[y + i][x + j][k]], i, j)) {
-				//	std::cout << "Pattern " << wave[y + i][x + j][k] << " not allowed in position " << i << ", " << j << ". Erasing." << std::endl;
-					wave[y + i][x + j].erase(wave[y + i][x + j].begin() + k);
-				}
-				else {
-				//	std::cout << "Pattern " << wave[y + i][x + j][k] << " allowed in position " << i << ", " << j << ". Did not erase." << std::endl;
-					k++;
-				}
+	size_t ystart = std::max(0, y - n + 1);
+	size_t yend = std::min((int)wave.size(), y + n );
+	size_t xstart = std::max(0, x - n + 1);
+	size_t xend = std::min((int)wave[0].size(), x + n );
+
+	for (size_t i = ystart; i < yend; i++) {
+		for (size_t j = xstart; j < xend; j++) {
+			if (wave[i][j].size() <= 1) continue;
+			
+			//test print
+			/*std::cout << i << ", " << j << ", " << std::endl;
+			for (auto it : wave[i][j]) {
+				std::cout << it << std::endl; printPattern(patterns[it]);
+			}*/
+
+			std::vector<size_t> temp;
+			std::copy_if(wave[i][j].begin(), wave[i][j].end(), std::back_inserter(temp),
+				[=,this](size_t pindex) {return allowed(wave[y][x][0], pindex, (int)i-(int)y, (int)j-(int)x); });
+			wave[i][j] = std::move(temp);
+			
+			if (wave[i][j].size() == 0) {
+				std::cout << "Contradiction at " << i << ", " << j;
+				assert(wave[i][j].size() != 0); //contradiction, throw an exception or something
 			}
-			//printPattern(patterns[wave[y][x][0]]);
-			//std::cout << i << ", " << j << ", " << std::endl;
-			//for (auto it : wave[y + i][x + j]) { std::cout << it << std::endl; printPattern(patterns[it]);  }
-			entropy[y + i][x + j] = shannonEntropy(y + i, x + j);
-			//std::cout << "Entropy: " << entropy[y + i][x + j] << std::endl;
+
+			//test print
+			/*printPattern(patterns[wave[y][x][0]]);
+			std::cout << i << ", " << j << ", " << std::endl;
+			for (auto it : wave[i][j]) { std::cout << it << std::endl; printPattern(patterns[it]);  }
+			*/
+			entropy[i][j] = shannonEntropy(i, j);
+			//std::cout << "Entropy: " << entropy[i][j] << std::endl;
+			
 		}
 	}
 }
@@ -238,12 +272,26 @@ void Propagator<T>::setOverlapRules()
 	}
 }
 
+template<typename T>
+void Propagator<T>::printOverlaps(const size_t index)
+{
+	for (int i = 0; i < 2 * (int)options.n - 1; i++) {
+		for (int j = 0; j < 2 * (int)options.n - 1; j++) {
+			std::cout << i - (int)options.n + 1 << ", " << j - (int)options.n + 1 << ":" << std::endl;
+			for (auto k : rules[index][i][j]) {
+				printPattern(patterns[k]);
+				std::cout << std::endl;
+			}
+		}
+	}
+}
 
 /*Checks if pattern is allowed in given position according to current rules*/
 template <typename T>
-bool Propagator<T>::allowed(const size_t patternaindex, const matrix<T> &patternb, const int yoffset, const int xoffset) {
+bool Propagator<T>::allowed(const size_t patternaindex, const size_t patternbindex, const int yoffset, const int xoffset) {
 	for(auto i:rules[patternaindex][yoffset + (int)options.n - 1][xoffset + (int)options.n - 1]){
-			if (patterns[i] == patternb) return true;
+			if (i == patternbindex) return true;
+			if (i > patternbindex) return false;
 	}
 	return false;
 }
