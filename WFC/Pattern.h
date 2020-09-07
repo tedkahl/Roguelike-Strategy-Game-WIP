@@ -27,10 +27,11 @@ template <typename T>
 matrix<T> subMatrix(const matrix<T> &mat, size_t yoffset, size_t xoffset, size_t height, size_t width) {
 	assert(yoffset + height <= mat.size());
 	assert(xoffset + width <= mat[0].size());
-	matrix<T> submatrix;
-	matrix<T> testmatrix = { {2,2},{2,1} };
-	for (auto i = mat.begin() + yoffset; i != mat.begin() + yoffset + height; i++) {
-		submatrix.push_back(std::vector<T>(i->begin() + xoffset, i->begin() + xoffset + width));
+	matrix<T> submatrix(height, std::vector<T>(width));
+	for (size_t i = 0; i < height; i++) {
+		for (size_t j = 0; j < width; j++) {
+			submatrix[i][j] = mat[yoffset + i][xoffset + j];
+		}
 	}
 	return submatrix;
 }
@@ -40,14 +41,19 @@ relative to a*/
 template <typename T>
 bool overlaps(const matrix<T> &a, const matrix<T> &b, const int yoffset, const int xoffset)
 {
-	size_t n = a.size();
-	size_t overlap_height = n - std::abs(yoffset);
-	size_t overlap_width = n - std::abs(xoffset);
-	assert((size_t)std::abs(xoffset) < n);
-	assert((size_t)std::abs(yoffset) < n);
+	size_t ystarta = std::max(0, yoffset);
+	size_t xstarta = std::max(0, xoffset);
+	size_t ystartb = std::max(0, -yoffset);
+	size_t xstartb = std::max(0, -xoffset);
+	size_t overlap_height = a.size() - std::abs(yoffset);
+	size_t overlap_width = a.size() - std::abs(xoffset);
 
-	return (subMatrix(a, std::max(0, yoffset), std::max(0, xoffset), overlap_height, overlap_width) ==
-		subMatrix(b, std::max(0, -yoffset), std::max(0, -xoffset), overlap_height, overlap_width));
+	for (size_t i = 0; i < overlap_height; i++) {
+		for (size_t j = 0; j < overlap_width; j++) {
+			if (a[ystarta + i][xstarta + j] != b[ystartb + i][xstartb + j]) return false;
+		}
+	}
+	return true;
 }
 
 
