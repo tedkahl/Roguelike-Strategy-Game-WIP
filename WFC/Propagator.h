@@ -172,7 +172,7 @@ std::pair<size_t, size_t> Propagator<T>::findLowestEntropy()
 	std::vector<std::pair<size_t, size_t>> squares = {};
 	for (size_t i = 0; i < wave.size(); i++) {
 		for (size_t j = 0; j < wave[0].size(); j++) {
-			if (entropy[i][j] == -1) continue; //ignore already collapsed squares
+			if (entropy[i][j] == 0) continue; //ignore already collapsed squares
 			if (entropy[i][j] < lowestEntropy) {
 				squares.clear();
 				squares.push_back(std::make_pair(i, j));
@@ -197,8 +197,8 @@ size_t Propagator<T>::collapse(size_t y, size_t x) {
 		total -= pattern_weights[i];
 
 		if (total < 0) { 
-			wave = { i };
-			entropy[y][x] = -1;
+			wave[y][x] = { i };
+			entropy[y][x] = 0;
 			return i;
 		}
 	}
@@ -209,13 +209,10 @@ template <typename T>
 double Propagator<T>::shannonEntropy(size_t y, size_t x) const
 {
 	double sumwlogw = 0, sumweight=0;
-	for (size_t i = 0; i < patterns.size(); i++) {
-		if(wave[y][x][i])
-		{
+	for (auto i:wave[y][x]) {
 			sumwlogw += pattern_wlogw[i];
 			sumweight += pattern_weights[i];
 		}
-	}
 	return log(sumweight) - (sumwlogw / sumweight);
 }
 
@@ -229,7 +226,7 @@ void Propagator<T>::getNeighbors(std::stack<std::pair<int,int>> &flagged, const 
 
 	for (int i = ystart; i < yend; i++) {
 		for (int j = xstart; j < xend; j++) {
-			if (entropy[i][j] == -1) continue;
+			if (entropy[i][j] == 0) continue;
 			flagged.push(std::make_pair(i, j));
 		}
 	}
@@ -270,7 +267,6 @@ bool Propagator<T>::checkConflicts(const int y, const int x)
 	int xend = std::min((int)wave[0].size(), x + (int)options.n);
 
 	int yindex, xindex;
-	bool definite=false;
 	std::vector<size_t> temp;
 	for (int i = ystart; i < yend; i++) {
 		for (int j = xstart; j < xend; j++) {
@@ -280,7 +276,6 @@ bool Propagator<T>::checkConflicts(const int y, const int x)
 				std::copy_if(wave[y][x].begin(), wave[y][x].end(), std::back_inserter(temp), [=,this](size_t pindex) {
 					return rules[wave[i][j][0]][yindex][xindex][pindex];
 				});
-				if (temp.size() == 1 && temp != wave[y][x]) definite = true;
 				wave[y][x] = std::move(temp);
 				entropy[y][x] = shannonEntropy(y,x);
 			}
@@ -291,7 +286,7 @@ bool Propagator<T>::checkConflicts(const int y, const int x)
 		assert(false);
 	}
 
-	return definite;
+	return temp.size()==1;
 }
 
 //test
