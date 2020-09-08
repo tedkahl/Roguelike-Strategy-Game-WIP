@@ -24,7 +24,6 @@ public:
 	void initPropagator(const WFCOptions &op, std::vector<matrix<T>> &patterns, 
 		std::vector<unsigned> &pattern_weights_, const int sumofweights_);
 	
-	void propagate(const size_t pindex, const int y, const int x);
 	Propagator() {};
 	
 private:
@@ -47,6 +46,9 @@ private:
 	std::vector<matrix<T>> patterns;
 	std::vector<unsigned> pattern_weights;
 	std::vector<double> pattern_wlogw;
+
+	void getNeighbors(const int y, const int x);
+	void propagate(const size_t pindex, const int y, const int x);
 
 	matrix<std::vector<bool>> wave;
 	matrix<T> output;
@@ -225,45 +227,50 @@ double Propagator<T>::shannonEntropy(size_t y, size_t x) const
 	return log(sumweight) - (sumwlogw / sumweight);
 }
 
+template <typename T>
+void Propagator<T>::getNeighbors(const int y, const int x)
+{
+	int  ystart = std::max(0, y - (int)options.n + 1);
+	int  yend = std::min((int)wave.size(), y + (int)options.n);
+	int  xstart = std::max(0, x - (int)options.n + 1);
+	int  xend = std::min((int)wave[0].size(), x + (int)options.n);
+
+	for (int i = ystart; i < yend; i++) {
+		for (int j = xstart; j < xend; j++) {
+			if (entropy[i][j] == -1) continue;
+			stack.push(std::make_pair(i, j));
+		}
+	}
+}
+
 //After collapse, eliminate conflicting patterns from overlapping squares, then adjust entropy for those squares
 template <typename T>
 void Propagator<T>::propagate(size_t pindex, int y, int x)
 {
 	std::cout << "propagate pattern " << pindex << "at " << y << ", " << x << std::endl;
-	int n = options.n;	
+	
+	std::pair<int, int> current;
+	getNeighbors(y, x);
 
-	size_t ystart = std::max(0, y - n + 1);
-	size_t yend = std::min((int)wave.size(), y + n );
-	size_t xstart = std::max(0, x - n + 1);
-	size_t xend = std::min((int)wave[0].size(), x + n );
+	bool changed;
+	while (!stack.empty()) {
+		std::cout << stack.size() << std::endl;
+		current = stack.top();
+		stack.pop();
+		changed = checkConflicts(current.first, current.second);
+		std::cout << (changed? "Changed" : "Not changed");
 
-	for (size_t i = ystart; i < yend; i++) {
-		for (size_t j = xstart; j < xend; j++) {
-			if (entropy[i][j] == -1) continue;
-			for (size_t k = 0; k < patterns.size(); k++) {
-				if (wave[i][j][k] && !allowed(pindex, k, (int)i - (int)y, (int)j - (int)x)){
-					wave[i][j][k] = false;
-					num_patterns[i][j]--;
-				}
-				if (num_patterns[i][j] == 0) {
-					std::cout << "Contradiction at " << i << ", " << j;
-					assert(num_patterns[i][j] != 0);
-				}
-				
-			}
-
-			//test print
-			/*printPattern(wave[y][x][0]);
-			std::cout << i << ", " << j << ", " << std::endl;
-			for (auto it : wave[i][j]) { std::cout << it << std::endl; printPattern(it);  }
-			*/
-			entropy[i][j] = shannonEntropy(i, j);
-			//std::cout << "Entropy: " << entropy[i][j] << std::endl;
-			
+		if (wave[current.first][current.second] == empty) {
+			std::cout << "Contradiction at " << current.first << ", " << current.second;
+			assert(false);
 		}
-	}
-}
 
+		if (changed) {
+			entropy[current.first][current.second] = shannonEntropy(current.first, current.second);
+			getNeighbors(current.first, current.second);
+		}
+	}	
+}
 
 /*Checks if pattern is allowed in given position according to current rules*/
 template <typename T>
