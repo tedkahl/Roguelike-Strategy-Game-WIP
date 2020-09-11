@@ -26,7 +26,6 @@ public:
 	Propagator() {};
 	
 private:
-	size_t rule_matrix_size;
 	WFCOptions options;
 	int sumofweights; 
 
@@ -61,7 +60,6 @@ void Propagator<T>::initPropagator(const WFCOptions &options_, std::vector<matri
 	srand((unsigned int)time(NULL));
 
 	options = options_;
-	rule_matrix_size = options.n * 2 - 1;
 	patterns = patterns_;
 	pattern_weights = pattern_weights_;
 	sumofweights = sumofweights_;
@@ -106,8 +104,8 @@ the index of each pattern that can overlap in that position. Other patterns are 
 template <typename T>
 void Propagator<T>::initOverlapRules()
 {
-	rules.assign(patterns.size(), matrix<std::vector<bool>>(rule_matrix_size,
-		std::vector<std::vector<bool>>(rule_matrix_size, std::vector<bool>(patterns.size()))));
+	rules.assign(patterns.size(), matrix<std::vector<bool>>(options.n * 2 - 1,
+		std::vector<std::vector<bool>>(options.n * 2 - 1, std::vector<bool>(patterns.size()))));
 	int n = options.n;
 	for (size_t i = 0; i < patterns.size(); i++) {
 		for (int j = 1 - n; j <= n - 1; j++) {
@@ -175,7 +173,7 @@ std::pair<size_t, size_t> Propagator<T>::findLowestEntropy()
 			if (entropy[i][j] == 0) continue; //ignore already collapsed squares
 			if (entropy[i][j] < lowestEntropy) {
 				squares.clear();
-				squares.push_back(std::make_pair(i, j));
+				squares.emplace_back(i, j);
 				lowestEntropy = entropy[i][j];
 			}
 			else if (entropy[i][j] == lowestEntropy) {
