@@ -38,9 +38,6 @@
     <ClInclude Include="Tests.h">
       <Filter>Header Files\WFC</Filter>
     </ClInclude>
-    <ClInclude Include="Wave.h">
-      <Filter>Header Files\WFC</Filter>
-    </ClInclude>
     <ClInclude Include="WFC.h">
       <Filter>Header Files\WFC</Filter>
     </ClInclude>

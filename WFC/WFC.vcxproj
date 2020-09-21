@@ -142,7 +142,6 @@
     <ClInclude Include="pch.h" />
     <ClInclude Include="Propagator.h" />
     <ClInclude Include="Tests.h" />
-    <ClInclude Include="Wave.h" />
     <ClInclude Include="WFC.h" />
     <ClInclude Include="WFCOptions.h" />
   </ItemGroup>
