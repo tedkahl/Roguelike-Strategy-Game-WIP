@@ -280,7 +280,17 @@ bool Propagator<T>::checkConflicts(const int y, const int x)
 		}
 	}
 	if (wave[y][x].size() == 0) {
-		std::cout << "Contradiction at " << y << ", " << x;
+		std::cout << "Contradiction at " << y << ", " << x<<std::endl;
+		for (int i = 0;i < patterns.size();i++) {
+			printPattern(i);
+			std::cout << std::endl;
+		}
+		for (int i = y;i < y + options.n;i++) {
+			for (int j = x;j < x + options.n;j++) {
+				std::cout << output[i][j];
+			}
+			std::cout << std::endl;
+		}
 		assert(false);
 	}
 
