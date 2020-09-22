@@ -79,8 +79,7 @@
       <AdditionalIncludeDirectories>C:\Users\Ted\source\repos\libraries\SFML-2.5.1\include</AdditionalIncludeDirectories>
       <AdditionalUsingDirectories>
       </AdditionalUsingDirectories>
-      <LanguageStandard>
-      </LanguageStandard>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

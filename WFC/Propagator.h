@@ -204,7 +204,6 @@ size_t Propagator<T>::collapse(size_t y, size_t x) {
 template <typename T>
 double Propagator<T>::shannonEntropy(size_t y, size_t x) const
 {
-	std::optional<int> x;
 	double sumwlogw = 0, sumweight=0;
 	for (auto i:wave[y][x]) {
 			sumwlogw += pattern_wlogw[i];
@@ -217,6 +216,7 @@ template <typename T>
 std::vector<size_t>& Propagator<T>::waveAt(std::pair<int, int> coords) {
 	return wave[coords.first][coords.second];
 }
+
 template <typename T>
 void Propagator<T>::getNeighbors(std::stack<std::pair<int,int>> &flagged, const std::pair<int, int> coords)
 {
@@ -252,8 +252,8 @@ void Propagator<T>::propagate(size_t pindex, const std::pair<int,int> coords)
 	}	
 }
 
-//Checks for conflicts with overlapping definite patterns, removes from wave
-//returns true if 
+//Checks for conflicts with adjacent definite patterns at a given square, removes invalid patterns from wave
+//returns true if sqyare is now definite (has only one valid pattern)
 template <typename T>
 bool Propagator<T>::checkConflicts(const std::pair<int,int> coords)
 {
@@ -261,26 +261,22 @@ bool Propagator<T>::checkConflicts(const std::pair<int,int> coords)
 	std::vector<size_t> temp;
 
 	std::optional<std::pair<int, int>> next;
-	for (auto i : directions) {
-		if ((next = getCoords(coords, wave, i)).has_value() && entropy[next.value().first][next.value().second] == 0)
-			
-	}
 
 	for (auto i : directions) {
-		if (next = getCoords(coords, wave, i)) {
-			yindex = next.value().first - coords.first + (int)options.n - 1;
-			yindex = next.value().second - coords.second + (int)options.n - 1;
+		if ((next = getCoords(coords, wave, i)).has_value() && entropy[next.value().first][next.value().second] == 0) {
+			yindex = coords.first - next.value().first + (int)options.n - 1;
+			xindex = coords.second - next.value().second + (int)options.n - 1;
 			std::copy_if(waveAt(coords).begin(), waveAt(coords).end(), std::back_inserter(temp), [=, this](size_t pindex) {
-				return rules[wave[next.value().first][next.value().second][0]][yindex][xindex][pindex];
+				return rules[waveAt(next.value())[0]][yindex][xindex][pindex];
 				});
-			wave[y][x] = std::move(temp);
-			entropy[y][x] = shannonEntropy(y, x);
+			waveAt(coords) = std::move(temp);
+			entropy[coords.first][coords.second] = shannonEntropy(coords.first, coords.second);
 		}
 	}
-		}
-	}
-	if (wave[y][x].size() == 0) {
-		std::cout << "Contradiction at " << y << ", " << x;
+		
+	
+	if (waveAt(coords).size() == 0) {
+		std::cout << "Contradiction at " << coords.first << ", " << coords.second;
 		assert(false);
 	}
 

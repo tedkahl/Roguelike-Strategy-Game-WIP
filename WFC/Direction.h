@@ -7,7 +7,7 @@ const std::array<size_t, 4> directions = { 0,1,2,3 };
 const std::array<int, 4> xdir = { 0,1,0,-1 };
 const std::array<int, 4> ydir = { 1,0,-1,0 };
 
-const std::pair<int, int> getCoords(std::pair<int, int> coords, matrix<std::vector<size_t>> &wave, int dir)
+const std::optional<std::pair<int, int>> getCoords(std::pair<int, int> coords, matrix<std::vector<size_t>> &wave, int dir)
 {
 	coords.first += xdir[dir];
 	coords.second += ydir[dir];
