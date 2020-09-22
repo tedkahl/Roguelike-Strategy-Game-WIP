@@ -4,7 +4,6 @@
 #include <unordered_map>
 #include <vector>
 #include "Pattern.h"
-#include "Wave.h"
 #include "Tests.h"
 const unsigned default_n = 3;
 template <class T>
