@@ -269,8 +269,8 @@ bool Propagator<T>::checkConflicts(const int y, const int x)
 	for (int i = ystart; i < yend; i++) {
 		for (int j = xstart; j < xend; j++) {
 			if (wave[i][j].size() == 1) {
-				yindex = i - y + (int)options.n - 1;
-				xindex = j - x + (int)options.n - 1;
+				yindex = y - i + (int)options.n - 1;
+				xindex = x - j + (int)options.n - 1;
 				std::copy_if(wave[y][x].begin(), wave[y][x].end(), std::back_inserter(temp), [=,this](size_t pindex) {
 					return rules[wave[i][j][0]][yindex][xindex][pindex];
 				});
