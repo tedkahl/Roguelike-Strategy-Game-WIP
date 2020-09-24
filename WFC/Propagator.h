@@ -175,7 +175,7 @@ std::pair<size_t, size_t> Propagator<T>::findLowestEntropy()
 				lowestEntropy = entropy[i][j];
 			}
 			else if (entropy[i][j] == lowestEntropy) {
-				squares.push_back(std::make_pair(i, j));
+				squares.emplace_back(i,j);
 			}
 		}
 	}
@@ -204,6 +204,7 @@ size_t Propagator<T>::collapse(size_t y, size_t x) {
 template <typename T>
 double Propagator<T>::shannonEntropy(size_t y, size_t x) const
 {
+	if (wave[y][x].size() == 1) return 0;
 	double sumwlogw = 0, sumweight=0;
 	for (auto i:wave[y][x]) {
 			sumwlogw += pattern_wlogw[i];
@@ -253,7 +254,7 @@ void Propagator<T>::propagate(size_t pindex, const std::pair<int,int> coords)
 }
 
 //Checks for conflicts with adjacent definite patterns at a given square, removes invalid patterns from wave
-//returns true if sqyare is now definite (has only one valid pattern)
+//returns true if square is now definite (has only one valid pattern)
 template <typename T>
 bool Propagator<T>::checkConflicts(const std::pair<int,int> coords)
 {
@@ -271,6 +272,7 @@ bool Propagator<T>::checkConflicts(const std::pair<int,int> coords)
 				});
 			waveAt(coords) = std::move(temp);
 			entropy[coords.first][coords.second] = shannonEntropy(coords.first, coords.second);
+			if (waveAt(coords).size() == 1) updateOutput(waveAt(coords)[0], coords.first, coords.second);
 		}
 	}
 		
