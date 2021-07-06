@@ -137,11 +137,12 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Direction.h" />
     <ClInclude Include="Pattern.h" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="Propagator-old.h" />
     <ClInclude Include="Propagator.h" />
     <ClInclude Include="Tests.h" />
-    <ClInclude Include="Wave.h" />
     <ClInclude Include="WFC.h" />
     <ClInclude Include="WFCOptions.h" />
   </ItemGroup>

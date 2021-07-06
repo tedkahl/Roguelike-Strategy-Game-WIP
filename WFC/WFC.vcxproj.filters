@@ -32,16 +32,19 @@
     <ClInclude Include="pch.h">
       <Filter>Header Files\WFC</Filter>
     </ClInclude>
-    <ClInclude Include="Propagator.h">
-      <Filter>Header Files\WFC</Filter>
-    </ClInclude>
     <ClInclude Include="Tests.h">
       <Filter>Header Files\WFC</Filter>
     </ClInclude>
-    <ClInclude Include="Wave.h">
+    <ClInclude Include="WFC.h">
       <Filter>Header Files\WFC</Filter>
     </ClInclude>
-    <ClInclude Include="WFC.h">
+    <ClInclude Include="Propagator-old.h">
+      <Filter>Header Files\WFC</Filter>
+    </ClInclude>
+    <ClInclude Include="Propagator.h">
+      <Filter>Header Files\WFC</Filter>
+    </ClInclude>
+    <ClInclude Include="Direction.h">
       <Filter>Header Files\WFC</Filter>
     </ClInclude>
   </ItemGroup>

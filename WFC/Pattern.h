@@ -13,7 +13,7 @@ namespace std {
 		size_t operator()(const matrix<T>& m) const noexcept{
 			size_t seed = sizeof m;
 			for (auto i:m) for (auto j:i) {
-					seed ^= static_cast<size_t>(j) + 0x9e3779b9 + (seed << 6) + (seed >> 2); //based on Boost's hash_combine
+				seed ^= std::hash<T>{}(j)+0x9e3779b9 + (seed << 6) + (seed >> 2); //based on Boost's hash_combine
 			
 			}
 			return seed;
@@ -41,12 +41,12 @@ relative to a*/
 template <typename T>
 bool overlaps(const matrix<T> &a, const matrix<T> &b, const int yoffset, const int xoffset)
 {
-	size_t ystarta = std::max(0, yoffset);
-	size_t xstarta = std::max(0, xoffset);
-	size_t ystartb = std::max(0, -yoffset);
-	size_t xstartb = std::max(0, -xoffset);
-	size_t overlap_height = a.size() - std::abs(yoffset);
-	size_t overlap_width = a.size() - std::abs(xoffset);
+	size_t ystarta = std::max(0, yoffset),
+		xstarta = std::max(0, xoffset),
+		ystartb = std::max(0, -yoffset),
+		xstartb = std::max(0, -xoffset),
+		overlap_height = a.size() - std::abs(yoffset),
+		overlap_width = a.size() - std::abs(xoffset);
 
 	for (size_t i = 0; i < overlap_height; i++) {
 		for (size_t j = 0; j < overlap_width; j++) {
