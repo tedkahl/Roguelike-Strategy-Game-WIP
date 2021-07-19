@@ -1,33 +1,32 @@
 #pragma once
-#include <vector>
 #include <assert.h>
 #include <algorithm>
-
-template<class T>
-using matrix = std::vector<std::vector<T>>;
+#include <vector>
+#include <array>
+template<typename T, size_t N, size_t M>
+using matrix = std::array<std::array<T, M>, N>;
 
 namespace std {
-	template <typename T>
-	class hash<matrix<T>> {
+	template<typename T, unsigned N, unsigned M>
+	class hash<matrix<T, N, M>> {
 	public:
-		size_t operator()(const matrix<T>& m) const noexcept{
+		size_t operator()(const matrix<T, N, M>& m) const noexcept {
 			size_t seed = sizeof m;
-			for (auto i:m) for (auto j:i) {
+			for (auto i : m) for (auto j : i) {
 				seed ^= std::hash<T>{}(j)+0x9e3779b9 + (seed << 6) + (seed >> 2); //based on Boost's hash_combine
-			
+
 			}
 			return seed;
 		}
 	};
 }
 
-
 /*Returns submatrix of specified height and width, beginning at given offsets*/
-template <typename T>
-matrix<T> subMatrix(const matrix<T> &mat, size_t yoffset, size_t xoffset, size_t height, size_t width) {
+template<typename T, unsigned N, unsigned M>
+auto subMatrix(const matrix<T, N, M>& mat, const size_t yoffset, const size_t xoffset, const size_t height, const size_t width) {
 	assert(yoffset + height <= mat.size());
 	assert(xoffset + width <= mat[0].size());
-	matrix<T> submatrix(height, std::vector<T>(width));
+	matrix<T, height, width> submatrix;
 	for (size_t i = 0; i < height; i++) {
 		for (size_t j = 0; j < width; j++) {
 			submatrix[i][j] = mat[yoffset + i][xoffset + j];
@@ -36,20 +35,20 @@ matrix<T> subMatrix(const matrix<T> &mat, size_t yoffset, size_t xoffset, size_t
 	return submatrix;
 }
 
-/*Determines if two patterns can overlap in a given configuration. yoffset and xoffset specify the position of b 
+/*Determines if two patterns can overlap in a given configuration. yoffset and xoffset specify the position of b
 relative to a*/
-template <typename T>
-bool overlaps(const matrix<T> &a, const matrix<T> &b, const int yoffset, const int xoffset)
+template<typename T, unsigned N, unsigned M>
+bool overlaps(const matrix<T, N, M>& a, const matrix<T, N, M>& b, const int yoffset, const int xoffset)
 {
-	size_t ystarta = std::max(0, yoffset),
+	unsigned ystarta = std::max(0, yoffset),
 		xstarta = std::max(0, xoffset),
 		ystartb = std::max(0, -yoffset),
 		xstartb = std::max(0, -xoffset),
 		overlap_height = a.size() - std::abs(yoffset),
 		overlap_width = a.size() - std::abs(xoffset);
 
-	for (size_t i = 0; i < overlap_height; i++) {
-		for (size_t j = 0; j < overlap_width; j++) {
+	for (unsigned i = 0; i < overlap_height; i++) {
+		for (unsigned j = 0; j < overlap_width; j++) {
 			if (a[ystarta + i][xstarta + j] != b[ystartb + i][xstartb + j]) return false;
 		}
 	}
@@ -58,50 +57,25 @@ bool overlaps(const matrix<T> &a, const matrix<T> &b, const int yoffset, const i
 
 
 /*Returns pattern reflected about the x axis*/
-template <typename T>
-matrix<T> reflect(matrix<T> &pattern) {
-	size_t n = pattern.size();
-	matrix<T> reflected(n, std::vector<T>(n));
-	for (size_t i = 0; i < n; i++)
-		for (size_t j = 0; j < n; j++) {
-			reflected[i][n - 1 - j] = pattern[i][j];
+template<typename T, unsigned N, unsigned M>
+matrix<T, N, M> reflect(matrix<T, N, M>& pattern)
+{
+	matrix<T, N, M> reflected;
+	for (unsigned i = 0; i < N; i++)
+		for (unsigned j = 0; j < M; j++) {
+			reflected[i][M - 1 - j] = pattern[i][j];
 		}
 	return reflected;
-
 }
 
 /*Returns the matrix rotated 90 degrees clockwise*/
-template <typename T>
-matrix<T> rotate90(matrix<T> &pattern)
+template<typename T, unsigned N, unsigned M>
+matrix<T, M, N> rotate90(matrix<T, N, M>& pattern)
 {
-	size_t n = pattern.size();
-	matrix<T> rotated(n, std::vector<T>(n));
-	for (size_t i = 0; i < n; i++)
-		for (size_t j = 0; j < n; j++) {
-			rotated[j][n - 1 - i]=pattern[i][j];
+	matrix<T, M, N> rotated;
+	for (unsigned i = 0; i < N; i++)
+		for (unsigned j = 0; j < M; j++) {
+			rotated[j][N - 1 - i] = pattern[i][j];
 		}
 	return rotated;
 }
-
-/*
-template <typename T>
-matrix<T> rotate180(matrix<T> matrix)
-{
-	matrix<T> rotated(matrix.size(), std::vector<T>(matrix[0].size()));
-	for (size_t i = 0; i < matrix.size(); i++)
-		for (size_t j = 0; j < matrix[0].size(); j++) {
-			rotated[rotated.size()-1-i][rotated[0].size() -1 - j]= matrix[i][j];
-		}
-	return rotated;
-}
-
-template <typename T>
-matrix<T> rotate270(matrix<T> matrix)
-{
-	matrix<T> rotated(matrix[0].size(), std::vector<T>(matrix.size()));
-	for (size_t i = 0; i < matrix.size(); i++)
-		for (size_t j = 0; j < matrix[0].size(); j++) {
-			rotated[rotated.size() - 1 - j][i]= matrix[i][j];
-		}
-	return rotated;
-}*/

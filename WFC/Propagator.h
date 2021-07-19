@@ -13,17 +13,17 @@
 class Propagator
 {
 public:
-	Propagator(const WFCOptions &options_,
-			   const std::vector<unsigned> &pattern_weights_);
+	Propagator(const WFCOptions& options_,
+		const std::vector<unsigned>& pattern_weights_);
 
 	std::vector<std::array<std::vector<bool>, 4>> rules;
 	matrix<std::vector<std::array<unsigned, 4>>> valid;
 
-	std::vector<bool> &waveAt(std::pair<int, int> coords);
+	std::vector<bool>& waveAt(std::pair<int, int> coords);
 	size_t collapse(std::pair<size_t, size_t> coords);
-	std::pair<size_t, size_t> findLowestEntropy();
-	void setRules(std::vector<std::array<std::vector<bool>, 4>> &rules_,
-				  std::vector<std::array<unsigned, 4>> &valid_);
+	std::optional<std::pair<size_t, size_t>> findLowestEntropy();
+	void setRules(std::vector<std::array<std::vector<bool>, 4>>& rules_,
+		std::vector<std::array<unsigned, 4>>& valid_);
 
 	auto getWave();
 
@@ -35,7 +35,6 @@ private:
 	matrix<std::vector<bool>> wave;
 
 	void initEntropy();
-	matrix<std::vector<size_t>> initWave();
 	double shannonEntropy(size_t y, size_t x) const;
 
 	std::vector<unsigned> pattern_weights;
@@ -46,13 +45,12 @@ private:
 	matrix<bool> collapsed;
 
 	void checkNeighbors(const std::tuple<int, int, size_t> removed);
-	bool checkConflicts(const std::pair<int, int> coords);
 };
 
-Propagator::Propagator(const WFCOptions &options_,
-					   const std::vector<unsigned> &pattern_weights_) : options(options_), numpatterns(pattern_weights_.size()), pattern_weights(pattern_weights_),
-																		wave(options.oheight - options.n + 1, std::vector<std::vector<bool>>(options.owidth - options.n + 1, std::vector<bool>(numpatterns, 1))),
-																		collapsed(wave.size(), std::vector<bool>(wave[0].size())), pattern_wlogw(), entropy()
+Propagator::Propagator(const WFCOptions& options_,
+	const std::vector<unsigned>& pattern_weights_) : options(options_), numpatterns(pattern_weights_.size()), pattern_weights(pattern_weights_),
+	wave(options.oheight - options.n + 1, std::vector<std::vector<bool>>(options.owidth - options.n + 1, std::vector<bool>(numpatterns, 1))),
+	pattern_wlogw(), entropy(), collapsed(wave.size(), std::vector<bool>(wave[0].size()))
 {
 	initEntropy();
 	srand((unsigned int)time(NULL));
@@ -60,8 +58,8 @@ Propagator::Propagator(const WFCOptions &options_,
 
 auto Propagator::getWave() { return &wave; }
 
-void Propagator::setRules(std::vector<std::array<std::vector<bool>, 4>> &rules_,
-						  std::vector<std::array<unsigned, 4>> &valid_)
+void Propagator::setRules(std::vector<std::array<std::vector<bool>, 4>>& rules_,
+	std::vector<std::array<unsigned, 4>>& valid_)
 {
 	rules = std::move(rules_);
 	valid.assign(wave.size(), std::vector<std::vector<std::array<unsigned, 4>>>(wave[0].size(), valid_));
@@ -79,7 +77,7 @@ void Propagator::initEntropy()
 }
 
 //find all squares with the lowest current entropy and return one at random
-std::pair<size_t, size_t> Propagator::findLowestEntropy()
+std::optional<std::pair<size_t, size_t>> Propagator::findLowestEntropy()
 {
 	double lowestEntropy = DBL_MAX;
 	std::vector<std::pair<size_t, size_t>> squares = {};
@@ -102,7 +100,7 @@ std::pair<size_t, size_t> Propagator::findLowestEntropy()
 		}
 	}
 	if (squares.size() == 0)
-		return std::make_pair(options.oheight, options.oheight); //indicates fully collapsed
+		return std::nullopt;
 	return squares[rand() % squares.size()];					 //return random lowest entropy square of those found
 }
 
@@ -159,7 +157,7 @@ double Propagator::shannonEntropy(size_t y, size_t x) const
 	return ret;
 }
 
-std::vector<bool> &Propagator::waveAt(std::pair<int, int> coords)
+std::vector<bool>& Propagator::waveAt(std::pair<int, int> coords)
 {
 	return wave[coords.first][coords.second];
 }

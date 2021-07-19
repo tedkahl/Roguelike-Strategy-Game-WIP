@@ -1,4 +1,5 @@
 #pragma once
+#define NOMINMAX
 #include <iostream>
 #include <string>
 #include <unordered_map>
@@ -8,56 +9,61 @@
 #include "Pattern.h"
 #include "Tests.h"
 #include "Direction.h"
-const unsigned default_n = 3;
 
 template<typename T>
 concept hashable = requires(T t) {
 	std::hash<T>{}(t);
 };
 
-template <typename T>
+template<typename T>
+struct traits;
+
+template<>
+struct traits<char> {
+	static const char blank = '_';
+};
+
+template <typename T, size_t Psize>
 requires hashable<T>
 class WFC
 {
 public:
-	std::vector < matrix<T>> getPatterns();
-	void insertRotations(std::vector < matrix<T>> &patternlist, matrix<T> &pattern, std::unordered_map<matrix<T>, size_t>& pmap);
-	WFC(matrix<T> &input_, const size_t oheight, const size_t owidth, 
-		const unsigned n=default_n, const bool rotate=true, const bool reflect=true);
+	void insertRotations(std::vector < matrix<T, Psize, Psize>>& patternlist, matrix<T, Psize, Psize>& pattern, std::unordered_map<matrix<T, Psize, Psize>, size_t>& pmap);
+	WFC() = delete;
+
+	template<size_t I_height, size_t I_width>
+	WFC(matrix<T, I_height, I_width>& input_, const size_t oheight, const size_t owidth, const size_t n, const bool rotate, const bool reflect);
 	void displayOutput(size_t y, size_t x);
-	void run();
+	//std::optional<matrix<T>> step();
+	auto run(bool display = false);
 private:
-	matrix<T> input;
-	matrix<T> output;
 	WFCOptions options;
 	std::vector<unsigned> pattern_weights;
-	std::vector<matrix<T>> patterns;
+	std::vector<matrix<T, Psize, Psize>> patterns;
 	Propagator prop;
 
+	std::vector < matrix<T, Psize, Psize>> getPatterns(auto input);
 	void updateOutput(size_t pindex, size_t y, size_t x);
 	auto getOverlapRules();
 	unsigned sumofweights;
 
 };
 
-//output.assign(options.oheight, std::vector<T>(options.owidth, '_'));
 
-template <class T>
+template <typename T, size_t Psize>
 requires hashable<T>
-WFC<T>::WFC(matrix<T> &input_, const size_t oheight, const size_t owidth, 
-	const unsigned n, const bool rotate, const bool reflect)
-	: options(oheight, owidth, n, rotate, reflect), sumofweights(0), input(input_), output(oheight, std::vector<T>(owidth, T('_'))),
-	 patterns(getPatterns()), prop(options, pattern_weights) {
+template<size_t I_height, size_t I_width>
+WFC<T, Psize>::WFC(matrix<T, I_height, I_width>& input_, const size_t oheight, const size_t owidth, const size_t n, const bool rotate, const bool reflect) : options(oheight, owidth, n, rotate, reflect), sumofweights(0),
+patterns(getPatterns(input_)), prop(options, pattern_weights) {
 	auto rules = getOverlapRules();
-	prop.setRules(rules.first,rules.second);
-	run();
+	prop.setRules(rules.first, rules.second);
 }
 
-template <class T>
+template <typename T, size_t Psize>
 requires hashable<T>
-std::vector<matrix<T>> WFC<T>::getPatterns() {
-	matrix<T> pattern;
-	std::vector<matrix<T>> patternlist;
+std::vector<matrix<T, Psize, Psize>> WFC<T, Psize>::getPatterns(auto input) {
+	matrix<T, Psize, Psize> pattern;
+	std::vector<matrix<T, Psize, Psize>> patternlist;
 
 	std::unordered_map<matrix<T>, size_t> pmap;
 	for (size_t i = 0; i <= input.size() - options.n; i++) {
@@ -73,10 +79,10 @@ std::vector<matrix<T>> WFC<T>::getPatterns() {
 	return patternlist;
 }
 
-template <class T>
+template <typename T, size_t Psize>
 requires hashable<T>
-void WFC<T>::insertRotations(std::vector<matrix<T>> &patternlist, matrix<T> &pattern, 
-	std::unordered_map<matrix<T>, size_t> &pmap) {
+void WFC<T, Psize>::insertRotations(std::vector<matrix<T, Psize, Psize>>& patternlist, matrix<T, Psize, Psize>& pattern,
+	std::unordered_map<matrix<T, Psize, Psize>, size_t>& pmap) {
 	int rotations = options.rotate ? 4 : 1;
 	for (int i = 0; i < rotations; i++)
 	{
@@ -92,39 +98,52 @@ void WFC<T>::insertRotations(std::vector<matrix<T>> &patternlist, matrix<T> &pat
 		pattern = rotate90(pattern);
 	}
 }
-template<typename T>
+template <typename T, size_t Psize>
 requires hashable<T>
-void WFC<T>::run()
+auto WFC<T, Psize>::run(bool display)
 {
-	std::pair<size_t, size_t> coords;
 	size_t collapsed;
 	while (true) {
-		coords = prop.findLowestEntropy();
-		if (coords.first == options.oheight) {
-			std::cout << "fully collapsed!"<<std::endl;
-			//printWave(patterns, prop);
+		auto coords_opt = prop.findLowestEntropy();
+		if (!coords_opt) {
+			std::cout << "fully collapsed!" << std::endl;
 			break; //no square found
 		}
+		auto& coords = coords_opt.value();
 		collapsed = prop.collapse(coords);
 		updateOutput(collapsed, coords.first, coords.second);
-		displayOutput(coords.first, coords.second);
+		if (display)displayOutput(coords.first, coords.second);
 		prop.propagate();
-//		printValidPatterns(coords, collapsed, patterns, prop);
 	}
+	return output;
 }
-
-
-template<typename T>
+/*
+template <typename T, size_t Psize>
 requires hashable<T>
-void WFC<T>::displayOutput(size_t y, size_t x) {
+std::optional<auto> WFC<T, Psize>::step()
+{
+	auto coords_opt = prop.findLowestEntropy();
+	if (!coords_opt) {
+		return std::nullopt;
+	}
+	auto& coords = coords_opt.value();
+	size_t collapsed = prop.collapse(coords);
+	updateOutput(collapsed, coords.first, coords.second);
+	prop.propagate();
+	return output;
+}*/
+
+
+template <typename T, size_t Psize>
+requires hashable<T>
+void WFC<T, Psize>::displayOutput(size_t y, size_t x) {
 	HANDLE hConsole;
 	hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-
 	for (size_t i = 0; i < output.size(); i++) {
 		for (size_t j = 0; j < output[0].size(); j++) {
 			if (i >= y && i < y + options.n &&
 				j >= x && j < x + options.n) {
-				SetConsoleTextAttribute(hConsole, 4);		
+				SetConsoleTextAttribute(hConsole, 4);
 				std::cout << output[i][j];
 				SetConsoleTextAttribute(hConsole, 7);
 			}
@@ -138,32 +157,31 @@ void WFC<T>::displayOutput(size_t y, size_t x) {
 /*Intialize rules matrix for each detected pattern. Rules stores, for each possible pattern and each overlap position,
 the index of each pattern that can overlap in that position. Other patterns are not permitted in that position.*/
 
-template<typename T>
+template <typename T, size_t Psize>
 requires hashable<T>
-auto WFC<T>::getOverlapRules() 
+auto WFC<T, Psize>::getOverlapRules()
 {
 	std::vector<bool> empty(patterns.size());
 	std::vector<std::array<std::vector< bool >, 4 > > rules(patterns.size(),
 		std::array<std::vector<bool>, 4>({ empty,empty,empty,empty }));
 	std::vector<std::array<unsigned, 4>> valid(patterns.size());
 
-	int n = options.n;
 	for (size_t i = 0; i < patterns.size(); i++) {
-		for (auto j:directions) {
-				for (size_t k = 0; k < patterns.size(); k++) {
-					if (overlaps(patterns[i], patterns[k], ydir[j], xdir[j])) {
-						rules[i][j][k] = 1; //pattern l is allowed in this overlap position with i
-						valid[i][j]++;
-					}
+		for (auto j : directions) {
+			for (size_t k = 0; k < patterns.size(); k++) {
+				if (overlaps(patterns[i], patterns[k], ydir[j], xdir[j])) {
+					rules[i][j][k] = 1; //pattern l is allowed in this overlap position with i
+					valid[i][j]++;
 				}
+			}
 		}
 	}
-	return std::make_pair(rules,valid);
+	return std::make_pair(rules, valid);
 }
 
-template <typename T>
+template <typename T, size_t Psize>
 requires hashable<T>
-void WFC<T>::updateOutput(size_t pindex, size_t y, size_t x) {
+void WFC<T, Psize>::updateOutput(size_t pindex, size_t y, size_t x) {
 	for (size_t i = 0; i < options.n; i++) {
 		for (size_t j = 0; j < options.n; j++) {
 
