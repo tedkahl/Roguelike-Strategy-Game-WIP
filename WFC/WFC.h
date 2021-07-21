@@ -56,7 +56,7 @@ requires hashable<T>
 WFC<T>::WFC(matrix<T>& input_, const size_t oheight, const size_t owidth,
 	const unsigned n, const bool rotate, const bool reflect)
 	: options(oheight, owidth, n, rotate, reflect), sumofweights(0), input(input_), output(oheight, std::vector<T>(owidth, T(traits<T>::blank))),
-	patterns(getPatterns()), prop(options, pattern_weights) {
+	patterns(getPatterns()), prop(pattern_weights) {
 	auto rules = getOverlapRules();
 	prop.setRules(rules.first, rules.second);
 }

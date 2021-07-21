@@ -138,10 +138,8 @@ size_t Propagator::collapse(std::pair<size_t, size_t> coords)
 double Propagator::shannonEntropy(size_t y, size_t x) const
 {
 	double sumwlogw = 0, sumweight = 0;
-	for (unsigned i = 0; i < numpatterns; i++)
+	for (auto i : wave[y][x])
 	{
-		if (!wave[y][x][i])
-			continue;
 		sumwlogw += pattern_wlogw[i];
 		sumweight += pattern_weights[i];
 	}
