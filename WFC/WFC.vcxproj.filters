@@ -44,19 +44,34 @@
     <ClInclude Include="Direction.h">
       <Filter>Header Files\WFC</Filter>
     </ClInclude>
-    <ClInclude Include="Window.h">
-      <Filter>Header Files\WFC</Filter>
-    </ClInclude>
     <ClInclude Include="Square.h">
-      <Filter>Header Files\WFC</Filter>
-    </ClInclude>
-    <ClInclude Include="Entity.h">
       <Filter>Header Files\WFC</Filter>
     </ClInclude>
     <ClInclude Include="Drawable.h">
       <Filter>Header Files\WFC</Filter>
     </ClInclude>
-    <ClInclude Include="Header.h">
+    <ClInclude Include="ResourceManager.h">
+      <Filter>Header Files\WFC</Filter>
+    </ClInclude>
+    <ClInclude Include="matrix.h">
+      <Filter>Header Files\WFC</Filter>
+    </ClInclude>
+    <ClInclude Include="Entity.h">
+      <Filter>Header Files\WFC</Filter>
+    </ClInclude>
+    <ClInclude Include="Game.h">
+      <Filter>Header Files\WFC</Filter>
+    </ClInclude>
+    <ClInclude Include="Data.h">
+      <Filter>Header Files\WFC</Filter>
+    </ClInclude>
+    <ClInclude Include="Util.h">
+      <Filter>Header Files\WFC</Filter>
+    </ClInclude>
+    <ClInclude Include="Board.h">
+      <Filter>Header Files\WFC</Filter>
+    </ClInclude>
+    <ClInclude Include="DataManager.h">
       <Filter>Header Files\WFC</Filter>
     </ClInclude>
   </ItemGroup>

@@ -14,47 +14,47 @@
 				return true;
 			});*/
 
-//printOverlaps(60, propagator, patterns, options);
-/*for (size_t i = 0; i < patterns.size();i++) {
-	printPattern(patterns[i]);
-	std::cout << "Weight: "<< pattern_weights[i]<<std::endl<<std::endl;
-}*/
+			//printOverlaps(60, propagator, patterns, options);
+			/*for (size_t i = 0; i < patterns.size();i++) {
+				printPattern(patterns[i]);
+				std::cout << "Weight: "<< pattern_weights[i]<<std::endl<<std::endl;
+			}*/
 
-/*for (size_t i = 0; i < patterns.size(); i++) {
-	printPattern(patterns[i]);
-	printOverlaps<T>(i, propagator, patterns, options);
-	std::cout << "----------------------------------------------------------------------------" << std::endl;
+			/*for (size_t i = 0; i < patterns.size(); i++) {
+				printPattern(patterns[i]);
+				printOverlaps<T>(i, propagator, patterns, options);
+				std::cout << "----------------------------------------------------------------------------" << std::endl;
 
-}*/
+			}*/
 
-//test: pattern overlaps with self
-/*for (int i = 0; i < patterns.size();i++) {
-	printPattern(patterns[i]);
-	std::cout << std::endl;
-	std::cout << rules[i][1][1].size() << std::endl;
-	printPattern(patterns[rules[i][1][1][0]]);
-	std::cout << std::endl;
-	std::cout << "Allowed? " << allowed(i, patterns[i], 0, 0) << std::endl;
-}*/
+			//test: pattern overlaps with self
+			/*for (int i = 0; i < patterns.size();i++) {
+				printPattern(patterns[i]);
+				std::cout << std::endl;
+				std::cout << rules[i][1][1].size() << std::endl;
+				printPattern(patterns[rules[i][1][1][0]]);
+				std::cout << std::endl;
+				std::cout << "Allowed? " << allowed(i, patterns[i], 0, 0) << std::endl;
+			}*/
 
 
 
 template<typename T>
 void printWave(std::vector<matrix<T>>& patterns, Propagator& prop) {
 	auto* wave = prop.getWave();
-	for (unsigned i = 0;i < wave->size();i++) for (unsigned j = 0;j < (*wave)[0].size();j++) {
+	for (unsigned i = 0;i < wave->height();i++) for (unsigned j = 0;j < wave->width();j++) {
 		std::cout << "at " << i << ", " << j << std::endl;
-		for (unsigned k = 0; k < (*wave)[i][j].size();k++) {
-			if ((*wave)[i][j][k]) std::cout << k << ",";
+		for (unsigned k = 0; k < wave->at(i, j).size();k++) {
+			if (wave->at(i, j)[k]) std::cout << k << ",";
 		}
 		std::cout << std::endl;
 	}
 }
 
 template<typename T>
-void printPattern(const matrix<T> &p) {
-	for (auto i : p) {
-		for (auto j : i) std::cout << j;
+void printPattern(const matrix<T>& p) {
+	for (unsigned i = 0;i < p.height();i++) {
+		for (unsigned j = 0;j < p.height();j++) std::cout << p.at(i,j);
 		std::cout << std::endl;
 	}
 }
@@ -66,8 +66,8 @@ void printValidPatterns(std::pair<size_t, size_t> coords, size_t collapsed, std:
 	std::cout << "y " << y << " x " << x << std::endl;
 	printPattern(patterns[collapsed]);
 	for (auto dir : directions) {
-		if (y + ydir[dir] < 0 || (unsigned)y + ydir[dir] >= wave->size() ||
-			x + xdir[dir] < 0 || (unsigned)x + xdir[dir] >= (*wave)[0].size()) continue;
+		if (y + ydir[dir] < 0 || (unsigned)y + ydir[dir] >= wave->height() ||
+			x + xdir[dir] < 0 || (unsigned)x + xdir[dir] >= wave->width()) continue;
 
 		std::cout << "valid in dir " << dir << std::endl;
 		for (int i = 0; i < patterns.size();i++) {

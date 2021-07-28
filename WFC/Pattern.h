@@ -2,33 +2,18 @@
 #include <assert.h>
 #include <algorithm>
 #include <vector>
-template<class T>
-using matrix = std::vector<std::vector<T>>;
+#include "matrix.h"
 
-namespace std {
-	template <typename T>
-	class hash<matrix<T>> {
-	public:
-		size_t operator()(const matrix<T>& m) const noexcept {
-			size_t seed = sizeof m;
-			for (auto i : m) for (auto j : i) {
-				seed ^= std::hash<T>{}(j)+0x9e3779b9 + (seed << 6) + (seed >> 2); //based on Boost's hash_combine
 
-			}
-			return seed;
-		}
-	};
-}
-
-/*Returns submatrix of specified height and width, beginning at given offsets*/
+/*Returns submatrix of specified width and height, beginning at given offsets*/
 template <typename T>
-matrix<T> subMatrix(const matrix<T>& mat, size_t yoffset, size_t xoffset, size_t height, size_t width) {
-	assert(yoffset + height <= mat.size());
-	assert(xoffset + width <= mat[0].size());
-	matrix<T> submatrix(height, std::vector<T>(width));
-	for (size_t i = 0; i < height; i++) {
-		for (size_t j = 0; j < width; j++) {
-			submatrix[i][j] = mat[yoffset + i][xoffset + j];
+matrix<T> subMatrix(matrix<T>& mat, const size_t yoffset, const size_t xoffset, const size_t width, const size_t height) {
+	assert(yoffset + width <= mat.width());
+	assert(xoffset + height <= mat.height());
+	matrix<T> submatrix(width, height);
+	for (size_t i = 0; i < width; i++) {
+		for (size_t j = 0; j < height; j++) {
+			submatrix.at(i, j) = mat.at(yoffset + i, xoffset + j);
 		}
 	}
 	return submatrix;
@@ -43,12 +28,12 @@ bool overlaps(const matrix<T>& a, const matrix<T>& b, const int yoffset, const i
 		xstarta = std::max(0, xoffset),
 		ystartb = std::max(0, -yoffset),
 		xstartb = std::max(0, -xoffset),
-		overlap_height = a.size() - std::abs(yoffset),
-		overlap_width = a.size() - std::abs(xoffset);
+		overlap_width = a.width() - std::abs(yoffset),
+		overlap_height = a.height() - std::abs(xoffset);
 
-	for (size_t i = 0; i < overlap_height; i++) {
-		for (size_t j = 0; j < overlap_width; j++) {
-			if (a[ystarta + i][xstarta + j] != b[ystartb + i][xstartb + j]) return false;
+	for (size_t i = 0; i < overlap_width; i++) {
+		for (size_t j = 0; j < overlap_height; j++) {
+			if (a.at(ystarta + i, xstarta + j) != b.at(ystartb + i, xstartb + j)) return false;
 		}
 	}
 	return true;
@@ -57,12 +42,12 @@ bool overlaps(const matrix<T>& a, const matrix<T>& b, const int yoffset, const i
 
 /*Returns pattern reflected about the x axis*/
 template <typename T>
-matrix<T> reflect(matrix<T>& pattern) {
-	size_t n = pattern.size();
-	matrix<T> reflected(n, std::vector<T>(n));
+matrix<T> reflect(const matrix<T>& pattern) {
+	size_t n = pattern.width();
+	matrix<T> reflected(n, n);
 	for (size_t i = 0; i < n; i++)
 		for (size_t j = 0; j < n; j++) {
-			reflected[i][n - 1 - j] = pattern[i][j];
+			reflected.at(i, n - 1 - j) = pattern.at(i, j);
 		}
 	return reflected;
 
@@ -70,13 +55,13 @@ matrix<T> reflect(matrix<T>& pattern) {
 
 /*Returns the matrix rotated 90 degrees clockwise*/
 template <typename T>
-matrix<T> rotate90(matrix<T>& pattern)
+matrix<T> rotate90(const matrix<T>& pattern)
 {
-	size_t n = pattern.size();
-	matrix<T> rotated(n, std::vector<T>(n));
+	size_t n = pattern.width();
+	matrix<T> rotated(n, n);
 	for (size_t i = 0; i < n; i++)
 		for (size_t j = 0; j < n; j++) {
-			rotated[j][n - 1 - i] = pattern[i][j];
+			rotated.at(j, n - 1 - i) = pattern.at(i, j);
 		}
 	return rotated;
 }

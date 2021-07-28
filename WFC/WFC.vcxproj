@@ -136,18 +136,23 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Board.h" />
+    <ClInclude Include="Data.h" />
+    <ClInclude Include="DataManager.h" />
     <ClInclude Include="Direction.h" />
-    <ClInclude Include="Drawable.h" />
     <ClInclude Include="Entity.h" />
-    <ClInclude Include="Header.h" />
+    <ClInclude Include="Game.h" />
+    <ClInclude Include="ResourceManager.h" />
+    <ClInclude Include="Drawable.h" />
+    <ClInclude Include="matrix.h" />
     <ClInclude Include="Pattern.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Propagator.h" />
     <ClInclude Include="Square.h" />
     <ClInclude Include="Tests.h" />
+    <ClInclude Include="Util.h" />
     <ClInclude Include="WFC.h" />
     <ClInclude Include="WFCOptions.h" />
-    <ClInclude Include="Window.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

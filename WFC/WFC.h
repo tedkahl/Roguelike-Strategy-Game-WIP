@@ -55,10 +55,9 @@ template <class T>
 requires hashable<T>
 WFC<T>::WFC(matrix<T>& input_, const size_t oheight, const size_t owidth,
 	const unsigned n, const bool rotate, const bool reflect)
-	: options(oheight, owidth, n, rotate, reflect), sumofweights(0), input(input_), output(oheight, std::vector<T>(owidth, T(traits<T>::blank))),
-	patterns(getPatterns()), prop(pattern_weights) {
-	auto rules = getOverlapRules();
-	prop.setRules(rules.first, rules.second);
+	: options(oheight, owidth, n, rotate, reflect), sumofweights(0), input(input_), output(oheight, owidth, traits<T>::blank),
+	patterns(getPatterns()), prop(options, pattern_weights, getOverlapRules()) {
+
 }
 
 template <class T>
@@ -68,8 +67,8 @@ std::vector<matrix<T>> WFC<T>::getPatterns() {
 	std::vector<matrix<T>> patternlist;
 
 	std::unordered_map<matrix<T>, size_t> pmap;
-	for (size_t i = 0; i <= input.size() - options.n; i++) {
-		for (size_t j = 0; j <= input[0].size() - options.n;j++) {
+	for (size_t i = 0; i <= input.width() - options.n; i++) {
+		for (size_t j = 0; j <= input.height() - options.n;j++) {
 			pattern = subMatrix(input, i, j, options.n, options.n);
 			insertRotations(patternlist, pattern, pmap);
 			if (options.reflect) {
@@ -105,6 +104,7 @@ requires hashable<T>
 matrix<T> WFC<T>::run(bool display)
 {
 	size_t collapsed;
+	int attempts = 0;
 	while (true) {
 		auto coords_opt = prop.findLowestEntropy();
 		if (!coords_opt) {
@@ -115,8 +115,14 @@ matrix<T> WFC<T>::run(bool display)
 		collapsed = prop.collapse(coords);
 		updateOutput(collapsed, coords.first, coords.second);
 		if (display)displayOutput(coords.first, coords.second);
-		prop.propagate();
+		if (!prop.propagate()) { //if contradiction is seen, retry within reason. 
+			attempts++;
+			assert(attempts < 25); //input is probably bad
+			prop.reset();
+			output.set(output.width(), output.height(), traits<T>::blank);
+		}
 	}
+	displayOutput(0, 0);
 	return output;
 }
 
@@ -141,15 +147,15 @@ requires hashable<T>
 void WFC<T>::displayOutput(size_t y, size_t x) {
 	HANDLE hConsole;
 	hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-	for (size_t i = 0; i < output.size(); i++) {
-		for (size_t j = 0; j < output[0].size(); j++) {
+	for (size_t i = 0; i < output.width(); i++) {
+		for (size_t j = 0; j < output.height(); j++) {
 			if (i >= y && i < y + options.n &&
 				j >= x && j < x + options.n) {
 				SetConsoleTextAttribute(hConsole, 4);
-				std::cout << output[i][j];
+				std::cout << output.at(i, j);
 				SetConsoleTextAttribute(hConsole, 7);
 			}
-			else std::cout << output[i][j];
+			else std::cout << output.at(i, j);
 		}
 		std::cout << std::endl;
 	}
@@ -176,6 +182,7 @@ auto WFC<T>::getOverlapRules()
 					valid[i][j]++;
 				}
 			}
+			assert(valid[i][j] != 0); //if any pattern has 0 overlaps in any direction, input is invalid. 
 		}
 	}
 	return std::make_pair(rules, valid);
@@ -186,8 +193,7 @@ requires hashable<T>
 void WFC<T>::updateOutput(size_t pindex, size_t y, size_t x) {
 	for (size_t i = 0; i < options.n; i++) {
 		for (size_t j = 0; j < options.n; j++) {
-
-			output[y + i][x + j] = patterns[pindex][i][j];
+			output.at(y + i, x + j) = patterns[pindex].at(i, j);
 		}
 	}
 }
