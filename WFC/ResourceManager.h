@@ -2,7 +2,10 @@
 #include <SFML/Graphics.hpp>
 #include <vector>
 #include <string>
+#include <map>
+#include <iostream>
 #include <algorithm>
+#include "assert.h"
 
 template<typename T>
 concept SFResource = requires(T t) {
@@ -38,24 +41,26 @@ T& ResourceManager<T>::get(std::string name) {
 	}
 	return *search->second;
 }
+
+
 //returns status code 0: fully drawn, 1: partially drawn but cut off, 2: not drawn
-int drawWithinBounds(sf::Sprite& s, unsigned x, unsigned y, unsigned startX, unsigned startY, unsigned endX, unsigned endY) {
-	unsigned posX, posY;
-	sf::IntRect Trect;
-
-	auto [w, h] = s.getTexture()->getSize();
-	if (x + w < startX || x > endX || y + h < startY || y > endY) {
-		return 2; //not drawn
-	}
-
-	posX = std::max(x, startX);
-	posY = std::max(y, startY);
-	Trect.left = posX - x;
-	Trect.top = posY - y;
-	Trect.width = std::min(w - Trect.left, endX - posX);
-	Trect.height = std::min(y - Trect.top, endY - posY);
-
-	s.setPosition(posX, posY);
-	s.setTextureRect(Trect);
-
-}
+//int drawWithinBounds(sf::Sprite& s, unsigned x, unsigned y, unsigned startX, unsigned startY, unsigned endX, unsigned endY) {
+//	unsigned posX, posY;
+//	sf::IntRect Trect;
+//
+//	auto [w, h] = s.getTexture()->getSize();
+//	if (x + w < startX || x > endX || y + h < startY || y > endY) {
+//		return 2; //not drawn
+//	}
+//
+//	posX = std::max(x, startX);
+//	posY = std::max(y, startY);
+//	Trect.left = posX - x;
+//	Trect.top = posY - y;
+//	Trect.width = std::min(w - Trect.left, endX - posX);
+//	Trect.height = std::min(y - Trect.top, endY - posY);
+//
+//	s.setPosition(posX, posY);
+//	s.setTextureRect(Trect);
+//
+//}

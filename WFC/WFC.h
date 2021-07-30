@@ -117,6 +117,7 @@ matrix<T> WFC<T>::run(bool display)
 		if (display)displayOutput(coords.first, coords.second);
 		if (!prop.propagate()) { //if contradiction is seen, retry within reason. 
 			attempts++;
+			std::cout << "failed!" << std::endl;
 			assert(attempts < 25); //input is probably bad
 			prop.reset();
 			output.set(output.width(), output.height(), traits<T>::blank);

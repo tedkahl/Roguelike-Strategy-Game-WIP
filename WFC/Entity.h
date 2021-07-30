@@ -1,26 +1,28 @@
 #pragma once
-#include "Drawable.h"
+#include "BoardState.h"
+#include "DrawComponent.h"
 #include "Data.h"
-#include "matrix.h"
+class DrawComponent;
+struct BoardState;
 
 class BoardEntity
 {
 private:
-	std::string name;
-	std::pair<unsigned, unsigned> coords;
+	std::string name_;
+	std::pair<unsigned, unsigned> coords_;
+	unsigned index_;
 	DrawComponent* dc_;
 public:
-	DrawComponent* dc() { return dc_; }
-	inline std::pair<unsigned, unsigned> getPos() { return coords; }
+	DrawComponent* dc();
+	void setDC(DrawComponent* dc);
+	inline unsigned index() const { return index_; }
+	inline void setIndex(unsigned index) { index_ = index; }
+	inline std::pair<unsigned, unsigned>  getOwner() const { return coords_; }
+	inline std::pair<unsigned, unsigned> getPos() const { return coords_; }
 	BoardEntity() = default;
-	inline void setPos(std::pair<unsigned, unsigned> newpos);
-	BoardEntity(std::string n, std::string path, sf::Vector2f offset, ResourceManager<sf::Texture>& tm_);
+	void setPos(std::pair<unsigned, unsigned> newpos, BoardState& state);
+	BoardEntity(DrawComponent* drawcomponent);
+
+	void set(std::string name, DrawComponent* drawcomponent, unsigned index);
 };
 
-BoardEntity::BoardEntity(std::string n, std::string path, sf::Vector2f offset, ResourceManager<sf::Texture>& tm_) : coords(0, 0) {
-	dc->set(path, offset, tm_);
-}
-
-void BoardEntity::setPos(std::pair<unsigned, unsigned> newpos) {
-	coords = newpos;
-}

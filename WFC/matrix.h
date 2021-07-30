@@ -13,9 +13,9 @@ public:
 	matrix(size_t w, size_t h, std::initializer_list<T> i) :data(i), height_(h), width_(w) {}
 	void set(size_t h, size_t w, const T& val);
 	inline T& at(size_t x, size_t y) { return data[y * width_ + x]; }
-	inline T const& at(size_t x, size_t y) const { return data[y * width_ + x]; }
-	inline T& at(std::pair<size_t, size_t> coords) { return data[coords.second * width_ + coords.first]; }
-	inline T const& at(std::pair<size_t, size_t> coords) const { return data[coords.second * width_ + coords.first]; }
+	inline T const& at(size_t x, size_t y) const { assert(x < width_&& y < height_); return data[y * width_ + x]; }
+	inline T& at(std::pair<size_t, size_t> coords) { assert(coords.second < width_&& coords.first < height_); return data[coords.second * width_ + coords.first]; }
+	inline T const& at(std::pair<size_t, size_t> coords) const { assert(coords.second < width_&& coords.first < height_); return data[coords.second * width_ + coords.first]; }
 	inline bool operator==(const matrix<T>& rhs) const { return (data == rhs.data && height_ == rhs.height_ && width_ == rhs.width_); }
 	inline size_t height() const { return height_; }
 	inline size_t width() const { return width_; }

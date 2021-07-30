@@ -1,55 +1,62 @@
 #pragma once
+#include <set>
 #include "Square.h"
+#include "DataManager.h"
+#include "matrix.h"
+#include "BoardState.h"
 template<typename T>
 class Board
 {
 private:
 	std::shared_ptr<sf::RenderTexture> boardTexture;
-	std::shared_ptr<ResourceManager<sf::Texture>> tm;
+	std::shared_ptr<ResourceManager<sf::Texture>> tm_;
 	std::shared_ptr<Data<T>> data;
-	std::vector < BoardEntity> entities;
-	sf::View boardView;
+	DataManager<BoardEntity> entities;
+	DataManager<DrawComponent> dcomponents;
+	//sf::View boardView;
 
 	void makeTexture();
-	void loadInfo();
 public:
-	matrix<Square> board;
-	Board(ResourceManager<sf::Texture>& tm_, Data<T>& data_);
+	BoardState state;
+	Board(std::shared_ptr<ResourceManager<sf::Texture>> tm, Data<T>& data_);
+	bool addEntity(T glyph, std::pair<unsigned, unsigned> coords);
+	bool removeEntity(BoardEntity* e);
 	void setEntityPos(BoardEntity* e, std::pair<unsigned, unsigned> newpos);
 	void setSquares(matrix<T>& WFCOutput);
 	void draw(sf::RenderWindow& window);
-	inline void moveView(float offsetX, float offsetY) { boardView.move(offsetX, offsetY); };
-	inline void resizeView(float width, float height) { boardView.setSize(width / 2, height / 2); };
-	Square& getSquare(sf::RenderWindow& window, sf::Vector2i pixel);
+	//inline void moveView(float offsetX, float offsetY) { boardView.move(offsetX, offsetY); };
+	//inline void resizeView(float width, float height) { boardView.setSize(width / 2, height / 2); };
+	Square* getSquare(sf::RenderWindow& window, sf::Vector2i pixel);
 };
 
 template<typename T>
-Board<T>::Board(ResourceManager<sf::Texture>& tm_, Data<T>& data_) :tm(&tm_), data(&data_) {}
+Board<T>::Board(std::shared_ptr<ResourceManager<sf::Texture>> tm, Data<T>& data_) :tm_(tm), data(&data_) {}
 
 template<typename T>
 void Board<T>::setEntityPos(BoardEntity* e, std::pair<unsigned, unsigned> newpos) {
 	auto coords = e->getPos();
-	assert(board.at(coords).removeEntity(e));
-	board.at(newpos).addE(e);
+	assert(state.board.at(coords).removeE(e));
+	state.board.at(newpos).addE(e);
 	e->setPos(newpos);
-	e->updateSpritePos();
 }
 
 template<typename T>
-Square& Board<T>::getSquare(sf::RenderWindow& window, sf::Vector2i pixel) {
-	sf::View currView = window.getView();
-	window.setView(boardView);
+Square* Board<T>::getSquare(sf::RenderWindow& window, sf::Vector2i pixel) {
+	/*sf::View currView = window.getView();
+	window.setView(boardView);*/
 	auto coords = window.mapPixelToCoords(pixel);
-	window.setView(currView);
+	//window.setView(currView);
 	//pixel + boardView.getCenter() - (boardView.getSize() / 2.0f);
 
 	float x_pos = coords.y + (.5 * coords.x);
 	float y_pos = coords.y - (.5 * coords.x);
-	x_pos = x_pos / 80 - (float)board.height() / 2;
-	y_pos = (float)board.height() / 2 - y_pos / 80;
+	x_pos = x_pos / sq::square_h - (float)state.board.height() / 2;
+	y_pos = y_pos / sq::square_h + (float)state.board.height() / 2;
 
 	std::cout << "xy: " << x_pos << " " << y_pos << std::endl;
-	return board.at((unsigned)x_pos, (unsigned)y_pos);
+	if (0 <= x_pos && x_pos < state.board.width() && 0 <= y_pos && y_pos < state.board.height())
+		return &state.board.at((unsigned)x_pos, (unsigned)y_pos);
+	return nullptr;
 }
 
 
@@ -57,40 +64,56 @@ template<typename T>
 void Board<T>::draw(sf::RenderWindow& window) {
 	sf::Sprite boardSprite((*boardTexture).getTexture());
 
-	sf::View currView = window.getView();
-
-	window.setView(boardView);
+	/*sf::View currView = window.getView();
+	window.setView(boardView);*/
 	window.draw(boardSprite);
-	for (auto i : entities) i.draw(&window);
-	window.setView(currView);
+	std::set<DrawComponent> s;
+	for (auto i : dcomponents) s.insert(i);
+	for (auto i : s) i.draw(&window);
+	//window.setView(currView);
 }
 
 template<typename T>
-void Board<T>::loadInfo() {
+bool Board<T>::addEntity(T glyph, std::pair<unsigned, unsigned> coords)
+{
+	if (state.board.at(coords).entities.size() != 0) return false;
+	auto search = (data->entityinfo).find(glyph);
+	if (search != data->entityinfo.end()) {
+		auto [ename, epath, eoffset] = search->second;
+
+		auto dc = dcomponents.declareNew(epath, eoffset, tm_);
+		auto entity = entities.declareNew(ename, dc);
+		entity->setPos(coords, state);
+		state.board.at(coords).addE(entity);
+		return true;
+	}
+	return false;
 }
+
+template<typename T>
+bool Board<T>::removeEntity(BoardEntity* e)
+{
+	if (!state.board.at(e->getPos()).removeE(e)) assert(false);
+	auto [parent, new_dc_ptr] = dcomponents.deactivate(e->dc()->index());
+	auto [square, new_e_ptr] = entities.deactivate(e->index());
+
+	state.board.at(square).replaceE(entities.firstInvalidPtr(), new_e_ptr);
+	parent->setDC(new_dc_ptr);
+}
+
 
 template<typename T>
 void Board<T>::setSquares(matrix<T>& WFCOutput)
 {
-	board.set(WFCOutput.width(), WFCOutput.height(), Square());
+	state.board.set(WFCOutput.width(), WFCOutput.height(), Square());
 
 	for (unsigned i = 0;i < WFCOutput.width();i++) {
 		for (unsigned j = 0;j < WFCOutput.height();j++) {
 			T val = WFCOutput.at(i, j);
 			auto [name, path, offset] = data->squareinfo.at(val);
-			board.at(i, j) = Square(name, path, offset, *tm);
-			board.at(i, j).setSpritePos(sf::Vector2f((i + j) * sq::square_w / 2, (board.height() - 1 + i - j) * sq::square_h / 2));
-
-			auto search = (data->entityinfo).find(val);
-			if (search != data->entityinfo.end()) {
-				auto [ename, epath, eoffset] = search->second;
-
-				entities.push_back(BoardEntity(ename, epath, eoffset, *tm));
-				auto e = std::make_shared<BoardEntity>(entities.back());
-				e->setPos(std::make_pair(i, j));
-				board.at(i, j).addE(e);
-				e->updateSpritePos();
-			}
+			state.board.at(i, j) = Square(name, path, offset, tm_);
+			state.board.at(i, j).dc()->setSpritePos(sf::Vector2f((state.board.width() - 1 + i - j) * sq::square_w / 2, (i + j) * sq::square_h / 2));
+			addEntity(val, std::make_pair(i, j));
 		}
 	}
 	makeTexture();
@@ -99,7 +122,7 @@ void Board<T>::setSquares(matrix<T>& WFCOutput)
 template<typename T>
 void Board<T>::makeTexture() {
 	boardTexture = std::make_shared<sf::RenderTexture>();
-	unsigned boardh = board.height(), boardw = board.width();
+	unsigned boardh = state.board.height(), boardw = state.board.width();
 	unsigned width = (boardh + boardw) * sq::square_w / 2;
 	unsigned height = (boardh + boardw) * sq::square_h / 2 + sq::square_t;
 	if (!boardTexture->create(width, height))
@@ -109,11 +132,8 @@ void Board<T>::makeTexture() {
 
 	boardTexture->clear(sf::Color::Black);
 
-	for (int i = boardh - 1; i >= 0;i--) {
-		for (int j = 0;j < boardw;j++) {
-			board.at(j, i).draw(boardTexture.get());
-		}
-	}
+	for (auto i : state.board)i.dc()->draw(boardTexture.get());
+
 	boardTexture->display();
-	boardView.setCenter(board.at(boardh / 2, boardw / 2).getSprite().getPosition());
+	//boardView.setCenter(state.board.at(boardh / 2, boardw / 2).getSprite().getPosition());
 }

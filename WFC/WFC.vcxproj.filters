@@ -21,6 +21,15 @@
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Square.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Entity.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DrawComponent.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="WFCOptions.h">
@@ -47,7 +56,7 @@
     <ClInclude Include="Square.h">
       <Filter>Header Files\WFC</Filter>
     </ClInclude>
-    <ClInclude Include="Drawable.h">
+    <ClInclude Include="DrawComponent.h">
       <Filter>Header Files\WFC</Filter>
     </ClInclude>
     <ClInclude Include="ResourceManager.h">
@@ -72,6 +81,9 @@
       <Filter>Header Files\WFC</Filter>
     </ClInclude>
     <ClInclude Include="DataManager.h">
+      <Filter>Header Files\WFC</Filter>
+    </ClInclude>
+    <ClInclude Include="BoardState.h">
       <Filter>Header Files\WFC</Filter>
     </ClInclude>
   </ItemGroup>
