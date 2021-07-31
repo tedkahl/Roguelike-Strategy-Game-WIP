@@ -26,7 +26,7 @@ public:
 	void draw(sf::RenderWindow& window);
 	//inline void moveView(float offsetX, float offsetY) { boardView.move(offsetX, offsetY); };
 	//inline void resizeView(float width, float height) { boardView.setSize(width / 2, height / 2); };
-	Square* getSquare(sf::RenderWindow& window, sf::Vector2i pixel);
+	std::optional < std::pair<unsigned, unsigned >> getCoords(sf::RenderWindow& window, sf::Vector2i pixel);
 };
 
 template<typename T>
@@ -39,14 +39,18 @@ void Board<T>::setEntityPos(BoardEntity* e, std::pair<unsigned, unsigned> newpos
 	state.board.at(newpos).addE(e);
 	e->setPos(newpos);
 }
+//
+//template<typename T>
+//Square* getSquare(std::pair<unsigned, unsigned> coords)
+//{
+//	if (0 <= x_pos && x_pos < state.board.width() && 0 <= y_pos && y_pos < state.board.height())
+//		return &state.board.at((unsigned)x_pos, (unsigned)y_pos);
+//	return nullptr;
+//}
 
 template<typename T>
-Square* Board<T>::getSquare(sf::RenderWindow& window, sf::Vector2i pixel) {
-	/*sf::View currView = window.getView();
-	window.setView(boardView);*/
+std::optional<std::pair<unsigned, unsigned>> Board<T>::getCoords(sf::RenderWindow& window, sf::Vector2i pixel) {
 	auto coords = window.mapPixelToCoords(pixel);
-	//window.setView(currView);
-	//pixel + boardView.getCenter() - (boardView.getSize() / 2.0f);
 
 	float x_pos = coords.y + (.5 * coords.x);
 	float y_pos = coords.y - (.5 * coords.x);
@@ -55,8 +59,8 @@ Square* Board<T>::getSquare(sf::RenderWindow& window, sf::Vector2i pixel) {
 
 	std::cout << "xy: " << x_pos << " " << y_pos << std::endl;
 	if (0 <= x_pos && x_pos < state.board.width() && 0 <= y_pos && y_pos < state.board.height())
-		return &state.board.at((unsigned)x_pos, (unsigned)y_pos);
-	return nullptr;
+		return std::make_pair((unsigned)x_pos, (unsigned)y_pos);
+	return std::nullopt;
 }
 
 

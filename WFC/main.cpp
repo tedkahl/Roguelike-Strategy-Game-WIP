@@ -64,11 +64,11 @@ int main()
 		  '.','.','.','x','.','.','.','.','.','.','.','.','x','.','.','.' });
 
 	matrix<char> input1(3, 3,
-		{ 'C','C','C',
-		  'C','C','C',
-		  'C','C','C' });
+		{ 'T','T','T',
+		  '.','.','.',
+		  '.','.','.' });
 
-	WFC<char> w(input1, 20, 20, 3, true, true);
+	WFC<char> w(input0, 20, 20, 3, true, true);
 	auto output = w.run();
 
 	sf::RenderWindow window(sf::VideoMode(1200, 800), "Dungeon Delve");
@@ -76,6 +76,7 @@ int main()
 	auto tm = std::make_shared<ResourceManager<sf::Texture>>();
 	Data<char> d;
 	Board<char> board(tm, d);
+	auto& squares = board.state.board;
 	//board.resizeView(window.getDefaultView().getSize().x, window.getDefaultView().getSize().y);
 	window.setView(sf::View(sf::FloatRect(0, 0, window.getSize().x / 2, window.getSize().y / 2)));
 	board.setSquares(output);
@@ -115,16 +116,16 @@ int main()
 			}
 			case sf::Event::MouseButtonPressed:
 			{
-				std::cout << "Pixel:" << event.mouseButton.x << " " << event.mouseButton.y << std::endl;
-				std::cout << "View:" << window.getView().getCenter().x << " " << window.getView().getCenter().y << " " << window.getView().getSize().x << " " << window.getView().getSize().y << std::endl;
-				board.getSquare(window, sf::Vector2i(event.mouseButton.x, event.mouseButton.y));
+				/*std::cout << "Pixel:" << event.mouseButton.x << " " << event.mouseButton.y << std::endl;
+				std::cout << "View:" << window.getView().getCenter().x << " " << window.getView().getCenter().y << " " << window.getView().getSize().x << " " << window.getView().getSize().y << std::endl;*/
+				board.getCoords(window, sf::Vector2i(event.mouseButton.x, event.mouseButton.y));
 				break;
 			}
 			case sf::Event::MouseMoved:
 			{
 				if (sf::Mouse::isButtonPressed(sf::Mouse::Button::Left)) {
 					//board.moveView(lastX - event.mouseMove.x, lastY - event.mouseMove.y);
-					auto cview = window.getView();
+					sf::View cview = window.getView();
 					cview.move(lastX - event.mouseMove.x, lastY - event.mouseMove.y);
 					window.setView(cview);
 					ftext.move(lastX - event.mouseMove.x, lastY - event.mouseMove.y);
@@ -137,20 +138,24 @@ int main()
 			{
 				std::cout << sf::Mouse::getPosition().x << " " << sf::Mouse::getPosition().y << std::endl;
 				switch (event.key.code) {
+				case sf::Keyboard::Key::A: {
+					if (auto coords = board.getCoords(window, sf::Mouse::getPosition(window))) {
+						auto& square = squares.at(coords.value());
+						if (square.entities.size() == 0) {
+							board.addEntity('C', coords.value());
+						}
+					}
+					break;
+				}
 				case sf::Keyboard::Key::D: {
-					if (auto square = board.getSquare(window, sf::Mouse::getPosition(window))) {
-						if (square->entities.size() > 0) {
-							auto e = square->entities[0];
+					if (auto coords = board.getCoords(window, sf::Mouse::getPosition(window))) {
+						auto& square = squares.at(coords.value());
+						if (square.entities.size() > 0) {
+							auto e = square.entities[0];
 							board.removeEntity(e);
 						}
 					}
-				}
-				case sf::Keyboard::Key::A: {
-					if (auto square = board.getSquare(window, sf::Mouse::getPosition(window))) {
-						if (square->entities.size() == 0) {
-							board.addEntity('C');
-						}
-					}
+					break;
 				}
 				}
 			}
