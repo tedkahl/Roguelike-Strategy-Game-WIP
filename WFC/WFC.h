@@ -32,7 +32,7 @@ public:
 	WFC() = delete;
 	WFC(matrix<T>& input_, const size_t owidth, const size_t oheight,
 		const unsigned n = 3, const bool rotate = true, const bool reflect = true);
-	void displayOutput(size_t y, size_t x);
+	void displayOutput(size_t x, size_t y);
 	std::optional<matrix<T>> step();
 	matrix<T> run(bool display = false);
 private:
@@ -43,7 +43,7 @@ private:
 	std::vector<matrix<T>> patterns;
 	Propagator prop;
 
-	void updateOutput(size_t pindex, size_t y, size_t x);
+	void updateOutput(size_t pindex, size_t x, size_t y);
 	auto getOverlapRules();
 	unsigned sumofweights;
 
@@ -57,10 +57,6 @@ WFC<T>::WFC(matrix<T>& input_, const size_t owidth, const size_t oheight,
 	const unsigned n, const bool rotate, const bool reflect)
 	: options(owidth, oheight, n, rotate, reflect), sumofweights(0), input(input_), output(owidth, oheight, traits<T>::blank),
 	patterns(getPatterns()), prop(options, pattern_weights, getOverlapRules()) {
-	for (auto i : patterns) {
-		printPattern(i);
-		std::cout << std::endl;
-	}
 }
 
 template <class T>
@@ -117,7 +113,7 @@ matrix<T> WFC<T>::run(bool display)
 		auto& coords = coords_opt.value();
 		collapsed = prop.collapse(coords);
 		updateOutput(collapsed, coords.first, coords.second);
-		if (display)displayOutput(coords.first, coords.second);
+		//if (display)displayOutput(coords.first, coords.second);
 		if (!prop.propagate()) { //if contradiction is seen, retry within reason. 
 			attempts++;
 			std::cout << "failed!" << std::endl;
@@ -126,7 +122,7 @@ matrix<T> WFC<T>::run(bool display)
 			output.set(output.width(), output.height(), traits<T>::blank);
 		}
 	}
-	displayOutput(0, 0);
+	//displayOutput(0, 0);
 	return output;
 }
 
@@ -181,10 +177,6 @@ auto WFC<T>::getOverlapRules()
 	for (size_t i = 0; i < patterns.size(); i++) {
 		for (auto j : directions) {
 			for (size_t k = 0; k < patterns.size(); k++) {
-				printPattern(patterns[i]);
-				std::cout << ",\n";
-				printPattern(patterns[k]);
-				std::cout << "-------------------------------\n";
 				if (overlaps(patterns[i], patterns[k], xdir[j], ydir[j])) {
 					rules[i][j][k] = 1; //pattern l is allowed in this overlap position with i
 					valid[i][j]++;

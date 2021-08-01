@@ -8,7 +8,6 @@
 /*Returns submatrix of specified width and height, beginning at given offsets*/
 template <typename T>
 matrix<T> subMatrix(matrix<T>& mat, const size_t xoffset, const size_t yoffset, const size_t width, const size_t height) {
-	std::cout << xoffset << " " << yoffset << " " << width << " " << height << std::endl;
 	assert(xoffset + width <= mat.width());
 	assert(yoffset + height <= mat.height());
 	matrix<T> submatrix(width, height);

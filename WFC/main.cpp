@@ -9,7 +9,7 @@
 
 auto getOutput(matrix<char>& in, unsigned owidth, unsigned oheight, unsigned n, bool rotate = true, bool reflect = true) {
 	WFC<char> w(in, owidth, oheight, n, rotate, reflect);
-	return w.run();
+	return w.run(true);
 }
 int main()
 {
@@ -79,7 +79,7 @@ int main()
 		  's','s','s',
 		  's','s','s' });
 
-	auto output = getOutput(input1, 20, 20, 3, true, true);
+	auto output = getOutput(input, 10, 20, 3, true, true);
 
 	sf::RenderWindow window(sf::VideoMode(1200, 800), "Dungeon Delve");
 
