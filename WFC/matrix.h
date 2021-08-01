@@ -15,10 +15,10 @@ public:
 	void set(size_t h, size_t w, const T& val);
 	inline T& at(size_t x, size_t y) { return data[y * width_ + x]; }
 	inline T const& at(size_t x, size_t y) const { assert(x < width_&& y < height_); return data[y * width_ + x]; }
-	inline T& at(std::pair<size_t, size_t> coords) { assert(coords.second < width_&& coords.first < height_); return data[coords.second * width_ + coords.first]; }
-	inline T const& at(std::pair<size_t, size_t> coords) const { assert(coords.second < width_&& coords.first < height_); return data[coords.second * width_ + coords.first]; }
-	inline T& at(sf::Vector2i coords) { assert(coords.y < width_&& coords.x < height_); return data[coords.y * width_ + coords.x]; }
-	inline T const& at(sf::Vector2i coords) const { assert(coords.y < width_&& coords.x < height_); return data[coords.y * width_ + coords.x]; }
+	inline T& at(std::pair<size_t, size_t> coords) { assert(coords.first < width_&& coords.second < height_); return data[coords.second * width_ + coords.first]; }
+	inline T const& at(std::pair<size_t, size_t> coords) const { assert(coords.first < width_&& coords.second < height_); return data[coords.second * width_ + coords.first]; }
+	inline T& at(sf::Vector2i coords) { assert(coords.x < width_&& coords.y < height_); return data[coords.y * width_ + coords.x]; }
+	inline T const& at(sf::Vector2i coords) const { assert(coords.x < width_&& coords.y < height_); return data[coords.y * width_ + coords.x]; }
 	inline bool operator==(const matrix<T>& rhs) const { return (data == rhs.data && height_ == rhs.height_ && width_ == rhs.width_); }
 	inline size_t height() const { return height_; }
 	inline size_t width() const { return width_; }
@@ -32,7 +32,7 @@ public:
 };
 
 template<typename T>
-void matrix<T>::set(size_t h, size_t w, const T& val) {
+void matrix<T>::set(size_t w, size_t h, const T& val) {
 	data.assign(h * w, val);
 	height_ = h;
 	width_ = w;

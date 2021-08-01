@@ -122,7 +122,7 @@ matrix<T> WFC<T>::run(bool display)
 			output.set(output.width(), output.height(), traits<T>::blank);
 		}
 	}
-	//displayOutput(0, 0);
+	displayOutput(0, 0);
 	return output;
 }
 
