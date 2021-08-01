@@ -13,7 +13,7 @@ class BoardEntity;
 class Square
 {
 private:
-	std::string name;
+	terrain_type type;
 	std::shared_ptr<DrawComponent> dc_;
 public:
 	std::vector <BoardEntity*> entities;
@@ -23,7 +23,7 @@ public:
 	void addE(BoardEntity* e);
 	void replaceE(BoardEntity* olde, BoardEntity* newe);
 	//std::vector<BoardEntity*>& getEntities() { return entities; }
-	Square(std::string n, std::string path, sf::Vector2f offset, std::shared_ptr<ResourceManager<sf::Texture>> tm);
+	Square(terrain_type t, DrawComponent* dc);
 	Square& operator=(const Square& other);
 };
 

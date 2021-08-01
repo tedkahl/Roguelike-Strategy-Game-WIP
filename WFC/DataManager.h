@@ -7,11 +7,11 @@
 template<typename T>
 class DataManager {
 private:
-	static const size_t MAX = 1000;
+	static const size_t MAX = 2000;
 	std::array<T, MAX> data;
 	unsigned active = 0;
 public:
-	T* firstInvalidPtr() { assert(active > 0); return &data[active]; }
+	T* firstInvalidPtr() { return &data[active]; }
 	T* get(unsigned index) { return &data[index]; }
 	//unsigned activate();
 
@@ -24,7 +24,7 @@ public:
 	iterator end() { return data.begin() + active; }
 
 };
-
+//Duelist 6,-33
 //template<typename T>
 //unsigned DataManager<T>::activate()
 //{

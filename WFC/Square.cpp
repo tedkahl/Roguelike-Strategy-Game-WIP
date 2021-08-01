@@ -1,6 +1,5 @@
 #include "Square.h"
-Square::Square(std::string n, std::string path, sf::Vector2f offset, std::shared_ptr<ResourceManager<sf::Texture>> tm) : dc_(std::make_shared<DrawComponent>(path, offset, tm)) {
-}
+Square::Square(terrain_type t, DrawComponent* dc) : type(t), dc_(dc) {}
 
 std::shared_ptr<DrawComponent> Square::dc() { return dc_; }
 

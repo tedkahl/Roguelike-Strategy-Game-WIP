@@ -12,5 +12,5 @@ void BoardEntity::set(std::string name, DrawComponent* drawcomponent, unsigned i
 
 void BoardEntity::setPos(std::pair<unsigned, unsigned> newpos, BoardState& state) {
 	coords_ = newpos;
-	dc_->updatePos(newpos, state);
+	dc_->updateEntityPos(newpos, state);
 }

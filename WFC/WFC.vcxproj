@@ -139,6 +139,7 @@
     <ClCompile Include="Square.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Actions.h" />
     <ClInclude Include="Board.h" />
     <ClInclude Include="BoardState.h" />
     <ClInclude Include="Data.h" />

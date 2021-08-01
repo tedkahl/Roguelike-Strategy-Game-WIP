@@ -15,14 +15,28 @@ private:
 public:
 	DrawComponent* dc();
 	void setDC(DrawComponent* dc);
-	inline unsigned index() const { return index_; }
-	inline void setIndex(unsigned index) { index_ = index; }
-	inline std::pair<unsigned, unsigned>  getOwner() const { return coords_; }
+	inline unsigned index() const { return index_; } //datamanager
+	inline void setIndex(unsigned index) { index_ = index; } //datamanager
+	inline std::pair<unsigned, unsigned>  getOwner() const { return coords_; } //datamanager
+	void set(std::string name, DrawComponent* drawcomponent, unsigned index); //datamanager
 	inline std::pair<unsigned, unsigned> getPos() const { return coords_; }
 	BoardEntity() = default;
 	void setPos(std::pair<unsigned, unsigned> newpos, BoardState& state);
 	BoardEntity(DrawComponent* drawcomponent);
-
-	void set(std::string name, DrawComponent* drawcomponent, unsigned index);
 };
 
+
+struct UnitStats {
+	int movement;
+	int max_hp;
+	int current_hp;
+};
+
+class Unit : public BoardEntity
+{
+private:
+	UnitStats stats;
+public:
+	UnitStats const& getStats() const { return stats; };
+
+};

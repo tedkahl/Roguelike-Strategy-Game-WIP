@@ -13,6 +13,7 @@ private:
 	std::shared_ptr<Data<T>> data;
 	DataManager<BoardEntity> entities;
 	DataManager<DrawComponent> dcomponents;
+	BoardEntity* selected;
 	//sf::View boardView;
 
 	void makeTexture();
@@ -66,11 +67,11 @@ std::optional<std::pair<unsigned, unsigned>> Board<T>::getCoords(sf::RenderWindo
 
 template<typename T>
 void Board<T>::draw(sf::RenderWindow& window) {
-	sf::Sprite boardSprite((*boardTexture).getTexture());
+	//sf::Sprite boardSprite((*boardTexture).getTexture());
 
 	/*sf::View currView = window.getView();
 	window.setView(boardView);*/
-	window.draw(boardSprite);
+	//window.draw(boardSprite);
 	std::set<DrawComponent> s;
 	for (auto i : dcomponents) s.insert(i);
 	for (auto i : s) i.draw(&window);
@@ -85,7 +86,7 @@ bool Board<T>::addEntity(T glyph, std::pair<unsigned, unsigned> coords)
 	if (search != data->entityinfo.end()) {
 		auto [ename, epath, eoffset] = search->second;
 
-		auto dc = dcomponents.declareNew(epath, eoffset, tm_);
+		auto dc = dcomponents.declareNew(epath, eoffset, tm_, 5);
 		auto entity = entities.declareNew(ename, dc);
 		entity->setPos(coords, state);
 		state.board.at(coords).addE(entity);
@@ -97,12 +98,14 @@ bool Board<T>::addEntity(T glyph, std::pair<unsigned, unsigned> coords)
 template<typename T>
 bool Board<T>::removeEntity(BoardEntity* e)
 {
-	if (!state.board.at(e->getPos()).removeE(e)) assert(false);
+	if (!state.board.at(e->getPos()).removeE(e)) return false;
 	auto [parent, new_dc_ptr] = dcomponents.deactivate(e->dc()->index());
 	auto [square, new_e_ptr] = entities.deactivate(e->index());
+	if (entities.firstInvalidPtr() == e) return true;
 
 	state.board.at(square).replaceE(entities.firstInvalidPtr(), new_e_ptr);
 	parent->setDC(new_dc_ptr);
+	return true;
 }
 
 
@@ -115,8 +118,8 @@ void Board<T>::setSquares(matrix<T>& WFCOutput)
 		for (unsigned j = 0;j < WFCOutput.height();j++) {
 			T val = WFCOutput.at(i, j);
 			auto [name, path, offset] = data->squareinfo.at(val);
-			state.board.at(i, j) = Square(name, path, offset, tm_);
-			state.board.at(i, j).dc()->setSpritePos(sf::Vector2f((state.board.width() - 1 + i - j) * sq::square_w / 2, (i + j) * sq::square_h / 2));
+			state.board.at(i, j) = Square(name, dcomponents.declareNew(path, offset, tm_, 0));
+			state.board.at(i, j).dc()->setSquarePos(std::make_pair(i, j), state);
 			addEntity(val, std::make_pair(i, j));
 		}
 	}
@@ -140,4 +143,9 @@ void Board<T>::makeTexture() {
 
 	boardTexture->display();
 	//boardView.setCenter(state.board.at(boardh / 2, boardw / 2).getSprite().getPosition());
+}
+
+void select(Unit* e, BoardState& state)
+{
+
 }

@@ -148,8 +148,8 @@ requires hashable<T>
 void WFC<T>::displayOutput(size_t y, size_t x) {
 	HANDLE hConsole;
 	hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-	for (size_t i = 0; i < output.width(); i++) {
-		for (size_t j = 0; j < output.height(); j++) {
+	for (size_t i = 0; i < output.height(); i++) {
+		for (size_t j = 0; j < output.width(); j++) {
 			if (i >= y && i < y + options.n &&
 				j >= x && j < x + options.n) {
 				SetConsoleTextAttribute(hConsole, 4);
