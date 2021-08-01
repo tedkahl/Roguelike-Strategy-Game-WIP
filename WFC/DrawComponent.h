@@ -29,7 +29,7 @@ public:
 	BoardEntity* getOwner();
 	void setOwner(BoardEntity* owner);
 	inline sf::Vector2f getOffset() { return sprite_offset; }
-	void draw(sf::RenderTarget* target);
+	void draw(sf::RenderTarget* target) const;
 	void updateEntityPos(std::pair<unsigned, unsigned> newpos, BoardState& state);
 	void setSquarePos(std::pair<unsigned, unsigned> newpos, BoardState& state);
 	friend bool operator<(const DrawComponent& l, const DrawComponent& r) { return l.zval_ < r.zval_; }

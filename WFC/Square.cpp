@@ -27,7 +27,7 @@ void Square::addE(BoardEntity* e) {
 
 Square& Square::operator=(const Square& other)
 {
-	name = other.name;
+	type = other.type;
 	dc_ = other.dc_;
 	return *this;
 }

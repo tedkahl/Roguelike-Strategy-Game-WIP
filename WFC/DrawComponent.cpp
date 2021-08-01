@@ -1,6 +1,6 @@
 #include "DrawComponent.h"
 
-void DrawComponent::draw(sf::RenderTarget* target) {
+void DrawComponent::draw(sf::RenderTarget* target) const {
 	target->draw(sprite);
 }
 

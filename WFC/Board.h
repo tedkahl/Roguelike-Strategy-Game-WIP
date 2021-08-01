@@ -73,8 +73,8 @@ void Board<T>::draw(sf::RenderWindow& window) {
 	window.setView(boardView);*/
 	//window.draw(boardSprite);
 	std::set<DrawComponent> s;
-	for (auto i : dcomponents) s.insert(i);
-	for (auto i : s) i.draw(&window);
+	for (const auto& i : dcomponents) s.insert(i);
+	for (const auto& i : s) i.draw(&window);
 	//window.setView(currView);
 }
 
