@@ -1,7 +1,11 @@
 #include "Square.h"
-Square::Square(terrain_type t, DrawComponent* dc) : type(t), dc_(dc) {}
+Square::Square(terrain_type t, DrawComponent* dc) : type(t), dc_(dc) {
+	dc_->setOwner(this);
+}
 
-std::shared_ptr<DrawComponent> Square::dc() { return dc_; }
+DrawComponent* Square::dc() const { return dc_; }
+
+void Square::setDC(DrawComponent* dc) { std::cout << "calling setDC(square)\n";dc_ = dc; }
 
 
 bool Square::removeE(BoardEntity* e) {

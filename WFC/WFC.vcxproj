@@ -133,6 +133,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Drawable.cpp" />
     <ClCompile Include="Entity.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="DrawComponent.cpp" />
@@ -145,6 +146,7 @@
     <ClInclude Include="Data.h" />
     <ClInclude Include="DataManager.h" />
     <ClInclude Include="Direction.h" />
+    <ClInclude Include="Drawable.h" />
     <ClInclude Include="Entity.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="ResourceManager.h" />

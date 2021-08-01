@@ -67,21 +67,33 @@ std::optional<std::pair<unsigned, unsigned>> Board<T>::getCoords(sf::RenderWindo
 
 template<typename T>
 void Board<T>::draw(sf::RenderWindow& window) {
-	//sf::Sprite boardSprite((*boardTexture).getTexture());
 
-	/*sf::View currView = window.getView();
-	window.setView(boardView);*/
-	//window.draw(boardSprite);
+	/*for (auto i : state.board) {
+		i.dc()->draw(&window);
+		for (auto j : i.entities) {
+			j->dc()->draw(&window);
+		}
+	}*/
+	auto& view = window.getView();
+	sf::FloatRect v(view.getCenter() - view.getSize() / 2.0f, view.getSize());
 	std::set<DrawComponent> s;
-	for (const auto& i : dcomponents) s.insert(i);
-	for (const auto& i : s) i.draw(&window);
-	//window.setView(currView);
+	for (const auto& i : dcomponents) {
+		if (i.getSprite().getGlobalBounds().intersects(v))
+			s.insert(i);
+	}
+	for (const auto& i : s) {
+		i.draw(&window);
+	}
 }
 
 template<typename T>
 bool Board<T>::addEntity(T glyph, std::pair<unsigned, unsigned> coords)
 {
-	if (state.board.at(coords).entities.size() != 0) return false;
+	std::cout << state.board.at(coords).entities.size();
+	if (state.board.at(coords).entities.size() != 0) {
+		std::cout << "entity already here";
+		return false;
+	}
 	auto search = (data->entityinfo).find(glyph);
 	if (search != data->entityinfo.end()) {
 		auto [ename, epath, eoffset] = search->second;
@@ -89,6 +101,9 @@ bool Board<T>::addEntity(T glyph, std::pair<unsigned, unsigned> coords)
 		auto dc = dcomponents.declareNew(epath, eoffset, tm_, 5);
 		auto entity = entities.declareNew(ename, dc);
 		entity->setPos(coords, state);
+		assert(entity->getOwner() == coords);
+		assert(entity->dc() == dc);
+		assert(std::get<BoardEntity*>(dc->getOwner()) == entity);
 		state.board.at(coords).addE(entity);
 		return true;
 	}
@@ -98,14 +113,24 @@ bool Board<T>::addEntity(T glyph, std::pair<unsigned, unsigned> coords)
 template<typename T>
 bool Board<T>::removeEntity(BoardEntity* e)
 {
-	if (!state.board.at(e->getPos()).removeE(e)) return false;
-	auto [parent, new_dc_ptr] = dcomponents.deactivate(e->dc()->index());
-	auto [square, new_e_ptr] = entities.deactivate(e->index());
-	if (entities.firstInvalidPtr() == e) return true;
-
-	state.board.at(square).replaceE(entities.firstInvalidPtr(), new_e_ptr);
-	parent->setDC(new_dc_ptr);
-	return true;
+	std::cout << "e " << e << " index " << e->index() << std::endl;
+	std::cout << "coords " << e->getOwner().first << " " << e->getOwner().second << std::endl;
+	int index = e->index();
+	if (state.board.at(e->getPos()).removeE(e)) {
+		auto [parent, new_dc_ptr] = dcomponents.deactivate(e->dc()->index());
+		std::visit([&](auto ptr) {ptr->setDC(new_dc_ptr);}, parent);
+		/*if (std::holds_alternative<BoardEntity*>(parent)) {
+			std::get<BoardEntity*>(parent)->setDC(new_dc_ptr);
+		}
+		else {
+			std::get<Square*>(parent)->setDC(new_dc_ptr);
+		}*/
+		auto [square, new_e_ptr] = entities.deactivate(index);
+		if (entities.firstInvalidPtr() != e)
+			state.board.at(square).replaceE(entities.firstInvalidPtr(), new_e_ptr);
+		return true;
+	}
+	return false;
 }
 
 
@@ -114,13 +139,13 @@ void Board<T>::setSquares(matrix<T>& WFCOutput)
 {
 	state.board.set(WFCOutput.width(), WFCOutput.height(), Square());
 
-	for (unsigned i = 0;i < WFCOutput.width();i++) {
-		for (unsigned j = 0;j < WFCOutput.height();j++) {
-			T val = WFCOutput.at(i, j);
+	for (unsigned h = 0;h < WFCOutput.height();h++) {
+		for (unsigned w = 0;w < WFCOutput.width();w++) {
+			T val = WFCOutput.at(w, h);
 			auto [name, path, offset] = data->squareinfo.at(val);
-			state.board.at(i, j) = Square(name, dcomponents.declareNew(path, offset, tm_, 0));
-			state.board.at(i, j).dc()->setSquarePos(std::make_pair(i, j), state);
-			addEntity(val, std::make_pair(i, j));
+			state.board.at(w, h) = Square(name, dcomponents.declareNew(path, offset, tm_, 0));
+			state.board.at(w, h).dc()->setSquarePos(std::make_pair(w, h), state);
+			addEntity(val, std::make_pair(w, h));
 		}
 	}
 	makeTexture();

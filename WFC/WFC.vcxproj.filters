@@ -30,6 +30,9 @@
     <ClCompile Include="DrawComponent.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Drawable.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="WFCOptions.h">
@@ -87,6 +90,9 @@
       <Filter>Header Files\WFC</Filter>
     </ClInclude>
     <ClInclude Include="Actions.h">
+      <Filter>Header Files\WFC</Filter>
+    </ClInclude>
+    <ClInclude Include="Drawable.h">
       <Filter>Header Files\WFC</Filter>
     </ClInclude>
   </ItemGroup>

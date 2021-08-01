@@ -30,7 +30,7 @@ private:
 	matrix<std::vector<uint8_t>> wave;
 
 	void initEntropy();
-	double shannonEntropy(size_t y, size_t x);
+	double shannonEntropy(size_t x, size_t y);
 
 	std::vector<unsigned> pattern_weights;
 	std::vector<double> pattern_wlogw;
@@ -49,10 +49,6 @@ Propagator::Propagator(const WFCOptions& options, const std::vector<unsigned>& p
 	numpatterns(pattern_weights_.size()), pattern_weights(pattern_weights_), wave(options.owidth - options.n + 1, options.oheight - options.n + 1, std::vector<uint8_t>(numpatterns, 1)), pattern_wlogw(), entropy(), rules(std::move(overlap_rules.first)),
 	valid(wave.width(), wave.height(), overlap_rules.second), collapsed(wave.width(), wave.height())
 {
-	uint8_t test = wave.at(0, 0)[0];
-	while (test != 1) {
-
-	}
 	initEntropy();
 	srand((unsigned int)time(NULL));
 }
@@ -120,18 +116,18 @@ std::optional<std::pair<size_t, size_t>> Propagator::findLowestEntropy()
 
 size_t Propagator::collapse(std::pair<size_t, size_t> coords)
 {
-	auto [y, x] = coords;
+	auto [x, y] = coords;
 	int total = 0;
 	for (unsigned i = 0; i < numpatterns; i++)
 	{
-		if (!wave.at(y, x)[i])
+		if (!wave.at(x, y)[i])
 			continue;
 		total += pattern_weights[i];
 	}
 	total = rand() % total;
 	for (unsigned i = 0; i < numpatterns; i++)
 	{
-		if (!wave.at(y, x)[i])
+		if (!wave.at(x, y)[i])
 			continue;
 		total -= pattern_weights[i];
 
@@ -139,13 +135,13 @@ size_t Propagator::collapse(std::pair<size_t, size_t> coords)
 		{
 			for (unsigned j = 0; j < numpatterns; j++)
 			{
-				if (!wave.at(y, x)[j] || j == i)
+				if (!wave.at(x, y)[j] || j == i)
 					continue;
-				wave.at(y, x)[j] = 0;
-				pstack.push(std::make_tuple(y, x, j));
+				wave.at(x, y)[j] = 0;
+				pstack.push(std::make_tuple(x, y, j));
 			}
-			entropy.at(y, x) = 0;
-			collapsed.at(y, x) = true;
+			entropy.at(x, y) = 0;
+			collapsed.at(x, y) = true;
 			return i;
 		}
 	}
@@ -154,12 +150,12 @@ size_t Propagator::collapse(std::pair<size_t, size_t> coords)
 }
 
 
-double Propagator::shannonEntropy(size_t y, size_t x)
+double Propagator::shannonEntropy(size_t x, size_t y)
 {
 	double sumwlogw = 0, sumweight = 0;
 	for (unsigned i = 0;i < numpatterns;i++)
 	{
-		if (!wave.at(y, x)[i]) continue;
+		if (!wave.at(x, y)[i]) continue;
 		sumwlogw += pattern_wlogw[i];
 		sumweight += pattern_weights[i];
 	}
@@ -175,7 +171,7 @@ void Propagator::checkNeighbors(const std::tuple<int, int, size_t> removed)
 {
 	std::optional<std::pair<int, int>> next;
 	int remaining;
-	size_t y, x;
+	size_t x, y;
 
 	std::vector<unsigned> to_remove;
 	std::vector<unsigned> temp;
@@ -183,25 +179,25 @@ void Propagator::checkNeighbors(const std::tuple<int, int, size_t> removed)
 	{
 		if ((next = getCoords(std::get<0>(removed), std::get<1>(removed), wave, dir)).has_value()) //get the adjacent square in the direction
 		{
-			y = next.value().first;
-			x = next.value().second;
-			if (entropy.at(y, x) == 0) continue;
+			x = next.value().first;
+			y = next.value().second;
+			if (entropy.at(x, y) == 0) continue;
 			for (unsigned j = 0; j < numpatterns; j++) //for each pattern remaining in the square
 			{
-				if (!wave.at(y, x)[j])
+				if (!wave.at(x, y)[j])
 					continue;
 				if (rules[std::get<2>(removed)][dir][j]) //if pattern was compatible with removed pattern
 				{
-					remaining = --valid.at(y, x)[j][oppositeDir(dir)]; //decrease number of valid patterns in the opposite direction
+					remaining = --valid.at(x, y)[j][oppositeDir(dir)]; //decrease number of valid patterns in the opposite direction
 					if (remaining == 0)
 					{
-						pstack.push(std::make_tuple(y, x, j)); //then, if allowed patterns is 0, propagate that pattern
-						wave.at(y, x)[j] = 0; //and remove it from the wave
+						pstack.push(std::make_tuple(x, y, j)); //then, if allowed patterns is 0, propagate that pattern
+						wave.at(x, y)[j] = 0; //and remove it from the wave
 					}
 				}
 			};
 
-			entropy.at(y, x) = shannonEntropy(y, x);
+			entropy.at(x, y) = shannonEntropy(x, y);
 		}
 	}
 }

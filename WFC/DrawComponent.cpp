@@ -8,7 +8,7 @@ void DrawComponent::set(std::string path, sf::Vector2f& offset, std::shared_ptr<
 {
 	tm_ = tm;
 	sprite_offset = offset;
-	sprite.setTexture(tm_->get(path));
+	sprite = std::move(sf::Sprite(tm_->get(path)));
 	priority_ = priority;
 	index_ = index;
 }
@@ -19,15 +19,16 @@ DrawComponent::DrawComponent(std::string path, sf::Vector2f& offset, std::shared
 }
 
 
-BoardEntity* DrawComponent::getOwner() { return owner_; }
+std::variant<BoardEntity*, Square*> DrawComponent::getOwner() { return owner_; }
+void DrawComponent::setOwner(Square* owner) { owner_ = owner; }
 void DrawComponent::setOwner(BoardEntity* owner) { owner_ = owner; }
 
 void DrawComponent::updateEntityPos(std::pair<unsigned, unsigned> newpos, BoardState& state) {
-	zval_ = (newpos.first * state.board.width() + newpos.second) * 10 + priority_;
+	zval_ = (newpos.second * state.board.width() + newpos.first) * 10 + priority_;
 	setSpritePos(state.board.at(newpos).dc()->getSprite().getPosition());
 }
 
 void DrawComponent::setSquarePos(std::pair<unsigned, unsigned> newpos, BoardState& state) {
-	zval_ = (newpos.first * state.board.width() + newpos.second) * 10 + priority_;
+	zval_ = (newpos.second * state.board.width() + newpos.first) * 10 + priority_;
 	setSpritePos(sf::Vector2f((state.board.width() - 1 + newpos.first - newpos.second) * sq::square_w / 2, (newpos.first + newpos.second) * sq::square_h / 2));
 }

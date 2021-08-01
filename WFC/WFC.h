@@ -30,7 +30,7 @@ public:
 	std::vector < matrix<T>> getPatterns();
 	void insertRotations(std::vector < matrix<T>>& patternlist, matrix<T>& pattern, std::unordered_map<matrix<T>, size_t>& pmap);
 	WFC() = delete;
-	WFC(matrix<T>& input_, const size_t oheight, const size_t owidth,
+	WFC(matrix<T>& input_, const size_t owidth, const size_t oheight,
 		const unsigned n = 3, const bool rotate = true, const bool reflect = true);
 	void displayOutput(size_t y, size_t x);
 	std::optional<matrix<T>> step();
@@ -53,11 +53,14 @@ private:
 
 template <class T>
 requires hashable<T>
-WFC<T>::WFC(matrix<T>& input_, const size_t oheight, const size_t owidth,
+WFC<T>::WFC(matrix<T>& input_, const size_t owidth, const size_t oheight,
 	const unsigned n, const bool rotate, const bool reflect)
-	: options(oheight, owidth, n, rotate, reflect), sumofweights(0), input(input_), output(oheight, owidth, traits<T>::blank),
+	: options(owidth, oheight, n, rotate, reflect), sumofweights(0), input(input_), output(owidth, oheight, traits<T>::blank),
 	patterns(getPatterns()), prop(options, pattern_weights, getOverlapRules()) {
-
+	for (auto i : patterns) {
+		printPattern(i);
+		std::cout << std::endl;
+	}
 }
 
 template <class T>
@@ -145,18 +148,18 @@ std::optional<matrix<T>> WFC<T>::step()
 
 template<typename T>
 requires hashable<T>
-void WFC<T>::displayOutput(size_t y, size_t x) {
+void WFC<T>::displayOutput(size_t x, size_t y) {
 	HANDLE hConsole;
 	hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 	for (size_t i = 0; i < output.height(); i++) {
 		for (size_t j = 0; j < output.width(); j++) {
-			if (i >= y && i < y + options.n &&
-				j >= x && j < x + options.n) {
+			if (i >= x && i < x + options.n &&
+				j >= y && j < y + options.n) {
 				SetConsoleTextAttribute(hConsole, 4);
-				std::cout << output.at(i, j);
+				std::cout << output.at(j, i);
 				SetConsoleTextAttribute(hConsole, 7);
 			}
-			else std::cout << output.at(i, j);
+			else std::cout << output.at(j, i);
 		}
 		std::cout << std::endl;
 	}
@@ -178,7 +181,11 @@ auto WFC<T>::getOverlapRules()
 	for (size_t i = 0; i < patterns.size(); i++) {
 		for (auto j : directions) {
 			for (size_t k = 0; k < patterns.size(); k++) {
-				if (overlaps(patterns[i], patterns[k], ydir[j], xdir[j])) {
+				printPattern(patterns[i]);
+				std::cout << ",\n";
+				printPattern(patterns[k]);
+				std::cout << "-------------------------------\n";
+				if (overlaps(patterns[i], patterns[k], xdir[j], ydir[j])) {
 					rules[i][j][k] = 1; //pattern l is allowed in this overlap position with i
 					valid[i][j]++;
 				}
@@ -191,10 +198,10 @@ auto WFC<T>::getOverlapRules()
 
 template <typename T>
 requires hashable<T>
-void WFC<T>::updateOutput(size_t pindex, size_t y, size_t x) {
+void WFC<T>::updateOutput(size_t pindex, size_t x, size_t y) {
 	for (size_t i = 0; i < options.n; i++) {
 		for (size_t j = 0; j < options.n; j++) {
-			output.at(y + i, x + j) = patterns[pindex].at(i, j);
+			output.at(x + i, y + j) = patterns[pindex].at(i, j);
 		}
 	}
 }

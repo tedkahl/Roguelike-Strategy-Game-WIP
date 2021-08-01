@@ -14,11 +14,12 @@ class Square
 {
 private:
 	terrain_type type;
-	std::shared_ptr<DrawComponent> dc_;
+	DrawComponent* dc_;
 public:
 	std::vector <BoardEntity*> entities;
 	Square() = default;
-	std::shared_ptr<DrawComponent> dc();
+	DrawComponent* dc() const;
+	void setDC(DrawComponent* dc);
 	bool removeE(BoardEntity* e);
 	void addE(BoardEntity* e);
 	void replaceE(BoardEntity* olde, BoardEntity* newe);
