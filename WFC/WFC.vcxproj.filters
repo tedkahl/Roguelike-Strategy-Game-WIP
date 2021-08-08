@@ -33,6 +33,9 @@
     <ClCompile Include="Drawable.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="UnitComponent.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="WFCOptions.h">
@@ -56,44 +59,47 @@
     <ClInclude Include="Direction.h">
       <Filter>Header Files\WFC</Filter>
     </ClInclude>
-    <ClInclude Include="Square.h">
-      <Filter>Header Files\WFC</Filter>
-    </ClInclude>
-    <ClInclude Include="DrawComponent.h">
-      <Filter>Header Files\WFC</Filter>
-    </ClInclude>
-    <ClInclude Include="ResourceManager.h">
-      <Filter>Header Files\WFC</Filter>
-    </ClInclude>
     <ClInclude Include="matrix.h">
       <Filter>Header Files\WFC</Filter>
     </ClInclude>
+    <ClInclude Include="UnitComponent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="Entity.h">
-      <Filter>Header Files\WFC</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Game.h">
-      <Filter>Header Files\WFC</Filter>
+    <ClInclude Include="DrawComponent.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Data.h">
-      <Filter>Header Files\WFC</Filter>
-    </ClInclude>
-    <ClInclude Include="Util.h">
-      <Filter>Header Files\WFC</Filter>
-    </ClInclude>
-    <ClInclude Include="Board.h">
-      <Filter>Header Files\WFC</Filter>
-    </ClInclude>
-    <ClInclude Include="DataManager.h">
-      <Filter>Header Files\WFC</Filter>
-    </ClInclude>
-    <ClInclude Include="BoardState.h">
-      <Filter>Header Files\WFC</Filter>
+    <ClInclude Include="Square.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Actions.h">
-      <Filter>Header Files\WFC</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Drawable.h">
-      <Filter>Header Files\WFC</Filter>
+    <ClInclude Include="Board.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BoardState.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Data.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DataManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ResourceManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Util.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Random.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Managed.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

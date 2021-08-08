@@ -16,7 +16,6 @@ private:
 	sf::Sprite sprite;
 	unsigned index_;
 	std::variant<BoardEntity*, Square*> owner_;
-	int owner_type;
 	unsigned zval_;
 	unsigned priority_;
 public:
@@ -24,7 +23,7 @@ public:
 	DrawComponent(std::string path, sf::Vector2f& offset, std::shared_ptr<ResourceManager<sf::Texture>> tm);
 	inline unsigned index() const { return index_; }
 	inline void setIndex(unsigned index) { index_ = index; }
-	void set(std::string path, sf::Vector2f& offset, std::shared_ptr<ResourceManager<sf::Texture>>, unsigned priority, unsigned index);
+	void set(std::string path, sf::Vector2f& offset, std::shared_ptr<ResourceManager<sf::Texture>>, unsigned priority, sf::IntRect& rect, unsigned index);
 	inline sf::Sprite const& getSprite() const { return sprite; }
 	inline void setSpritePos(const sf::Vector2f& position) { sprite.setPosition(position + sprite_offset); }
 	std::variant<BoardEntity*, Square*> getOwner();
@@ -34,5 +33,6 @@ public:
 	void draw(sf::RenderTarget* target) const;
 	void updateEntityPos(std::pair<unsigned, unsigned> newpos, BoardState& state);
 	void setSquarePos(std::pair<unsigned, unsigned> newpos, BoardState& state);
+	void updatePointers(DrawComponent& removed);
 	friend bool operator<(const DrawComponent& l, const DrawComponent& r) { return l.zval_ < r.zval_; }
 };

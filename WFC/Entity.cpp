@@ -1,16 +1,30 @@
 #include "Entity.h"
 
 DrawComponent* BoardEntity::dc() { return dc_; }
-void BoardEntity::setDC(DrawComponent* dc) { std::cout << "calling setDC(entity)\n";dc_ = dc; }
+void BoardEntity::setDC(DrawComponent* dc) { dc_ = dc; }
+UnitComponent* BoardEntity::uc() { return uc_; }
+void BoardEntity::setUC(UnitComponent* uc) { uc_ = uc; }
 
-void BoardEntity::set(unsigned type, DrawComponent* drawcomponent, unsigned index) {
+void BoardEntity::set(unsigned type, DrawComponent* dc, UnitComponent* uc, unsigned index) {
 	type_ = type;
-	dc_ = drawcomponent;
+	dc_ = dc;
+	uc_ = uc;
 	index_ = index;
 	dc_->setOwner(this);
+	if (uc_) uc_->setOwner(this);
 }
 
 void BoardEntity::setPos(std::pair<unsigned, unsigned> newpos, BoardState& state) {
 	coords_ = newpos;
+	owner_ = &state.board.at(newpos);
 	dc_->updateEntityPos(newpos, state);
 }
+
+
+void BoardEntity::updatePointers(BoardEntity& removed) {
+	owner_->replaceE(&removed, this);
+	dc_->setOwner(this);
+	if (uc_) uc_->setOwner(this);
+}
+
+Square* BoardEntity::getOwner() const { return owner_; }

@@ -18,21 +18,13 @@ public:
 	template<typename ...T_>
 	T* declareNew(T_... args);
 
-	auto deactivate(unsigned index);
+	void deactivate(unsigned index);
 	inline size_t active() const { return active_; }
 	typedef std::array<T, MAX>::iterator iterator;
 	iterator begin() { return data.begin(); }
 	iterator end() { return data.begin() + active_; }
 
 };
-//Duelist 6,-33
-//template<typename T>
-//unsigned DataManager<T>::activate()
-//{
-//	active++;
-//	assert(active <= MAX);
-//	return active - 1;
-//}
 
 template<typename T>
 template<typename ...T_>
@@ -44,13 +36,13 @@ T* DataManager<T>::declareNew(T_... args)
 	return &data[active_ - 1];
 }
 
-//return owner pointer (for components) or coords (for entities) for updating
+
 template<typename T>
-auto DataManager<T>::deactivate(unsigned index) {
+void DataManager<T>::deactivate(unsigned index) {
+	assert(index < active_);
 	std::swap(data[index], data[active_ - 1]);
 	data[index].setIndex(index);
-	auto owner = data[index].getOwner();
-	T* newptr = &data[index];
+	data[active_ - 1].setIndex(active_ - 1);
+	data[index].updatePointers(data[active_ - 1]);
 	--active_;
-	return std::make_pair(owner, newptr);
 }

@@ -10,21 +10,24 @@
 
 class DrawComponent;
 class BoardEntity;
+class UnitComponent;
 class Square
 {
 private:
-	terrain_type type;
+	unsigned type;
 	DrawComponent* dc_;
+	UnitComponent* unit_;
 public:
 	std::vector <BoardEntity*> entities;
 	Square() = default;
 	DrawComponent* dc() const;
+	UnitComponent* unit();
 	void setDC(DrawComponent* dc);
 	bool removeE(BoardEntity* e);
 	void addE(BoardEntity* e);
 	void replaceE(BoardEntity* olde, BoardEntity* newe);
 	//std::vector<BoardEntity*>& getEntities() { return entities; }
-	Square(terrain_type t, DrawComponent* dc);
+	Square(unsigned terrain_t, DrawComponent* dc);
 	Square& operator=(const Square& other);
 };
 

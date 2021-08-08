@@ -79,7 +79,7 @@ int main()
 		  's','s','s',
 		  's','s','s' });
 
-	auto output = getOutput(input, 20, 10, 3, true, true);
+	auto output = getOutput(input1, 20, 20, 3, true, true);
 
 	sf::RenderWindow window(sf::VideoMode(1200, 800), "Dungeon Delve");
 
@@ -88,7 +88,7 @@ int main()
 	Board<char> board(tm, d);
 	auto& squares = board.state.board;
 	//board.resizeView(window.getDefaultView().getSize().x, window.getDefaultView().getSize().y);
-	window.setView(sf::View(sf::FloatRect(0, 0, window.getSize().x / 2, window.getSize().y / 2)));
+	window.setView(sf::View(sf::FloatRect(0.f, 0.f, (float)window.getSize().x / 2, (float)window.getSize().y / 2)));
 	board.setSquares(output);
 	//window.setFramerateLimit(400);
 
@@ -119,7 +119,7 @@ int main()
 			case sf::Event::Resized:
 			{
 				// update the view to the new size of the window
-				sf::FloatRect visibleArea(0, 0, event.size.width / 2, event.size.height / 2);
+				sf::FloatRect visibleArea(0.f, 0.f, event.size.width / 2, event.size.height / 2);
 				window.setView(sf::View(visibleArea));
 				//board.resizeView(event.size.width, event.size.height);
 				break;
@@ -151,7 +151,7 @@ int main()
 				case sf::Keyboard::Key::A: {
 					if (auto coords = board.getCoords(window, sf::Mouse::getPosition(window))) {
 						auto& square = squares.at(coords.value());
-						board.addEntity('C', coords.value());
+						board.addEntity(rand() % 2 == 0 ? object_type::ROCK : object_type::CACTUS, coords.value());
 
 					}
 					break;
@@ -160,7 +160,6 @@ int main()
 					if (auto coords = board.getCoords(window, sf::Mouse::getPosition(window))) {
 						auto& square = squares.at(coords.value());
 						if (square.entities.size() != 0) {
-
 							auto e = square.entities[0];
 							board.removeEntity(e);
 						}
