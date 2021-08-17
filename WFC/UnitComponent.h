@@ -1,14 +1,13 @@
 #pragma once
+#include <SFML/Graphics.hpp>
 #include "Managed.h"
-#include "Entity.h"
 
 class BoardEntity;
 struct UnitStats {
 	unsigned movetype;
 	int movement;
 	int max_hp;
-	int min_damage;
-	int max_damage;
+	int damage;
 };
 
 
@@ -17,13 +16,15 @@ private:
 	UnitStats stats_;
 	int current_hp;
 	bool dummy_;
+	int team_;
 	BoardEntity* owner_;
 public:
 	inline bool dummy() { return dummy_; }
+	inline int team() { return team_; }
 	inline int hp() { return current_hp; }
+	sf::Vector2i getPos();
 	BoardEntity* getOwner();
 	void setOwner(BoardEntity* owner);
-	int team_;
 	UnitStats const& stats() const { return stats_; };
 	UnitComponent() = default;
 	//UnitComponent(UnitStats stats, int team) :stats_(stats), team_(team), current_hp(stats_.max_hp), Managed(index) {}

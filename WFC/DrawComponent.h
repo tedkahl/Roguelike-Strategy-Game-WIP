@@ -4,6 +4,7 @@
 #include <SFML/Graphics.hpp>
 #include "ResourceManager.h"
 #include "BoardState.h"
+#include "Data.h"
 #include <variant>
 class BoardEntity;
 struct BoardState;
@@ -31,8 +32,8 @@ public:
 	void setOwner(BoardEntity* owner);
 	inline sf::Vector2f getOffset() { return sprite_offset; }
 	void draw(sf::RenderTarget* target) const;
-	void updateEntityPos(std::pair<unsigned, unsigned> newpos, BoardState& state);
-	void setSquarePos(std::pair<unsigned, unsigned> newpos, BoardState& state);
+	void updateEntityPos(sf::Vector2i newpos, BoardState& state);
+	void setSquarePos(sf::Vector2i newpos, BoardState& state);
 	void updatePointers(DrawComponent& removed);
 	friend bool operator<(const DrawComponent& l, const DrawComponent& r) { return l.zval_ < r.zval_; }
 };

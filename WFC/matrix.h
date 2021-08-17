@@ -12,7 +12,9 @@ public:
 	matrix(size_t w, size_t h) :data(h* w), height_(h), width_(w) {}
 	matrix(size_t w, size_t h, const T val) :data(h* w, val), height_(h), width_(w) { }
 	matrix(size_t w, size_t h, std::initializer_list<T> i) :data(i), height_(h), width_(w) {}
-	void set(size_t h, size_t w, const T& val);
+	void set(size_t w, size_t h, const T& val = T());
+	void resize(size_t w, size_t h);
+	inline std::vector<T>& vec() { return data; }
 	inline T& at(size_t x, size_t y) { return data[y * width_ + x]; }
 	inline T const& at(size_t x, size_t y) const { assert(x < width_&& y < height_); return data[y * width_ + x]; }
 	inline T& at(std::pair<size_t, size_t> coords) { assert(coords.first < width_&& coords.second < height_); return data[coords.second * width_ + coords.first]; }
@@ -34,6 +36,13 @@ public:
 template<typename T>
 void matrix<T>::set(size_t w, size_t h, const T& val) {
 	data.assign(h * w, val);
+	height_ = h;
+	width_ = w;
+}
+
+template<typename T>
+void matrix<T>::resize(size_t w, size_t h) {
+	data.resize(h * w);
 	height_ = h;
 	width_ = w;
 }

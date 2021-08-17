@@ -11,7 +11,6 @@ class Board
 private:
 	std::shared_ptr<sf::RenderTexture> boardTexture;
 	std::shared_ptr<ResourceManager<sf::Texture>> tm_;
-	std::shared_ptr<Data<T>> data;
 	DataManager<BoardEntity> entities;
 	DataManager<DrawComponent> dcomponents;
 	DataManager<UnitComponent> units;
@@ -20,20 +19,20 @@ private:
 	void makeTexture();
 public:
 	BoardState state;
-	Board(std::shared_ptr<ResourceManager<sf::Texture>> tm, Data<T>& data_);
-	bool addEntity(object_type t, std::pair<unsigned, unsigned> coords);
+	Board(std::shared_ptr<ResourceManager<sf::Texture>> tm);
+	bool addEntity(object_type t, sf::Vector2i coords);
 	bool removeEntity(BoardEntity* e);
-	void setEntityPos(BoardEntity* e, std::pair<unsigned, unsigned> newpos);
+	void setEntityPos(BoardEntity* e, sf::Vector2i newpos);
 	void setSquares(matrix<T>& WFCOutput);
 	void draw(sf::RenderWindow& window);
-	std::optional < std::pair<unsigned, unsigned >> getCoords(sf::RenderWindow& window, sf::Vector2i pixel);
+	std::optional < sf::Vector2i> getCoords(sf::RenderWindow& window, sf::Vector2i pixel);
 };
 
 template<typename T>
-Board<T>::Board(std::shared_ptr<ResourceManager<sf::Texture>> tm, Data<T>& data_) :tm_(tm), data(&data_) {}
+Board<T>::Board(std::shared_ptr<ResourceManager<sf::Texture>> tm) :tm_(tm) {}
 
 template<typename T>
-void Board<T>::setEntityPos(BoardEntity* e, std::pair<unsigned, unsigned> newpos) {
+void Board<T>::setEntityPos(BoardEntity* e, sf::Vector2i newpos) {
 	auto coords = e->getPos();
 	assert(state.board.at(coords).removeE(e));
 	state.board.at(newpos).addE(e);
@@ -49,7 +48,7 @@ void Board<T>::setEntityPos(BoardEntity* e, std::pair<unsigned, unsigned> newpos
 //}
 
 template<typename T>
-std::optional<std::pair<unsigned, unsigned>> Board<T>::getCoords(sf::RenderWindow& window, sf::Vector2i pixel) {
+std::optional<sf::Vector2i> Board<T>::getCoords(sf::RenderWindow& window, sf::Vector2i pixel) {
 	auto coords = window.mapPixelToCoords(pixel);
 
 	double x_pos = coords.y + (.5 * coords.x);
@@ -59,7 +58,7 @@ std::optional<std::pair<unsigned, unsigned>> Board<T>::getCoords(sf::RenderWindo
 
 	std::cout << "xy: " << x_pos << " " << y_pos << std::endl;
 	if (0 <= x_pos && x_pos < state.board.width() && 0 <= y_pos && y_pos < state.board.height())
-		return std::make_pair((unsigned)x_pos, (unsigned)y_pos);
+		return sf::Vector2i(x_pos, y_pos);
 	return std::nullopt;
 }
 
@@ -80,14 +79,14 @@ void Board<T>::draw(sf::RenderWindow& window) {
 }
 
 template<typename T>
-bool Board<T>::addEntity(object_type type, std::pair<unsigned, unsigned> coords)
+bool Board<T>::addEntity(object_type type, sf::Vector2i coords)
 {
-	UnitComponent* uc = makeUnit(*data, units, 0, type);
+	UnitComponent* uc = makeUnit(units, 0, type);
 	if (uc && state.board.at(coords).unit()) {
 		std::cerr << "space already full\n";
 		return false;
 	}
-	DrawComponent* dc = getObjDC(*data, dcomponents, tm_, type);
+	DrawComponent* dc = getObjDC(dcomponents, tm_, type);
 	BoardEntity* entity = entities.declareNew(type, dc, uc);
 	entity->setPos(coords, state);
 	state.board.at(coords).addE(entity);
@@ -114,12 +113,12 @@ void Board<T>::setSquares(matrix<T>& WFCOutput)
 	for (unsigned h = 0;h < WFCOutput.height();h++) {
 		for (unsigned w = 0;w < WFCOutput.width();w++) {
 			T val = WFCOutput.at(w, h);
-			auto [terrain_t, entity_t] = data->glyphs.at(val);
-			auto [path, offset, rect] = data->squareinfo.at(terrain_t);
+			auto [terrain_t, entity_t] = Data<T>::d()->glyphs.at(val);
+			auto [path, offset, rect] = Data<T>::d()->squareinfo.at(terrain_t);
 			state.board.at(w, h) = Square(terrain_t, dcomponents.declareNew(path, offset, tm_, 0, rect));
-			state.board.at(w, h).dc()->setSquarePos(std::make_pair(w, h), state);
+			state.board.at(w, h).dc()->setSquarePos(sf::Vector2i(w, h), state);
 			if (entity_t != object_type::NONE)
-				addEntity(entity_t, std::make_pair(w, h));
+				addEntity(entity_t, sf::Vector2i(w, h));
 		}
 	}
 	makeTexture();

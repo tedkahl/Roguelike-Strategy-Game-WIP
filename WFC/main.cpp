@@ -84,8 +84,7 @@ int main()
 	sf::RenderWindow window(sf::VideoMode(1200, 800), "Dungeon Delve");
 
 	auto tm = std::make_shared<ResourceManager<sf::Texture>>();
-	Data<char> d;
-	Board<char> board(tm, d);
+	Board<char> board(tm);
 	auto& squares = board.state.board;
 	//board.resizeView(window.getDefaultView().getSize().x, window.getDefaultView().getSize().y);
 	window.setView(sf::View(sf::FloatRect(0.f, 0.f, (float)window.getSize().x / 2, (float)window.getSize().y / 2)));

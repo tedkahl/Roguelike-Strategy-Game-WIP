@@ -1,4 +1,7 @@
 #include "Entity.h"
+#include "DrawComponent.h"
+#include "UnitComponent.h"
+#include "Square.h"
 
 DrawComponent* BoardEntity::dc() { return dc_; }
 void BoardEntity::setDC(DrawComponent* dc) { dc_ = dc; }
@@ -14,7 +17,7 @@ void BoardEntity::set(unsigned type, DrawComponent* dc, UnitComponent* uc, unsig
 	if (uc_) uc_->setOwner(this);
 }
 
-void BoardEntity::setPos(std::pair<unsigned, unsigned> newpos, BoardState& state) {
+void BoardEntity::setPos(sf::Vector2i newpos, BoardState& state) {
 	coords_ = newpos;
 	owner_ = &state.board.at(newpos);
 	dc_->updateEntityPos(newpos, state);

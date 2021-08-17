@@ -1,5 +1,5 @@
 #include "Square.h"
-Square::Square(unsigned terrain_t, DrawComponent* dc) : type(terrain_t), dc_(dc) {
+Square::Square(unsigned terrain_t, DrawComponent* dc) : type_(terrain_t), dc_(dc) {
 	dc_->setOwner(this);
 }
 
@@ -36,7 +36,7 @@ UnitComponent* Square::unit() { return unit_; }
 
 Square& Square::operator=(const Square& other)
 {
-	type = other.type;
+	type_ = other.type_;
 	dc_ = other.dc_;
 	return *this;
 }

@@ -23,14 +23,14 @@ std::variant<BoardEntity*, Square*> DrawComponent::getOwner() { return owner_; }
 void DrawComponent::setOwner(Square* owner) { owner_ = owner; }
 void DrawComponent::setOwner(BoardEntity* owner) { owner_ = owner; }
 
-void DrawComponent::updateEntityPos(std::pair<unsigned, unsigned> newpos, BoardState& state) {
-	zval_ = (newpos.second * state.board.width() + newpos.first) * 10 + priority_;
+void DrawComponent::updateEntityPos(sf::Vector2i newpos, BoardState& state) {
+	zval_ = (newpos.y * state.board.width() + newpos.x) * 10 + priority_;
 	setSpritePos(state.board.at(newpos).dc()->getSprite().getPosition());
 }
 
-void DrawComponent::setSquarePos(std::pair<unsigned, unsigned> newpos, BoardState& state) {
-	zval_ = (newpos.second * state.board.width() + newpos.first) * 10 + priority_;
-	setSpritePos(sf::Vector2f((state.board.width() - 1 + newpos.first - newpos.second) * sq::square_w / 2, (newpos.first + newpos.second) * sq::square_h / 2));
+void DrawComponent::setSquarePos(sf::Vector2i newpos, BoardState& state) {
+	zval_ = (newpos.y * state.board.width() + newpos.x) * 10 + priority_;
+	setSpritePos(sf::Vector2f((state.board.width() - 1 + newpos.x - newpos.y) * sq::square_w / 2, (newpos.x + newpos.y) * sq::square_h / 2));
 }
 
 void DrawComponent::updatePointers(DrawComponent& removed)

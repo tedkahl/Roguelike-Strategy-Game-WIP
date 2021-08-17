@@ -1,5 +1,6 @@
 #pragma once
 #include <map>
+#include <memory>
 #include <string>
 #include <SFML/Graphics.hpp>
 namespace sq {
@@ -7,33 +8,54 @@ namespace sq {
 	const static float square_h = 40.f;
 	const static float square_t = 15.f;
 }
+template<typename T>
+struct Data;
+
 enum terrain_type {
-	GRASS, WATER, PAVEDSTONE, PAVEDSTONE_TALL, ROUGHSTONE, LAVA, SAND
+	GRASS, WATER, PAVEDSTONE, PAVEDSTONE_TALL, ROUGHSTONE, LAVA, SAND, TERRAIN_END
 };
 
 enum object_type {
 	NONE, ROCK, CACTUS, OTHER,
-	DUELIST, WOLF
+	DUELIST, WOLF, OBJECT_END
 };
 
 enum move_type {
-	WALK, FLY
+	WALK, FLY, MOVE_END
 };
 const unsigned firstunit = object_type::DUELIST;
 
+template<typename T>
+struct D {
+	void operator()(Data<T>* p) {
+		delete p;
+	}
+};
 
 template<typename T>
 struct Data {
+private:
+	Data();
+	static std::unique_ptr<Data<T>, D<T>> instance_;
 public:
+	static Data<T>* d() {
+		if (!instance_) instance_ = std::unique_ptr<Data<T>, D<T>>(new Data<T>());
+		return instance_.get();
+	}
+	~Data() = default;
 	std::map < T, std::tuple<terrain_type, object_type>> glyphs;
 	std::map <unsigned, std::tuple<std::string, sf::Vector2f, sf::IntRect>> squareinfo; //path, offset, texture rect
 	std::map <unsigned, std::tuple<std::string, sf::Vector2f, sf::IntRect>> entityinfo;
-	Data();
+	std::array<std::array<int, terrain_type::TERRAIN_END>, move_type::MOVE_END> movecosts;
 };
+
 
 template<typename T>
 Data<T>::Data()
 {
+	movecosts[move_type::FLY].fill(1);
+	movecosts[move_type::WALK] = { 1,2,1,1,1,999,2 };
+
 	glyphs.emplace(std::make_pair('.', std::make_tuple(terrain_type::LAVA, object_type::NONE)));
 	glyphs.emplace(std::make_pair('x', std::make_tuple(terrain_type::PAVEDSTONE, object_type::NONE)));
 	glyphs.emplace(std::make_pair('C', std::make_tuple(terrain_type::PAVEDSTONE, object_type::ROCK)));

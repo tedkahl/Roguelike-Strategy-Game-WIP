@@ -5,7 +5,7 @@
 #include "ResourceManager.h"
 #include "DrawComponent.h"
 #include "assert.h"
-#include "Data.h"
+//#include "Data.h"
 #include "Entity.h"
 
 class DrawComponent;
@@ -14,7 +14,7 @@ class UnitComponent;
 class Square
 {
 private:
-	unsigned type;
+	unsigned type_;
 	DrawComponent* dc_;
 	UnitComponent* unit_;
 public:
@@ -22,6 +22,7 @@ public:
 	Square() = default;
 	DrawComponent* dc() const;
 	UnitComponent* unit();
+	inline unsigned type() { return type_; }
 	void setDC(DrawComponent* dc);
 	bool removeE(BoardEntity* e);
 	void addE(BoardEntity* e);
