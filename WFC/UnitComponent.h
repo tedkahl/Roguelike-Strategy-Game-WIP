@@ -28,7 +28,7 @@ public:
 	UnitStats const& stats() const { return stats_; };
 	UnitComponent() = default;
 	//UnitComponent(UnitStats stats, int team) :stats_(stats), team_(team), current_hp(stats_.max_hp), Managed(index) {}
-	void set(UnitStats stats, int team, unsigned index) { stats = stats; team_ = team; current_hp = stats_.max_hp; index_ = index; }
+	void set(const UnitStats& stats, int team, unsigned index) { stats_ = stats; team_ = team; current_hp = stats_.max_hp; index_ = index; }
 	void updatePointers(UnitComponent& removed);
 };
 

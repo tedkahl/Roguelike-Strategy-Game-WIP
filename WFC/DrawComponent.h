@@ -2,10 +2,11 @@
 #include <array>
 #include <string>
 #include <SFML/Graphics.hpp>
+#include <variant>
+#include "Entity.h"
 #include "ResourceManager.h"
 #include "BoardState.h"
 #include "Data.h"
-#include <variant>
 class BoardEntity;
 struct BoardState;
 class Square;
@@ -15,6 +16,7 @@ private:
 	std::shared_ptr<ResourceManager<sf::Texture>> tm_;
 	sf::Vector2f sprite_offset;
 	sf::Sprite sprite;
+
 	unsigned index_;
 	std::variant<BoardEntity*, Square*> owner_;
 	unsigned zval_;
@@ -31,6 +33,7 @@ public:
 	void setOwner(Square* owner);
 	void setOwner(BoardEntity* owner);
 	inline sf::Vector2f getOffset() { return sprite_offset; }
+	//void update(sf::Vector2f& pos);
 	void draw(sf::RenderTarget* target) const;
 	void updateEntityPos(sf::Vector2i newpos, BoardState& state);
 	void setSquarePos(sf::Vector2i newpos, BoardState& state);

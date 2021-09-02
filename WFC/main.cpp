@@ -1,10 +1,14 @@
 ﻿#include <iostream>
+#include <memory>
 #include <SFML/Graphics.hpp>
 #include <thread>
 #include <chrono>
+#include "FrameCounter.h"
 #include "WFC.h"
 #include "Board.h"
-#include "Data.h"
+#include "TestBoards.h"
+#include "PlayerState.h"
+#include "Select.h"
 
 
 auto getOutput(matrix<char>& in, unsigned owidth, unsigned oheight, unsigned n, bool rotate = true, bool reflect = true) {
@@ -13,95 +17,21 @@ auto getOutput(matrix<char>& in, unsigned owidth, unsigned oheight, unsigned n, 
 }
 int main()
 {
-
-	matrix<char> input0(16, 32,
-		{ '.','.','.','x','.','.','.','.','.','.','.','.','x','.','.','.',
-		  '.','.','.','x','.','.','.','.','.','x','x','x','x','x','x','.',
-		  '.','x','x','x','x','x','.','.','.','x','x','x','x','x','x','.',
-		  '.','x','x','x','x','x','.','.','.','x','x','x','x','x','x','.',
-		  '.','x','x','x','x','x','x','x','x','x','x','x','x','x','x','.',
-		  'x','x','x','x','x','x','.','.','.','x','x','x','x','x','x','x',
-		  '.','x','x','x','x','x','.','.','.','x','x','x','x','x','x','.',
-		  '.','.','x','.','.','.','.','.','.','x','x','x','x','x','x','.',
-		  '.','.','x','.','.','.','.','.','.','.','.','T','.','.','.','.',
-		  '.','.','x','.','.','.','.','.','.','.','.','T','.','.','.','.',
-		  '.','.','x','x','x','x','x','x','.','.','T','T','T','T','.','.',
-		  'x','x','x','x','R','R','x','x','.','.','T','T','T','T','x','x',
-		  '.','.','x','x','R','R','x','x','x','x','T','T','T','T','.','.',
-		  '.','.','x','x','x','x','x','x','.','.','T','T','T','T','.','.',
-		  '.','.','x','x','x','x','x','x','.','.','.','.','x','.','.','.',
-		  '.','.','.','x','.','.','.','.','.','.','.','.','x','.','.','.',
-		  '.','.','.','x','.','.','.','.','.','.','.','.','x','.','.','.',
-		  '.','.','.','x','.','.','.','.','.','x','x','x','x','x','x','.',
-		  '.','x','x','x','C','x','.','.','.','x','x','x','x','x','x','.',
-		  '.','x','x','x','x','x','.','.','.','x','x','x','x','C','x','.',
-		  '.','x','x','x','x','x','x','x','x','x','x','x','C','C','x','.',
-		  'x','x','x','x','x','x','.','.','.','x','x','x','C','C','x','x',
-		  '.','x','x','x','x','x','.','.','.','x','C','x','x','x','x','.',
-		  '.','.','x','.','.','.','.','.','.','x','x','x','x','x','x','.',
-		  '.','.','x','.','.','.','.','.','.','.','.','x','.','.','.','.',
-		  '.','.','x','.','.','.','.','.','.','.','.','x','.','.','.','.',
-		  '.','.','x','x','x','x','x','x','.','.','x','x','x','x','.','.',
-		  'x','x','x','x','x','x','x','x','.','.','x','x','x','x','x','x',
-		  '.','.','C','C','x','R','x','x','x','x','x','x','x','x','.','.',
-		  '.','.','x','x','x','x','x','x','.','.','x','x','x','x','.','.',
-		  '.','.','x','x','x','x','x','x','.','.','.','.','x','.','.','.',
-		  '.','.','.','x','.','.','.','.','.','.','.','.','x','.','.','.' });
-
-
-
-	matrix<char> input(16, 16,
-		{ '.','.','.','x','.','.','.','.','.','.','.','.','x','.','.','.',
-		  '.','.','.','x','.','.','.','.','.','x','x','x','x','x','x','.',
-		  '.','x','x','x','x','x','.','.','.','x','x','x','x','x','x','.',
-		  '.','x','x','x','x','x','.','.','.','x','x','x','x','x','x','.',
-		  '.','x','x','x','x','x','x','x','x','x','x','x','x','x','x','.',
-		  'x','x','x','x','x','x','.','.','.','x','x','x','x','x','x','x',
-		  '.','x','x','x','x','x','.','.','.','x','x','x','x','x','x','.',
-		  '.','.','x','.','.','.','.','.','.','x','x','x','x','x','x','.',
-		  '.','.','x','.','.','.','.','.','.','.','.','x','.','.','.','.',
-		  '.','.','x','.','.','.','.','.','.','.','.','x','.','.','.','.',
-		  '.','.','x','x','x','x','x','x','.','.','x','x','x','x','.','.',
-		  'x','x','x','x','x','x','x','x','.','.','x','x','x','x','x','x',
-		  '.','.','x','x','x','x','x','x','x','x','x','x','x','x','.','.',
-		  '.','.','x','x','x','x','x','x','.','.','x','x','x','x','.','.',
-		  '.','.','x','x','x','x','x','x','.','.','.','.','x','.','.','.',
-		  '.','.','.','x','.','.','.','.','.','.','.','.','x','.','.','.' });
-
-	matrix<char> input1(3, 9,
-		{ 'G','G','G',
-		  'G','G','G',
-		  'G','G','G',
-		  'g','g','g',
-		  'g','g','g',
-		  'g','g','g',
-		  's','s','s',
-		  's','s','s',
-		  's','s','s' });
-
-	auto output = getOutput(input1, 20, 20, 3, true, true);
+	sf::Clock clock;
+	PlayerState p_state;
+	auto output = getOutput(input, 20, 20, 3, true, true);
 
 	sf::RenderWindow window(sf::VideoMode(1200, 800), "Dungeon Delve");
 
 	auto tm = std::make_shared<ResourceManager<sf::Texture>>();
 	Board<char> board(tm);
 	auto& squares = board.state.board;
-	//board.resizeView(window.getDefaultView().getSize().x, window.getDefaultView().getSize().y);
 	window.setView(sf::View(sf::FloatRect(0.f, 0.f, (float)window.getSize().x / 2, (float)window.getSize().y / 2)));
 	board.setSquares(output);
-	//window.setFramerateLimit(400);
-
+	window.setFramerateLimit(300);
 
 	int lastX = -1, lastY = -1;
-	int frames = 0;
-	sf::Clock clock;
-	sf::Time t;
-	sf::Font roboto;
-	roboto.loadFromFile("./Roboto/Roboto-Regular.ttf");
-	sf::Text ftext("60", roboto, 16);
-	ftext.setPosition(0, 0);
-	ftext.setFillColor(sf::Color::White);
-	ftext.setOutlineColor(sf::Color::Black);
+	FrameCounter fc;
 	while (window.isOpen())
 	{
 		sf::Event event;
@@ -120,24 +50,21 @@ int main()
 				// update the view to the new size of the window
 				sf::FloatRect visibleArea(0.f, 0.f, event.size.width / 2, event.size.height / 2);
 				window.setView(sf::View(visibleArea));
-				//board.resizeView(event.size.width, event.size.height);
 				break;
 			}
 			case sf::Event::MouseButtonPressed:
 			{
-				/*std::cout << "Pixel:" << event.mouseButton.x << " " << event.mouseButton.y << std::endl;
-				std::cout << "View:" << window.getView().getCenter().x << " " << window.getView().getCenter().y << " " << window.getView().getSize().x << " " << window.getView().getSize().y << std::endl;*/
-				board.getCoords(window, sf::Vector2i(event.mouseButton.x, event.mouseButton.y));
+				handleClick(board, window, clock.getElapsedTime(), p_state, event);
 				break;
 			}
 			case sf::Event::MouseMoved:
 			{
-				if (sf::Mouse::isButtonPressed(sf::Mouse::Button::Left)) {
+				if (sf::Mouse::isButtonPressed(sf::Mouse::Button::Right)) {
 					//board.moveView(lastX - event.mouseMove.x, lastY - event.mouseMove.y);
 					sf::View cview = window.getView();
 					cview.move(lastX - event.mouseMove.x, lastY - event.mouseMove.y);
 					window.setView(cview);
-					ftext.move(lastX - event.mouseMove.x, lastY - event.mouseMove.y);
+					fc.move(lastX - event.mouseMove.x, lastY - event.mouseMove.y);
 				}
 				lastX = event.mouseMove.x;
 				lastY = event.mouseMove.y;
@@ -152,6 +79,13 @@ int main()
 						auto& square = squares.at(coords.value());
 						board.addEntity(rand() % 2 == 0 ? object_type::ROCK : object_type::CACTUS, coords.value());
 
+					}
+					break;
+				}
+				case sf::Keyboard::Key::U: {
+					if (auto coords = board.getCoords(window, sf::Mouse::getPosition(window))) {
+						auto& square = squares.at(coords.value());
+						board.addEntity(rand() % 2 == 0 ? object_type::DUELIST : object_type::WOLF, coords.value());
 					}
 					break;
 				}
@@ -174,15 +108,10 @@ int main()
 		}
 		window.clear(sf::Color::Black);
 		board.draw(window);
-		frames++;
-		sf::Time t2 = clock.getElapsedTime();
-		if (t2 - t > sf::seconds(.5)) {
-			ftext.setString(std::to_string(frames * 2));
-			t = t2;
-			frames = 0;
-		}
-		window.draw(ftext);
+		fc.update(clock.getElapsedTime());
+		fc.draw(window);
 		window.display();
 	}
 	return 0;
 }
+

@@ -1,4 +1,6 @@
 #include "Square.h"
+#include "DrawComponent.h"
+#include "Entity.h"
 Square::Square(unsigned terrain_t, DrawComponent* dc) : type_(terrain_t), dc_(dc) {
 	dc_->setOwner(this);
 }

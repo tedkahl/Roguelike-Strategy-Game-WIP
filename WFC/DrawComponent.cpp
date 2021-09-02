@@ -1,5 +1,4 @@
 #include "DrawComponent.h"
-
 void DrawComponent::draw(sf::RenderTarget* target) const {
 	target->draw(sprite);
 }
@@ -37,3 +36,7 @@ void DrawComponent::updatePointers(DrawComponent& removed)
 {
 	std::visit([&](auto ptr) {ptr->setDC(this);}, owner_);
 }
+
+//void DrawComponent::update(sf::Vector2f& pos) {
+//	setSpritePos(pos);
+//}

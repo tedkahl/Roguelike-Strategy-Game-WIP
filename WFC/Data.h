@@ -3,6 +3,7 @@
 #include <memory>
 #include <string>
 #include <SFML/Graphics.hpp>
+
 namespace sq {
 	const static float square_w = 80.f;
 	const static float square_h = 40.f;
@@ -16,7 +17,7 @@ enum terrain_type {
 };
 
 enum object_type {
-	NONE, ROCK, CACTUS, OTHER,
+	NONE, ROCK, CACTUS, MOVESELECT,
 	DUELIST, WOLF, OBJECT_END
 };
 
@@ -25,24 +26,20 @@ enum move_type {
 };
 const unsigned firstunit = object_type::DUELIST;
 
-template<typename T>
-struct D {
-	void operator()(Data<T>* p) {
-		delete p;
-	}
-};
 
 template<typename T>
 struct Data {
 private:
 	Data();
-	static std::unique_ptr<Data<T>, D<T>> instance_;
+	inline static std::unique_ptr<Data<T>> instance_;
 public:
 	static Data<T>* d() {
-		if (!instance_) instance_ = std::unique_ptr<Data<T>, D<T>>(new Data<T>());
+		if (!instance_) instance_ = std::unique_ptr<Data<T>>(new Data<T>());
 		return instance_.get();
 	}
 	~Data() = default;
+	Data(const Data<T>&) = delete;
+	Data& operator= (const Data<T>) = delete;
 	std::map < T, std::tuple<terrain_type, object_type>> glyphs;
 	std::map <unsigned, std::tuple<std::string, sf::Vector2f, sf::IntRect>> squareinfo; //path, offset, texture rect
 	std::map <unsigned, std::tuple<std::string, sf::Vector2f, sf::IntRect>> entityinfo;
@@ -67,14 +64,15 @@ Data<T>::Data()
 	glyphs.emplace(std::make_pair('s', std::make_tuple(terrain_type::SAND, object_type::CACTUS)));
 
 	squareinfo.emplace(std::make_pair(terrain_type::LAVA, std::make_tuple("./textures/lava0.png", sf::Vector2f(0, 10), sf::IntRect())));
-	squareinfo.emplace(std::make_pair(terrain_type::PAVEDSTONE, std::make_tuple("./textures/whitepaved0.png", sf::Vector2f(0, 0), sf::IntRect())));
+	squareinfo.emplace(std::make_pair(terrain_type::PAVEDSTONE, std::make_tuple("./textures/whitepaved0.png", sf::Vector2f(), sf::IntRect())));
 	squareinfo.emplace(std::make_pair(terrain_type::PAVEDSTONE_TALL, std::make_tuple("./textures/whitepavedtall.png", sf::Vector2f(0, -15), sf::IntRect())));
-	squareinfo.emplace(std::make_pair(terrain_type::WATER, std::make_tuple("./textures/lightwater0.png", sf::Vector2f(0, 0), sf::IntRect())));
-	squareinfo.emplace(std::make_pair(terrain_type::GRASS, std::make_tuple("./textures/grass0.png", sf::Vector2f(0, 0), sf::IntRect())));
-	squareinfo.emplace(std::make_pair(terrain_type::SAND, std::make_tuple("./textures/sand0.png", sf::Vector2f(0, 0), sf::IntRect())));
+	squareinfo.emplace(std::make_pair(terrain_type::WATER, std::make_tuple("./textures/lightwater0.png", sf::Vector2f(), sf::IntRect())));
+	squareinfo.emplace(std::make_pair(terrain_type::GRASS, std::make_tuple("./textures/grass0.png", sf::Vector2f(), sf::IntRect())));
+	squareinfo.emplace(std::make_pair(terrain_type::SAND, std::make_tuple("./textures/sand0.png", sf::Vector2f(), sf::IntRect())));
 
 	entityinfo.emplace(std::make_pair(object_type::ROCK, std::make_tuple("./textures/brownrock0.png", sf::Vector2f(9, -40), sf::IntRect())));
 	entityinfo.emplace(std::make_pair(object_type::CACTUS, std::make_tuple("./textures/orig.png", sf::Vector2f(22, -40), sf::IntRect(211, 1579, 44, 66))));
+	entityinfo.emplace(std::make_pair(object_type::MOVESELECT, std::make_tuple("./textures/moveselect.png", sf::Vector2f(), sf::IntRect())));
 	entityinfo.emplace(std::make_pair(object_type::DUELIST, std::make_tuple("./textures/duelist.png", sf::Vector2f(6, -33), sf::IntRect())));
 	entityinfo.emplace(std::make_pair(object_type::WOLF, std::make_tuple("./textures/direwolf.png", sf::Vector2f(6, -33), sf::IntRect())));
 }

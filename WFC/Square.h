@@ -3,10 +3,8 @@
 #include <string>
 #include <vector>
 #include "ResourceManager.h"
-#include "DrawComponent.h"
 #include "assert.h"
 //#include "Data.h"
-#include "Entity.h"
 
 class DrawComponent;
 class BoardEntity;

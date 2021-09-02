@@ -1,9 +1,13 @@
 #pragma once
 #include <set>
+#include <optional>
 #include "Square.h"
+#include "Entity.h"
+#include "Data.h"
 #include "DataManager.h"
 #include "matrix.h"
 #include "BoardState.h"
+#include "Paths.h"
 #include "Util.h"
 template<typename T>
 class Board
@@ -11,18 +15,19 @@ class Board
 private:
 	std::shared_ptr<sf::RenderTexture> boardTexture;
 	std::shared_ptr<ResourceManager<sf::Texture>> tm_;
-	DataManager<BoardEntity> entities;
 	DataManager<DrawComponent> dcomponents;
 	DataManager<UnitComponent> units;
 	//BoardEntity* selected;
 
 	void makeTexture();
 public:
+	DataManager<BoardEntity> entities;
 	BoardState state;
 	Board(std::shared_ptr<ResourceManager<sf::Texture>> tm);
-	bool addEntity(object_type t, sf::Vector2i coords);
+	BoardEntity* addEntity(object_type t, sf::Vector2i coords);
 	bool removeEntity(BoardEntity* e);
 	void setEntityPos(BoardEntity* e, sf::Vector2i newpos);
+	void select(UnitComponent* u);
 	void setSquares(matrix<T>& WFCOutput);
 	void draw(sf::RenderWindow& window);
 	std::optional < sf::Vector2i> getCoords(sf::RenderWindow& window, sf::Vector2i pixel);
@@ -79,18 +84,17 @@ void Board<T>::draw(sf::RenderWindow& window) {
 }
 
 template<typename T>
-bool Board<T>::addEntity(object_type type, sf::Vector2i coords)
+BoardEntity* Board<T>::addEntity(object_type type, sf::Vector2i coords)
 {
 	UnitComponent* uc = makeUnit(units, 0, type);
 	if (uc && state.board.at(coords).unit()) {
 		std::cerr << "space already full\n";
-		return false;
+		return nullptr;
 	}
 	DrawComponent* dc = getObjDC(dcomponents, tm_, type);
 	BoardEntity* entity = entities.declareNew(type, dc, uc);
 	entity->setPos(coords, state);
-	state.board.at(coords).addE(entity);
-	return true;
+	return entity;
 }
 
 template<typename T>
@@ -143,7 +147,23 @@ void Board<T>::makeTexture() {
 	//boardView.setCenter(state.board.at(boardh / 2, boardw / 2).getSprite().getPosition());
 }
 
-//void select(Unit* e, BoardState& state)
+struct selection {
+	UnitComponent* u;
+	pathsGrid g;
+};
+
+//template<typename T>
+//selection Board<T>::select(UnitComponent* u)
 //{
+//	auto pathsGrid = getMoveRange(u, state);
 //
+//	unsigned start = entities.active();
+//	unsigned end = start;
+//	for (int i = ret.minX;i <= ret.maxX;i++) {
+//		for (int j = ret.minY;j <= ret.maxY;j++) {
+//			if (ret.grid.at(i, j).search == ret.search)
+//				end++;
+//			addEntity(object_type::MOVESELECT, sf::Vector2i(i, j));
+//		}
+//	}
 //}

@@ -1,6 +1,6 @@
 #pragma once
 #include <stdlib.h>
-int roll(int numdice, int sides) {
+static int roll(int numdice, int sides) {
 	int sum = 0;
 	for (int i = 0;i < numdice;i++) sum += (rand() % sides + 1);
 	return sum;

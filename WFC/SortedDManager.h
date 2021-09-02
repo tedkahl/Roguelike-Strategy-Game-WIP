@@ -3,7 +3,7 @@
 #include <string>
 #include "assert.h"
 template<typename T>
-class DataManager {
+class SortedDManager {
 private:
 	static const size_t MAX = 2000;
 	std::array<T, MAX> data;
