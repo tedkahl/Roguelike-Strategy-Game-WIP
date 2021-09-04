@@ -2,10 +2,9 @@
 #include <array>
 #include <string>
 #include "assert.h"
-template<typename T>
+template<typename T, size_t MAX>
 class DataManager {
 private:
-	static const size_t MAX = 2000;
 	std::array<T, MAX> data;
 	unsigned active_ = 0;
 public:
@@ -23,9 +22,9 @@ public:
 	iterator end() { return data.begin() + active_; }
 };
 
-template<typename T>
+template<typename T, size_t MAX>
 template<typename ...T_>
-T* DataManager<T>::declareNew(T_... args)
+T* DataManager<T, MAX>::declareNew(T_... args)
 {
 	active_++;
 	assert(active_ <= MAX);
@@ -34,8 +33,8 @@ T* DataManager<T>::declareNew(T_... args)
 }
 
 
-template<typename T>
-void DataManager<T>::deactivate(unsigned index) {
+template<typename T, size_t MAX>
+void DataManager<T, MAX>::deactivate(unsigned index) {
 	assert(index < active_);
 	std::swap(data[index], data[active_ - 1]);
 	data[index].setIndex(index);

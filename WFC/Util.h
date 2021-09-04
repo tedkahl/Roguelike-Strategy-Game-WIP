@@ -25,7 +25,7 @@ static DrawComponent* getObjDC(DataManager<DrawComponent>& dcomponents, std::sha
 	return nullptr;
 }
 
-static bool isUnit(object_type t) {
+static constexpr bool isUnit(object_type t) {
 	return t >= firstunit;
 }
 

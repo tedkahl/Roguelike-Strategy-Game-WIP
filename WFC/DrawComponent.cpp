@@ -3,14 +3,14 @@ void DrawComponent::draw(sf::RenderTarget* target) const {
 	target->draw(sprite);
 }
 
-void DrawComponent::set(std::string path, sf::Vector2f& offset, std::shared_ptr<ResourceManager<sf::Texture>> tm, unsigned priority, sf::IntRect& rect, unsigned index)
+void DrawComponent::set(std::string path, sf::Vector2f& offset, std::shared_ptr<ResourceManager<sf::Texture>> tm, unsigned priority, sf::IntRect& rect, unsigned index, int batch)
 {
 	tm_ = tm;
 	sprite_offset = offset;
 	sprite = std::move(sf::Sprite(tm_->get(path)));
 	if (rect != sf::IntRect()) sprite.setTextureRect(rect);
 	priority_ = priority;
-	index_ = index;
+	batch_ = batch;
 }
 
 DrawComponent::DrawComponent(std::string path, sf::Vector2f& offset, std::shared_ptr<ResourceManager<sf::Texture>> tm) :tm_(tm), sprite_offset(offset)
