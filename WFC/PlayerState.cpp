@@ -10,3 +10,7 @@ void PlayerState::deleteCommand() {
 	delete command;
 	command = nullptr;
 }
+
+void PlayerState::deSelect() {
+	selected = nullptr;
+}

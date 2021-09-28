@@ -5,7 +5,7 @@
 #include <chrono>
 #include "FrameCounter.h"
 #include "WFC.h"
-#include "Board.h"
+#include "Level.h"
 #include "TestBoards.h"
 #include "PlayerState.h"
 #include "Select.h"
@@ -19,18 +19,18 @@ int main()
 {
 	sf::Clock clock;
 	PlayerState p_state;
-	auto output = getOutput(input, 20, 20, 3, true, true);
+	auto output = getOutput(input0, 20, 20, 3, true, true);
 
 	sf::RenderWindow window(sf::VideoMode(1200, 800), "Dungeon Delve");
 
 	auto tm = std::make_shared<ResourceManager<sf::Texture>>();
-	Board<char> board(tm);
+	Level<char> board(tm);
 	auto& squares = board.state.board;
 	window.setView(sf::View(sf::FloatRect(0.f, 0.f, (float)window.getSize().x / 2, (float)window.getSize().y / 2)));
 	board.setSquares(output);
 	window.setFramerateLimit(300);
 
-	int lastX = -1, lastY = -1;
+	float lastX = -1., lastY = -1.;
 	FrameCounter fc;
 	while (window.isOpen())
 	{
@@ -48,7 +48,7 @@ int main()
 			case sf::Event::Resized:
 			{
 				// update the view to the new size of the window
-				sf::FloatRect visibleArea(0.f, 0.f, event.size.width / 2, event.size.height / 2);
+				sf::FloatRect visibleArea(0.f, 0.f, static_cast<float>(event.size.width) / 2, static_cast<float>(event.size.height) / 2);
 				window.setView(sf::View(visibleArea));
 				break;
 			}
@@ -66,8 +66,8 @@ int main()
 					window.setView(cview);
 					fc.move(lastX - event.mouseMove.x, lastY - event.mouseMove.y);
 				}
-				lastX = event.mouseMove.x;
-				lastY = event.mouseMove.y;
+				lastX = static_cast<float>(event.mouseMove.x);
+				lastY = static_cast<float>(event.mouseMove.y);
 				break;
 			}
 			case sf::Event::KeyPressed:
@@ -83,6 +83,11 @@ int main()
 					break;
 				}
 				case sf::Keyboard::Key::U: {
+					/*for (auto i : board.entities) {
+						std::cerr << "Entity position:" << i.getPos().x << " " << i.getPos().y << std::endl;
+						std::cerr << "owner pointer:" << i.getOwner() << std::endl;
+						std::cerr << "Actual address of that square:" << &board.state.board.at(i.getPos()) << std::endl;
+					}*/
 					if (auto coords = board.getCoords(window, sf::Mouse::getPosition(window))) {
 						auto& square = squares.at(coords.value());
 						board.addEntity(rand() % 2 == 0 ? object_type::DUELIST : object_type::WOLF, coords.value());
@@ -96,6 +101,10 @@ int main()
 							auto e = square.entities[0];
 							board.removeEntity(e);
 						}
+						else if (square.unit()) {
+							auto e = square.unit();
+							board.removeEntity(e);
+						}
 						else {
 							std::cout << "no entity!" << std::endl;
 						}
@@ -107,6 +116,7 @@ int main()
 			}
 		}
 		window.clear(sf::Color::Black);
+		board.update(clock.getElapsedTime());
 		board.draw(window);
 		fc.update(clock.getElapsedTime());
 		fc.draw(window);

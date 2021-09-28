@@ -133,26 +133,30 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Board.cpp" />
     <ClCompile Include="Command.cpp" />
-    <ClCompile Include="DCAccessor.cpp" />
     <ClCompile Include="Entity.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="DrawComponent.cpp" />
-    <ClCompile Include="Movement.cpp" />
+    <ClCompile Include="RealTime.cpp" />
     <ClCompile Include="Paths.cpp" />
     <ClCompile Include="PlayerState.cpp" />
     <ClCompile Include="Square.cpp" />
     <ClCompile Include="UnitComponent.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Animation.h" />
+    <ClInclude Include="DCSortable.h" />
     <ClInclude Include="Command.h" />
-    <ClInclude Include="DCAccessor.h" />
+    <ClInclude Include="Debug.h" />
     <ClInclude Include="FrameCounter.h" />
+    <ClInclude Include="HasDC.h" />
+    <ClInclude Include="junk.h" />
     <ClInclude Include="Location.h" />
-    <ClInclude Include="Movement.h" />
+    <ClInclude Include="RealTime.h" />
     <ClInclude Include="Paths.h" />
+    <ClInclude Include="Level.h" />
     <ClInclude Include="Board.h" />
-    <ClInclude Include="BoardState.h" />
     <ClInclude Include="Data.h" />
     <ClInclude Include="DataManager.h" />
     <ClInclude Include="Direction.h" />

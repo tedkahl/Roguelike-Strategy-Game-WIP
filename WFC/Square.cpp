@@ -1,17 +1,20 @@
 #include "Square.h"
 #include "DrawComponent.h"
 #include "Entity.h"
-Square::Square(unsigned terrain_t, DrawComponent* dc) : type_(terrain_t), dc_(dc) {
-	dc_->setOwner(this);
+Square::Square(unsigned terrain_t, SortedDManager<DrawComponent>* m, DrawComponent* dcs, sf::Vector2i newpos, matrix<float>& heightmap) : pos(newpos.x, newpos.y), manager(m), dc_(dcs->sortable()), type_(terrain_t), unit_(nullptr) {
+	dcs->setOwner(this);
+	dcs->setSquarePos(newpos, heightmap);
+	dcs->updateCoords(newpos);
+}
+const DCSortable& Square::dcSortable() const {
+	return dc_;
 }
 
-DrawComponent* Square::dc() const { return dc_; }
+DrawComponent* Square::dc() const { return manager->get(dc_.sortVal()); }
 
-void Square::setDC(DrawComponent* dc) { dc_ = dc; }
-
-
-bool Square::removeE(BoardEntity* e) {
-	if (unit_ && e->uc() == unit_) unit_ = nullptr;
+bool Square::removeE(Entity* e) {
+	std::cerr << "Removing entity at " << pos.x << " " << pos.y << std::endl;
+	if (e == unit_) unit_ = nullptr;
 	else {
 		auto search = std::find(entities.begin(), entities.end(), e);
 		if (search == entities.end()) return false;
@@ -20,25 +23,28 @@ bool Square::removeE(BoardEntity* e) {
 	return true;
 }
 
-void Square::replaceE(BoardEntity* olde, BoardEntity* newe) {
-	if (unit_ && olde->uc() == unit_) unit_ = newe->uc();
+void Square::replaceE(Entity* olde, Entity* newe) {
+	if (olde == unit_) unit_ = newe;
 	else {
 		std::replace(entities.begin(), entities.end(), olde, newe);
 	}
 }
 
-void Square::addE(BoardEntity* e) {
-
-	if (e->uc() && !unit_) unit_ = e->uc();
+void Square::addE(Entity* e) {
+	std::cerr << "Adding entity at " << pos.x << " " << pos.y << std::endl;
+	if (e->uc() && !unit_) unit_ = e;
 	else {
 		entities.push_back(e);
 	}
 }
-UnitComponent* Square::unit() { return unit_; }
+Entity* Square::unit() { return unit_; }
 
-Square& Square::operator=(const Square& other)
-{
-	type_ = other.type_;
-	dc_ = other.dc_;
-	return *this;
-}
+//Square& Square::operator=(const Square& other) 
+//{
+//	type_ = std::move(other.type_);
+//	manager = std::move(other.manager);
+//	dc_ = std::move(other.dc_);
+//	unit_ = std::move(other.unit_);
+//	entities = std::move(other.entities);
+//	return *this;
+//}

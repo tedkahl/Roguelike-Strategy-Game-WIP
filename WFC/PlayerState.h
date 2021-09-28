@@ -4,10 +4,11 @@
 enum class sel_state { DEFAULT, MOVING };
 struct PlayerState {
 	Command* command;
-	UnitComponent* selected;
+	Entity* selected;
 	int team;
 	sel_state state;
 	PlayerState();
+	void deSelect();
 	void switchCommand(Command* new_command);
 	void deleteCommand();
 };

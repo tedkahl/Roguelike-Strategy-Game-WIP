@@ -1,39 +1,44 @@
 #pragma once
-#include "BoardState.h"
+#include <SFML/Graphics.hpp>
+#include "Board.h"
 #include "Managed.h"
-#include "DrawComponent.h"
 #include "UnitComponent.h"
 #include "Square.h"
-#include "Movement.h"
-#include <SFML/Graphics.hpp>
+#include "RealTime.h"
+#include "DrawComponent.h"
+#include "DCSortable.h"
 //#include "Data.h"
 class DrawComponent;
-struct BoardState;
+struct Board;
 class UnitComponent;
 class Square;
-class Movement;
-class BoardEntity : public Managed
+class RealTime;
+class DCSortable;
+class Entity : public Managed
 {
 private:
 	unsigned type_;
 	sf::Vector2i coords_;
 	Square* owner_;
-	DrawComponent* dc_;
+	SortedDManager<DrawComponent>* manager;
+	DCSortable dc_;
 	UnitComponent* uc_;
-	Movement* movement;
+	std::unique_ptr<RealTime> movement;
 public:
-	DrawComponent* dc();
-	void setDC(DrawComponent* dc);
-	UnitComponent* uc();
+	DrawComponent* dc() const;
+	//DCAccessor& dcAccess();
+	void setDC(DCSortable& dc);
+	UnitComponent* uc() const;
 	void setUC(UnitComponent* dc);
-	Square* getOwner() const; //datamanager
-	inline void addMovement(Movement* move) { movement = move; }
+	void setOwner(Square* new_owner);
+	Square* getOwner() const;
+	void addMovement(std::unique_ptr<RealTime>&& move);
 	void update(sf::Time current);
-	void updatePointers(BoardEntity& removed);
-	void set(unsigned type, DrawComponent* dc, UnitComponent* uc, unsigned index); //datamanager
+	void updatePointers(Entity& removed);
+	void set(unsigned type, SortedDManager<DrawComponent>* m, DrawComponent* dcs, UnitComponent* uc, sf::Vector2i newpos, Board& state, unsigned index); //datamanager
 	inline sf::Vector2i getPos() const { return coords_; }
-	BoardEntity() = default;
-	void setPos(sf::Vector2i newpos, BoardState& state);
-	//BoardEntity(DrawComponent* drawcomponent);
+	Entity() = default;
+	void setPos(sf::Vector2i newpos, Board& state);
+	//Entity(DrawComponent* drawcomponent);
 };
 

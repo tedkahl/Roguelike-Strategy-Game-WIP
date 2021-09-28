@@ -3,7 +3,7 @@
 #include <memory>
 #include <string>
 #include <SFML/Graphics.hpp>
-
+#include "Animation.h"
 namespace sq {
 	const static float square_w = 80.f;
 	const static float square_h = 40.f;
@@ -17,15 +17,45 @@ enum terrain_type {
 };
 
 enum object_type {
-	NONE, ROCK, CACTUS, MOVESELECT,
+	NONE, MOVESELECT, ATTACKSELECT,
+	ROCK, CACTUS,
 	DUELIST, WOLF, OBJECT_END
 };
 
 enum move_type {
 	WALK, FLY, MOVE_END
 };
-const unsigned firstunit = object_type::DUELIST;
 
+enum attack_type {
+	NO_ATTACK, MELEE, RANGED_LOS, RANGED_ARROW
+};
+
+enum anim_state {
+	DEFAULT, WALKING, ATTACKING, DEFENDING, ANIM_STATE_END
+};
+
+enum obj_height { SQUARE, FLAT, TALL };
+const int firstunit = object_type::DUELIST;
+static constexpr bool isUnit(object_type t) {
+	return t >= firstunit;
+}
+static constexpr bool isTall(object_type t) {
+	return t > object_type::MOVESELECT;
+}
+
+//
+//Animation* get_animation(object_type otype, anim_state state) {
+//	switch (otype) {
+//	case: object_type::DUELIST{
+//		switch (state) {
+//		case: anim_state::ATTACK{
+//			return smooth(sf::Clock., int duration, int num_frames)
+//		}
+//}
+//	}
+//	}
+//
+//}
 
 template<typename T>
 struct Data {
@@ -44,6 +74,8 @@ public:
 	std::map <unsigned, std::tuple<std::string, sf::Vector2f, sf::IntRect>> squareinfo; //path, offset, texture rect
 	std::map <unsigned, std::tuple<std::string, sf::Vector2f, sf::IntRect>> entityinfo;
 	std::array<std::array<int, terrain_type::TERRAIN_END>, move_type::MOVE_END> movecosts;
+
+
 };
 
 
@@ -53,10 +85,12 @@ Data<T>::Data()
 	movecosts[move_type::FLY].fill(1);
 	movecosts[move_type::WALK] = { 1,2,1,1,1,999,2 };
 
+
+
 	glyphs.emplace(std::make_pair('.', std::make_tuple(terrain_type::LAVA, object_type::NONE)));
 	glyphs.emplace(std::make_pair('x', std::make_tuple(terrain_type::PAVEDSTONE, object_type::NONE)));
 	glyphs.emplace(std::make_pair('C', std::make_tuple(terrain_type::PAVEDSTONE, object_type::ROCK)));
-	glyphs.emplace(std::make_pair('T', std::make_tuple(terrain_type::LAVA, object_type::NONE)));
+	glyphs.emplace(std::make_pair('T', std::make_tuple(terrain_type::PAVEDSTONE_TALL, object_type::NONE)));
 	glyphs.emplace(std::make_pair('R', std::make_tuple(terrain_type::PAVEDSTONE_TALL, object_type::ROCK)));
 	glyphs.emplace(std::make_pair('w', std::make_tuple(terrain_type::WATER, object_type::NONE)));
 	glyphs.emplace(std::make_pair('g', std::make_tuple(terrain_type::GRASS, object_type::NONE)));
@@ -73,6 +107,7 @@ Data<T>::Data()
 	entityinfo.emplace(std::make_pair(object_type::ROCK, std::make_tuple("./textures/brownrock0.png", sf::Vector2f(9, -40), sf::IntRect())));
 	entityinfo.emplace(std::make_pair(object_type::CACTUS, std::make_tuple("./textures/orig.png", sf::Vector2f(22, -40), sf::IntRect(211, 1579, 44, 66))));
 	entityinfo.emplace(std::make_pair(object_type::MOVESELECT, std::make_tuple("./textures/moveselect.png", sf::Vector2f(), sf::IntRect())));
+	entityinfo.emplace(std::make_pair(object_type::ATTACKSELECT, std::make_tuple("./textures/attackselect.png", sf::Vector2f(), sf::IntRect())));
 	entityinfo.emplace(std::make_pair(object_type::DUELIST, std::make_tuple("./textures/duelist.png", sf::Vector2f(6, -33), sf::IntRect())));
 	entityinfo.emplace(std::make_pair(object_type::WOLF, std::make_tuple("./textures/direwolf.png", sf::Vector2f(6, -33), sf::IntRect())));
 }

@@ -7,7 +7,7 @@
 
 /*Returns submatrix of specified width and height, beginning at given offsets*/
 template <typename T>
-matrix<T> subMatrix(matrix<T>& mat, const size_t xoffset, const size_t yoffset, const size_t width, const size_t height) {
+static matrix<T> subMatrix(matrix<T>& mat, size_t xoffset, size_t yoffset, size_t width, size_t height) {
 	assert(xoffset + width <= mat.width());
 	assert(yoffset + height <= mat.height());
 	matrix<T> submatrix(width, height);
@@ -22,7 +22,7 @@ matrix<T> subMatrix(matrix<T>& mat, const size_t xoffset, const size_t yoffset, 
 /*Determines if two patterns can overlap in a given configuration. yoffset and xoffset specify the position of b
 relative to a*/
 template <typename T>
-bool overlaps(const matrix<T>& a, const matrix<T>& b, const int xoffset, const int yoffset)
+static bool overlaps(const matrix<T>& a, const matrix<T>& b, int xoffset, int yoffset)
 {
 	size_t ystarta = std::max(0, yoffset),
 		xstarta = std::max(0, xoffset),
@@ -42,7 +42,7 @@ bool overlaps(const matrix<T>& a, const matrix<T>& b, const int xoffset, const i
 
 /*Returns pattern reflected about the x axis*/
 template <typename T>
-matrix<T> reflect(const matrix<T>& pattern) {
+static matrix<T> reflect(const matrix<T>& pattern) {
 	size_t n = pattern.width();
 	matrix<T> reflected(n, n);
 	for (size_t i = 0; i < n; i++)
@@ -55,7 +55,7 @@ matrix<T> reflect(const matrix<T>& pattern) {
 
 /*Returns the matrix rotated 90 degrees clockwise*/
 template <typename T>
-matrix<T> rotate90(const matrix<T>& pattern)
+static matrix<T> rotate90(const matrix<T>& pattern)
 {
 	size_t n = pattern.width();
 	matrix<T> rotated(n, n);

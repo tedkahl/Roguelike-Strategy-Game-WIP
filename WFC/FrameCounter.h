@@ -22,7 +22,7 @@ public:
 			frames = 0;
 		}
 	}
-	void move(int x, int y) {
+	void move(float x, float y) {
 		ftext.move(x, y);
 	}
 	void draw(sf::RenderWindow& window) {

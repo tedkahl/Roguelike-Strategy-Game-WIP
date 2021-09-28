@@ -3,31 +3,37 @@
 #include <string>
 #include <vector>
 #include "ResourceManager.h"
+#include "DCSortable.h"
+#include "DrawComponent.h"
 #include "assert.h"
 //#include "Data.h"
 
 class DrawComponent;
-class BoardEntity;
+class Entity;
 class UnitComponent;
+class DCSortable;
 class Square
 {
 private:
 	unsigned type_;
-	DrawComponent* dc_;
-	UnitComponent* unit_;
+	SortedDManager<DrawComponent>* manager;
+	DCSortable dc_;
+	Entity* unit_;
 public:
-	std::vector <BoardEntity*> entities;
+	sf::Vector2i pos;
+	std::vector <Entity*> entities;
 	Square() = default;
 	DrawComponent* dc() const;
-	UnitComponent* unit();
+	const DCSortable& dcSortable()const;
+	Entity* unit();
 	inline unsigned type() { return type_; }
-	void setDC(DrawComponent* dc);
-	bool removeE(BoardEntity* e);
-	void addE(BoardEntity* e);
-	void replaceE(BoardEntity* olde, BoardEntity* newe);
-	//std::vector<BoardEntity*>& getEntities() { return entities; }
-	Square(unsigned terrain_t, DrawComponent* dc);
-	Square& operator=(const Square& other);
+	//void setDC(const DCAccessor& dc);
+	bool removeE(Entity* e);
+	void addE(Entity* e);
+	void replaceE(Entity* olde, Entity* newe);
+	//std::vector<Entity*>& getEntities() { return entities; }
+	Square(unsigned terrain_t, SortedDManager<DrawComponent>* m, DrawComponent* dcs, sf::Vector2i newpos, matrix<float>& heightmap);
+
 };
 
 

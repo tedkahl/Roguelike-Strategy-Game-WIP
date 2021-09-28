@@ -16,6 +16,12 @@
     <Filter Include="Header Files\WFC">
       <UniqueIdentifier>{88478a8e-bbb9-4593-879c-e05713892dd6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\DrawComponent">
+      <UniqueIdentifier>{86a92bd5-c5fb-4019-9e72-cf546a964c69}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Test">
+      <UniqueIdentifier>{493cf43b-80d6-4594-8559-7c13b83f8c2f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -39,13 +45,13 @@
     <ClCompile Include="Paths.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Movement.cpp">
+    <ClCompile Include="RealTime.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="PlayerState.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="DCAccessor.cpp">
+    <ClCompile Include="Board.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -80,19 +86,16 @@
     <ClInclude Include="Entity.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="DrawComponent.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Square.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Paths.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Board.h">
+    <ClInclude Include="Level.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="BoardState.h">
+    <ClInclude Include="Board.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Data.h">
@@ -116,7 +119,7 @@
     <ClInclude Include="FrameCounter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Movement.h">
+    <ClInclude Include="RealTime.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Location.h">
@@ -131,13 +134,28 @@
     <ClInclude Include="PlayerState.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="TestBoards.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="DrawComponent.h">
+      <Filter>Header Files\DrawComponent</Filter>
+    </ClInclude>
+    <ClInclude Include="DCSortable.h">
+      <Filter>Header Files\DrawComponent</Filter>
     </ClInclude>
     <ClInclude Include="SortedDManager.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\DrawComponent</Filter>
     </ClInclude>
-    <ClInclude Include="DCAccessor.h">
+    <ClInclude Include="HasDC.h">
+      <Filter>Header Files\DrawComponent</Filter>
+    </ClInclude>
+    <ClInclude Include="Debug.h">
+      <Filter>Header Files\Test</Filter>
+    </ClInclude>
+    <ClInclude Include="TestBoards.h">
+      <Filter>Header Files\Test</Filter>
+    </ClInclude>
+    <ClInclude Include="junk.h">
+      <Filter>Header Files\Test</Filter>
+    </ClInclude>
+    <ClInclude Include="Animation.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

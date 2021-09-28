@@ -2,9 +2,11 @@
 #include <SFML/Graphics.hpp>
 #include "Managed.h"
 
-class BoardEntity;
+class Entity;
 struct UnitStats {
 	unsigned movetype;
+	int attack_type;
+	int attack_range;
 	int movement;
 	int max_hp;
 	int damage;
@@ -17,14 +19,14 @@ private:
 	int current_hp;
 	bool dummy_;
 	int team_;
-	BoardEntity* owner_;
+	Entity* owner_;
 public:
 	inline bool dummy() { return dummy_; }
 	inline int team() { return team_; }
 	inline int hp() { return current_hp; }
 	sf::Vector2i getPos();
-	BoardEntity* getOwner();
-	void setOwner(BoardEntity* owner);
+	Entity* getOwner();
+	void setOwner(Entity* owner);
 	UnitStats const& stats() const { return stats_; };
 	UnitComponent() = default;
 	//UnitComponent(UnitStats stats, int team) :stats_(stats), team_(team), current_hp(stats_.max_hp), Managed(index) {}
