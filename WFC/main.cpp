@@ -35,7 +35,6 @@ int main()
 	while (window.isOpen())
 	{
 		sf::Event event;
-
 		while (window.pollEvent(event))
 		{
 			switch (event.type) {
@@ -51,9 +50,10 @@ int main()
 				window.setView(sf::View(visibleArea));
 				break;
 			}
+			case sf::Event::KeyPressed:
 			case sf::Event::MouseButtonPressed:
 			{
-				handleClick(board, window, clock.getElapsedTime(), p_state, event);
+				handleInput(board, window, clock.getElapsedTime(), p_state, event);
 				break;
 			}
 			case sf::Event::MouseMoved:
@@ -68,49 +68,6 @@ int main()
 				lastX = static_cast<float>(event.mouseMove.x);
 				lastY = static_cast<float>(event.mouseMove.y);
 				break;
-			}
-			case sf::Event::KeyPressed:
-			{
-				std::cout << sf::Mouse::getPosition().x << " " << sf::Mouse::getPosition().y << std::endl;
-				switch (event.key.code) {
-				case sf::Keyboard::Key::A: {
-					if (auto coords = board.getCoords(window, sf::Mouse::getPosition(window))) {
-						auto& square = squares.at(coords.value());
-						board.addEntity(rand() % 2 == 0 ? object_type::ROCK : object_type::CACTUS, coords.value());
-
-					}
-					break;
-				}
-				case sf::Keyboard::Key::U: {
-					/*for (auto i : board.entities) {
-						std::cerr << "Entity position:" << i.getPos().x << " " << i.getPos().y << std::endl;
-						std::cerr << "owner pointer:" << i.getOwner() << std::endl;
-						std::cerr << "Actual address of that square:" << &board.state.board.at(i.getPos()) << std::endl;
-					}*/
-					if (auto coords = board.getCoords(window, sf::Mouse::getPosition(window))) {
-						auto& square = squares.at(coords.value());
-						board.addEntity(rand() % 2 == 0 ? object_type::DUELIST : object_type::WOLF, coords.value());
-					}
-					break;
-				}
-				case sf::Keyboard::Key::D: {
-					if (auto coords = board.getCoords(window, sf::Mouse::getPosition(window))) {
-						auto& square = squares.at(coords.value());
-						if (square.entities.size() != 0) {
-							auto e = square.entities[0];
-							board.removeEntity(e);
-						}
-						else if (square.unit()) {
-							auto e = square.unit();
-							board.removeEntity(e);
-						}
-						else {
-							std::cout << "no entity!" << std::endl;
-						}
-					}
-					break;
-				}
-				}
 			}
 			}
 		}
