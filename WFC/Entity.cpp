@@ -34,7 +34,8 @@ void Entity::update(sf::Time current) {
 			cout << "setting sprite pos " << to_string(update.sprite_position_.value()) << endl;
 			dc_p->setSpritePos(update.sprite_position_.value());
 		}
-		if (update.action) update.action.value()(this);
+		if (update.action)
+			update.action.value()(this);
 
 		if (update.finished) {
 			std::cout << "Action finished" << std::endl;
