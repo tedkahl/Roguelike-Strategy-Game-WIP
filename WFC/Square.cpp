@@ -38,6 +38,7 @@ void Square::addE(Entity* e) {
 	}
 }
 Entity* Square::unit() { return unit_; }
+UnitComponent* Square::unit_uc() { return unit_ ? unit_->uc() : nullptr; }
 
 //Square& Square::operator=(const Square& other) 
 //{

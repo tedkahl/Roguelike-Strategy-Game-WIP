@@ -28,14 +28,13 @@ int main()
 	auto& squares = board.state.board;
 	window.setView(sf::View(sf::FloatRect(0.f, 0.f, (float)window.getSize().x / 2, (float)window.getSize().y / 2)));
 	board.setSquares(output);
-	window.setFramerateLimit(300);
+	window.setFramerateLimit(30);
 
 	float lastX = -1., lastY = -1.;
 	FrameCounter fc;
 	while (window.isOpen())
 	{
 		sf::Event event;
-
 
 		while (window.pollEvent(event))
 		{

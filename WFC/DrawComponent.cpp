@@ -2,6 +2,14 @@
 void DrawComponent::draw(sf::RenderTarget* target) const {
 	target->draw(sprite);
 }
+void DrawComponent::setAnimation(sf::Time start, std::vector<AnimationSeg>&& segs, bool loop, float speed) {
+	cout << "setting animation" << endl;
+	animation.set(start, std::forward< std::vector<AnimationSeg>>(segs), loop, speed);
+}
+void DrawComponent::updateAnimation(sf::Time current) {
+	if (animation.active())
+		setTextureRect(animation.getRect(current, sprite.getTexture()->getSize().x));
+}
 
 void DrawComponent::set(std::string path, sf::Vector2f& offset, std::shared_ptr<ResourceManager<sf::Texture>> tm, unsigned obj_height, const sf::IntRect& rect, int batch)
 {
@@ -10,8 +18,9 @@ void DrawComponent::set(std::string path, sf::Vector2f& offset, std::shared_ptr<
 	sprite = std::move(sf::Sprite(tm_->get(path)));
 	if (rect != sf::IntRect()) {
 		sprite.setTextureRect(rect);
-		default_rect = rect;
 	}
+	default_rect = sprite.getTextureRect();
+
 	obj_height_ = obj_height;
 	setMoveDirection(1);
 	batch_ = batch;

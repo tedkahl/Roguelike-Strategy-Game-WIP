@@ -49,8 +49,9 @@ struct pathsGrid {
 	sf::Vector2i offset; //position of upper left corner on full grid
 	unsigned search;
 	std::optional<std::vector<sf::Vector2i>> getPath(sf::Vector2i& dest);
-	bool is_movable(sf::Vector2i& loc) { return is_attackable(loc) && !grid.at(loc).attack_only; }
-	bool is_attackable(sf::Vector2i& loc) { return on_board(loc, grid) && grid.at(loc).search == search; }
+	//std::optional<Square> getSquare(sf::Vector2i& loc) { if (on_board(loc - offset, grid)) return grid.at(loc - offset); else return std::nullopt; };
+	bool is_movable(sf::Vector2i& loc) { return is_attackable(loc) && !grid.at(loc - offset).attack_only; }
+	bool is_attackable(sf::Vector2i& loc) { return on_board(loc - offset, grid) && grid.at(loc - offset).search == search; }
 	pathsGrid(matrix<map_node>& g, unsigned minX, unsigned minY, unsigned maxX, unsigned maxY, unsigned search_) :grid(subMatrix(g, minX, minY, maxX - minX + 1, maxY - minY + 1)), offset(minX, minY), search(search_) {}
 	pathsGrid() :grid(), search(0) {}
 };
@@ -63,10 +64,10 @@ static void getAttackRange(matrix<map_node>& grid, unsigned search, int& minX, i
 		for (auto i : dir) {
 			new_pos = pos + i;
 			if (!on_board(new_pos, state.board)) continue;
-			if (grid.at(new_pos).search == search && (!grid.at(new_pos).attack_only || grid.at(new_pos).moves_left <= grid.at(pos).moves_left)) continue;
+			if (grid.at(new_pos).search == search && (!grid.at(new_pos).attack_only || grid.at(new_pos).moves_left >= grid.at(pos).moves_left)) continue;
 
 			if (!block_attack(u.attack_type, pos, new_pos, state)) {
-				grid.at(new_pos) = map_node(grid.at(pos).moves_left, pos, search, true);
+				grid.at(new_pos) = map_node(grid.at(pos).moves_left, pos, search, true, false);
 				minX = std::min(new_pos.x, minX);
 				minY = std::min(new_pos.y, minY);
 				maxX = std::max(new_pos.x, maxX);

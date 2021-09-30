@@ -76,6 +76,9 @@ void Level<T>::update(sf::Time current)
 	for (auto& i : entities) {
 		i.update(current);
 	}
+	for (auto& i : dcomponents) {
+		i.updateAnimation(current);
+	}
 }
 template<typename T>
 void Level<T>::draw(sf::RenderWindow& window) {
@@ -113,7 +116,7 @@ Entity* Level<T>::entityClickedOn(const sf::RenderWindow& window, sf::Vector2i c
 	for (int j = 0;j < 4;j++) {
 		for (auto& i : cols)
 		{
-			if (on_board(start + i, state) && (state.board.at(start + i).unit()))
+			if (on_board(start + i, state.board) && (state.board.at(start + i).unit()))
 			{
 				std::cout << "unit found" << std::endl;
 				Entity* u = state.board.at(start + i).unit();
@@ -169,7 +172,7 @@ unsigned Level<T>::addTargeter(const pathsGrid& paths)
 			if (paths.grid.at(i, j).search == paths.search) {
 				auto type = paths.grid.at(i, j).attack_only ? object_type::ATTACKSELECT : object_type::MOVESELECT;
 				obj_dc = getObjDCBatched(dcomponents, tm_, type, batch); //add all dcomponents
-				std::cout << "Adding target square at " << to_string(sf::Vector2i(i, j) + paths.offset) << std::endl;
+				//std::cout << "Adding target square at " << to_string(sf::Vector2i(i, j) + paths.offset) << std::endl;
 				obj_dc->updateEntityPos(sf::Vector2i(i, j) + paths.offset, state.heightmap);
 			}
 		}

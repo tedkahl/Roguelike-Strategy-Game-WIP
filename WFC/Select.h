@@ -16,12 +16,14 @@ static void handleClick(Level<char>& level, sf::RenderWindow& window, sf::Time n
 			p_state.deSelect();
 			p_state.deleteCommand();
 		}
-		Entity* unit = level.entityClickedOn(window, coords, sf::Vector2i(event.mouseButton.x, event.mouseButton.y));
-		if (unit) {
-			p_state.selected = unit;
-			std::cout << "switching command" << std::endl;
-			p_state.switchCommand(new AttackMove(unit, level));
-			p_state.command->showTargeter();
+		else {
+			Entity* unit = level.entityClickedOn(window, coords, sf::Vector2i(event.mouseButton.x, event.mouseButton.y));
+			if (unit) {
+				p_state.selected = unit;
+				std::cout << "switching command" << std::endl;
+				p_state.switchCommand(new AttackMove(unit, level));
+				p_state.command->showTargeter();
+			}
 		}
 	}
 }

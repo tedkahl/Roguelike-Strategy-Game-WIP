@@ -8,10 +8,10 @@
 static UnitComponent* makeUnit(DataManager<UnitComponent>& units, int team, object_type t) {
 	switch (t) {
 	case object_type::WOLF: {
-		return units.declareNew(UnitStats(move_type::WALK, attack_type::MELEE, 1, 6, 10 + roll(1, 3), 4), team);
+		return units.declareNew(UnitStats(move_type::WALK, attack_type::MELEE, 1, 6, 10 + roll(1, 3), 4), 1);
 	}
 	case object_type::DUELIST: {
-		return units.declareNew(UnitStats(move_type::WALK, attack_type::MELEE, 1, 4, 18 + roll(2, 2), 6), team);
+		return units.declareNew(UnitStats(move_type::WALK, attack_type::MELEE, 1, 4, 18 + roll(2, 2), 6), 0);
 	}
 	case object_type::ROCK: {
 		return units.declareNew(UnitStats(move_type::WALK, attack_type::NO_ATTACK, 0, 0, 50, 0), 100);

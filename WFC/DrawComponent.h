@@ -15,26 +15,34 @@ class Entity;
 struct Board;
 class Square;
 
+const int max_seg = 3;
+using std::cout;
+using std::endl;
 class DrawComponent : public DCSortable {
 private:
 	std::shared_ptr<ResourceManager<sf::Texture>> tm_;
 	sf::Vector2f sprite_offset;
 	sf::Sprite sprite;
 	sf::IntRect default_rect;
-	Animation* anim;
-
 	std::variant<Entity*, Square*> owner_;
+	Animation<max_seg> animation;
 public:
 	DrawComponent() = default;
 	DrawComponent(std::string path, sf::Vector2f& offset, std::shared_ptr<ResourceManager<sf::Texture>> tm);
 
 	void set(std::string path, sf::Vector2f& offset, std::shared_ptr<ResourceManager<sf::Texture>>, unsigned obj_height, const sf::IntRect& rect, int batch = -1);
 	inline sf::Sprite const& getSprite() const { return sprite; }
-	inline void setSpritePos(const sf::Vector2f& position) { sprite.setPosition(position + sprite_offset); }
+	inline void setSpritePos(const sf::Vector2f& position) {
+		//cout << "setting sprite pos " << position.x << " " << position.y << endl;
+		sprite.setPosition(position + sprite_offset);
+	}
 	inline void setTextureRect(const sf::IntRect& rect) {
-		if (rect.left == -1)
+		if (rect.left == -1) {
 			sprite.setTextureRect(default_rect);
+			std::cout << "animation done " << to_str(default_rect);
+		}
 		else sprite.setTextureRect(rect);
+		//std::cout << to_str(sprite.getTextureRect());
 	}
 
 	std::variant<Entity*, Square*> getOwner() const;
@@ -43,7 +51,9 @@ public:
 
 	inline sf::Vector2f getOffset() { return sprite_offset; }
 
+	void setAnimation(sf::Time start, std::vector<AnimationSeg>&& segs, bool loop = false, float speed = 1.f);
 	void draw(sf::RenderTarget* target) const;
+	void updateAnimation(sf::Time current);
 
 	void updateEntityPos(sf::Vector2i newpos, matrix<float>& heightmap);
 	void setSquarePos(sf::Vector2i newpos, matrix<float>& heightmap);

@@ -26,6 +26,7 @@ public:
 	DrawComponent* dc() const;
 	const DCSortable& dcSortable()const;
 	Entity* unit();
+	UnitComponent* unit_uc();
 	inline unsigned type() { return type_; }
 	//void setDC(const DCAccessor& dc);
 	bool removeE(Entity* e);

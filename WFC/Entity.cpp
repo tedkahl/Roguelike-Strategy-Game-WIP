@@ -5,34 +5,42 @@ void Entity::setDC(DCSortable& dc) { dc_ = dc; }
 UnitComponent* Entity::uc() const { return uc_; }
 void Entity::setUC(UnitComponent* uc) { uc_ = uc; }
 
-void Entity::addMovement(std::unique_ptr<RealTime>&& move) {
-	movement = std::move(move);
-	DrawComponent* dc_p = dc();
-	dc_p->setMoveDirection(0);
-	dc_.setMoveDirection(0);
-	manager->fixChangedVal(dc_p);
+void Entity::addRT(std::unique_ptr<RealTime>&& rt) {
+	rt_actions.push(std::move(rt));
 }
 void Entity::update(sf::Time current) {
-	if (movement) {
-		//std::cout << "updating entity at pos " << coords_.x << " " << coords_.y << std::endl;
+
+	if (!rt_actions.empty()) {
+		//cout << "performing action" << endl;
 		DrawComponent* dc_p = dc();
-		auto update = movement->getUpdate(current);
+
+		auto update = rt_actions.front()->getUpdate(current);
+		if (update.move_dir) {
+			cout << "updating move dir" << endl;
+			dc_p->setMoveDirection(update.move_dir.value());
+			dc_.setMoveDirection(update.move_dir.value());
+			if (update.first)
+				dc_p->setAnimation(current, rt_actions.front()->getAnimSegs());
+		}
 
 		if (update.coords_ && update.coords_.value() != coords_) {
+			cout << "updating coords" << endl;
 			dc_p->updateCoords(update.coords_.value());
 			dc_.updateCoords(update.coords_.value());
 			coords_ = update.coords_.value();
+			std::cout << to_string(coords_) << " ";
 		}
+		if (update.sprite_position_) {
+			cout << "setting sprite pos " << to_string(update.sprite_position_.value()) << endl;
+			dc_p->setSpritePos(update.sprite_position_.value());
+		}
+		if (update.action) update.action.value()(this);
 
 		if (update.finished) {
-			std::cout << "Movement finished" << std::endl;
-			dc_p->setMoveDirection(1);
-			dc_.setMoveDirection(1);
-			movement->getBoard().moveEntity(this, coords_);
-			delete movement.release();
-		}
-		else {
-			if (update.spritePosition_) dc_p->setSpritePos(update.spritePosition_.value());
+			std::cout << "Action finished" << std::endl;
+			if (coords_ != owner_->pos)
+				rt_actions.front()->getBoard().moveEntity(this, coords_); //bad
+			rt_actions.pop();
 		}
 		manager->fixChangedVal(dc_p);
 	}
@@ -44,7 +52,7 @@ void Entity::set(unsigned type, SortedDManager<DrawComponent>* m, DrawComponent*
 	manager = m;
 	uc_ = uc;
 	index_ = index;
-	movement = nullptr;
+	while (!rt_actions.empty()) rt_actions.pop();
 
 	//set component owners
 	dcs->setOwner(this);

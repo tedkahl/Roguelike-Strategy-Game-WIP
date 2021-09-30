@@ -26,6 +26,10 @@ public:
 	inline int hp() { return current_hp; }
 	sf::Vector2i getPos();
 	Entity* getOwner();
+	bool damage(int attack) {
+		current_hp -= attack;
+		return current_hp < 0;
+	}
 	void setOwner(Entity* owner);
 	UnitStats const& stats() const { return stats_; };
 	UnitComponent() = default;

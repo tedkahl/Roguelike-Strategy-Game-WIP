@@ -145,6 +145,7 @@
     <ClCompile Include="UnitComponent.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Actions.h" />
     <ClInclude Include="Animation.h" />
     <ClInclude Include="DCSortable.h" />
     <ClInclude Include="Command.h" />

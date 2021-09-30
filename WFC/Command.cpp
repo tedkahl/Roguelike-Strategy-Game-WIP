@@ -26,14 +26,24 @@ AttackMove::AttackMove(Entity* agent, Level<char>& board_) : Command(agent, boar
 void AttackMove::execute(sf::Vector2i target, sf::Time now) {
 	hideTargeter();
 	sf::Vector2i move_target = target;
-	if (paths.is_attackable(target) && level.state.board.at(target).unit() && isEnemy(level.state.board.at(target).unit()->uc(), agent_->uc())) {
-		move_target = paths.grid.at(target).prev;
+	bool attack = false;
+	cout << "target " << to_string(target) << endl;
+	cout << paths.is_attackable(target) << endl;
+	cout << isEnemy(level.state.board.at(target).unit_uc(), agent_->uc()) << endl;
+
+	if (paths.is_attackable(target) && isEnemy(level.state.board.at(target).unit_uc(), agent_->uc())) {
+		cout << "Moving to attack!" << endl;
+		move_target = paths.grid.at(target - paths.offset).prev;
+		attack = true;
 	}
 	auto move_path = paths.getPath(move_target);
 
 	if (move_path)
 	{
-		agent_->addMovement(std::make_unique<GridMove>(std::move(move_path.value()), sf::seconds(.2), now, level.state));
+		agent_->addRT(std::make_unique<GridMove>(std::move(move_path.value()), static_cast<object_type>(agent_->type_), sf::seconds(.2), now, level.state));
+	}
+	if (attack) {
+		agent_->addRT(std::make_unique<MeleeAttack>(move_target, target, static_cast<object_type>(agent_->type_), anim_state::ATTACKING, now, level.state));
 	}
 }
 
