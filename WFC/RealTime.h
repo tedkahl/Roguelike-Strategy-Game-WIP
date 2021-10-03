@@ -9,6 +9,7 @@
 class Level;
 //typedef std::function<void(Entity*, sf::Vector2i, Board&)> entity_action;
 typedef std::function<void(Entity*)> entity_action;
+typedef std::function<void(Entity*, sf::Vector2i target_)> entity_target_action;
 
 struct EntityUpdate
 {
@@ -24,15 +25,15 @@ struct EntityUpdate
 class RealTime
 {
 protected:
-	Level* level_;
+	Board* board_;
 	sf::Time start_time;
 	virtual std::optional<sf::Vector2i> getCoords(unsigned index) { return std::nullopt; }
 public:
-	RealTime(sf::Time start_t, Level& level_);
-	RealTime(Level& level_);
+	RealTime(sf::Time start_t, Board& board_);
+	RealTime(Board& board_);
 	virtual EntityUpdate getUpdate(sf::Time current) = 0;
 	virtual std::vector<AnimationSeg> getAnimSegs() = 0;
-	Level& getBoard() const;
+	Board& getBoard() const;
 };
 
 class GridMove : public RealTime {
@@ -44,7 +45,7 @@ private:
 	object_type type_;
 	//sf::IntRect getTextureRect(sf::Time current);
 public:
-	GridMove(std::vector<sf::Vector2i>&& path, object_type type, sf::Time speed, sf::Time start_t, Level& level);
+	GridMove(std::vector<sf::Vector2i>&& path, object_type type, sf::Time speed, sf::Time start_t, Board& board);
 	virtual std::vector<AnimationSeg> getAnimSegs() override;
 	virtual EntityUpdate getUpdate(sf::Time current) override;
 };
@@ -59,7 +60,7 @@ private:
 	bool hasTriggered = false;
 
 public:
-	MeleeAttack(sf::Vector2i pos, sf::Vector2i target, object_type type, anim_state state, sf::Time start_t, Level& level);
+	MeleeAttack(sf::Vector2i pos, sf::Vector2i target, object_type type, anim_state state, sf::Time start_t, Board& board);
 	//virtual bool isFinished(sf::Time current) override;
 	virtual EntityUpdate getUpdate(sf::Time current) override;
 	virtual std::vector<AnimationSeg> getAnimSegs() override;

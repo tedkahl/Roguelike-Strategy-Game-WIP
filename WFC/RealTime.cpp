@@ -2,11 +2,11 @@
 
 using std::cout;
 using std::endl;
-RealTime::RealTime(sf::Time start_t, Level& level) :start_time(start_t), level_(&level) {};
-RealTime::RealTime(Level& level) : start_time(), level_(&level) {};
+RealTime::RealTime(sf::Time start_t, Board& board) :start_time(start_t), board_(&board) {};
+RealTime::RealTime(Board& board) : start_time(), board_(&board) {};
 
 //start time unused for now
-GridMove::GridMove(std::vector<sf::Vector2i>&& path, object_type type, sf::Time speed, sf::Time start_t, Level& level) :RealTime(level), type_(type), path_(path), speed_(speed) {
+GridMove::GridMove(std::vector<sf::Vector2i>&& path, object_type type, sf::Time speed, sf::Time start_t, Board& board) :RealTime(board), type_(type), path_(path), speed_(speed) {
 	std::cout << "Path established: " << std::endl;
 	for (auto& i : path) {
 		std::cout << i.x << " " << i.y << ", ";
@@ -47,13 +47,12 @@ std::optional<sf::Vector2i> GridMove::getCoords(unsigned index) {
 
 
 std::optional<sf::Vector2f> GridMove::getSpritePos(float pos, unsigned index) {
-	auto& state = level_->state;
 	unsigned end_index = std::min(index + 1, path_.size() - 1);
-	sf::Vector2f startcoords = squarePosFromCoords(path_[index], state.board.width());
-	sf::Vector2f endcoords = squarePosFromCoords(path_[end_index], state.board.width());
+	sf::Vector2f startcoords = squarePosFromCoords(path_[index], board_->board.width());
+	sf::Vector2f endcoords = squarePosFromCoords(path_[end_index], board_->board.width());
 	//std::cout << pos << ", " << index << std::endl;
-	float start_h = state.heightmap.at(path_[index]);
-	float end_h = state.heightmap.at(path_[end_index]);
+	float start_h = board_->heightmap.at(path_[index]);
+	float end_h = board_->heightmap.at(path_[end_index]);
 	float fraction = (pos - index);
 	startcoords = startcoords + (endcoords - startcoords) * fraction;
 	startcoords.y += (fraction >= .5 ? end_h : start_h);
@@ -61,10 +60,10 @@ std::optional<sf::Vector2f> GridMove::getSpritePos(float pos, unsigned index) {
 	return startcoords;
 }
 
-Level& RealTime::getBoard() const { return *level_; }
+Board& RealTime::getBoard() const { return *board_; }
 
 
-MeleeAttack::MeleeAttack(sf::Vector2i pos, sf::Vector2i target, object_type type, anim_state a_state, sf::Time start_t, Level& level) :RealTime(level), start_pos(squarePosFromCoords(pos, level_->state.board.width())), target_(target), dir(target - pos),
+MeleeAttack::MeleeAttack(sf::Vector2i pos, sf::Vector2i target, object_type type, anim_state a_state, sf::Time start_t, Board& board) :RealTime(board), start_pos(squarePosFromCoords(pos, board_->board.width())), target_(target), dir(target - pos),
 anim_info(animation_manager::instance()->get_basic_anim(type, a_state, 1)) {}
 
 
@@ -81,7 +80,7 @@ EntityUpdate MeleeAttack::getUpdate(sf::Time current) {
 	cout << "fraction " << fraction << endl;
 	if (fraction >= .5 && !hasTriggered) {
 		hasTriggered = true;
-		action = [=, this](Entity* e) {actions::attack(*level_, target_, e); };
+		action = [=, this](Entity* e) {actions::attack(*board_, target_, e); };
 	}
 	if (fraction >= 1) return EntityUpdate(true, false, 1, target_ - dir, start_pos);
 	fraction = .5 - std::abs(.5 - fraction);

@@ -40,7 +40,7 @@ void Entity::update(sf::Time current) {
 		if (update.finished) {
 			std::cout << "Action finished" << std::endl;
 			if (coords_ != owner_->pos)
-				rt_actions.front()->getBoard().state.moveEntity(this, coords_); //bad
+				rt_actions.front()->getBoard().moveEntity(this, coords_); //bad
 			rt_actions.pop();
 		}
 		manager->fixChangedVal(dc_p);
