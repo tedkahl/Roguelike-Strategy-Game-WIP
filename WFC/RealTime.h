@@ -2,9 +2,8 @@
 #include <SFML/Graphics.hpp>
 #include <optional>
 #include <functional>
-#include "Actions.h"
 #include "AnimationManager.h"
-#include "Level.h"
+#include "Board.h"
 #include "DrawComponent.h"
 class Level;
 //typedef std::function<void(Entity*, sf::Vector2i, Board&)> entity_action;

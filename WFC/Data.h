@@ -32,7 +32,7 @@ public:
 };
 
 template<typename T>
-void combine_vectors(std::vector<T>& first, std::vector<std::vector<T>>&& vecs) {
+static void combine_vectors(std::vector<T>& first, std::vector<std::vector<T>>&& vecs) {
 	for (auto&& i : vecs) {
 		first.reserve(first.size() + i.size());
 		first.insert(first.end(), std::make_move_iterator(i.begin()), std::make_move_iterator(i.end()));
