@@ -4,5 +4,5 @@
 class Entity;
 class Level;
 namespace actions {
-	static void attack(Level& level, sf::Vector2i target, Entity* e);
+	void attack(Level& level, sf::Vector2i target, Entity* e);
 }

@@ -5,7 +5,8 @@
 static void handleEsc(PlayerState& p_state) {
 	if (p_state.command) p_state.deSelect();
 }
-static void handleInput(Level& level, sf::RenderWindow& window, sf::Time now, PlayerState& p_state, sf::Event& event) {
+static void handleInput(Level& level, sf::RenderWindow& window, sf::Time now, PlayerState& p_state, sf::Event& event)
+{
 	auto& squares = level.state.board;
 	if (event.type == sf::Event::MouseButtonPressed)
 	{
@@ -71,3 +72,4 @@ static void handleInput(Level& level, sf::RenderWindow& window, sf::Time now, Pl
 		}
 		}
 	}
+}

@@ -30,17 +30,17 @@ struct map_node {
 };
 
 //modify this for allied teams?
-//template<typename T1, typename T2>
-//requires requires(T1 t1, T2 t2) {
-//	{t1.team()}->std::same_as<int>;
-//	{t2.team()}->std::same_as<int>;
-//}
-//static bool isEnemy(T1* u1, T2* u2) {
-//	return u1 && u2 && u1->team() != u2->team();
-//}
-static bool isEnemy(UnitComponent* u1, UnitComponent* u2) {
+template<typename T1, typename T2>
+requires requires(T1 t1, T2 t2) {
+	{t1.team()}->std::same_as<int>;
+	{t2.team()}->std::same_as<int>;
+}
+static bool isEnemy(T1* u1, T2* u2) {
 	return u1 && u2 && u1->team() != u2->team();
 }
+//static bool isEnemy(UnitComponent* u1, UnitComponent* u2) {
+//	return u1 && u2 && u1->team() != u2->team();
+//}
 
 static bool block_attack(int type, sf::Vector2i start, sf::Vector2i end, Board& state) {
 	return false;

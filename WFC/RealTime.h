@@ -5,7 +5,7 @@
 #include "AnimationManager.h"
 #include "Board.h"
 #include "DrawComponent.h"
-class Level;
+struct Board;
 //typedef std::function<void(Entity*, sf::Vector2i, Board&)> entity_action;
 typedef std::function<void(Entity*)> entity_action;
 typedef std::function<void(sf::Vector2i target_, Entity*)> entity_target_action;
