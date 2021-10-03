@@ -12,7 +12,6 @@ struct UnitStats {
 	int damage;
 };
 
-
 class UnitComponent : public Managed {
 private:
 	UnitStats stats_;
@@ -21,6 +20,8 @@ private:
 	int team_;
 	Entity* owner_;
 public:
+	enum move_state { FREE, HAS_MOVED, HAS_ACTED };
+	uint8_t movestate;
 	inline bool dummy() { return dummy_; }
 	inline int team() { return team_; }
 	inline int hp() { return current_hp; }
