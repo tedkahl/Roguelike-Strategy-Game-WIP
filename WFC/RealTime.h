@@ -2,11 +2,11 @@
 #include <SFML/Graphics.hpp>
 #include <optional>
 #include <functional>
-#include "Data.h"
-#include "Animation.h"
-#include "Board.h"
+#include "Actions.h"
+#include "AnimationManager.h"
+#include "Level.h"
 #include "DrawComponent.h"
-struct Board;
+class Level;
 //typedef std::function<void(Entity*, sf::Vector2i, Board&)> entity_action;
 typedef std::function<void(Entity*)> entity_action;
 
@@ -24,15 +24,15 @@ struct EntityUpdate
 class RealTime
 {
 protected:
-	Board* state;
+	Level* level_;
 	sf::Time start_time;
 	virtual std::optional<sf::Vector2i> getCoords(unsigned index) { return std::nullopt; }
 public:
-	RealTime(sf::Time start_t, Board& state_);
-	RealTime(Board& state_);
+	RealTime(sf::Time start_t, Level& level_);
+	RealTime(Level& level_);
 	virtual EntityUpdate getUpdate(sf::Time current) = 0;
 	virtual std::vector<AnimationSeg> getAnimSegs() = 0;
-	Board& getBoard() const;
+	Level& getBoard() const;
 };
 
 class GridMove : public RealTime {
@@ -44,7 +44,7 @@ private:
 	object_type type_;
 	//sf::IntRect getTextureRect(sf::Time current);
 public:
-	GridMove(std::vector<sf::Vector2i>&& path, object_type type, sf::Time speed, sf::Time start_t, Board& b_state);
+	GridMove(std::vector<sf::Vector2i>&& path, object_type type, sf::Time speed, sf::Time start_t, Level& level);
 	virtual std::vector<AnimationSeg> getAnimSegs() override;
 	virtual EntityUpdate getUpdate(sf::Time current) override;
 };
@@ -59,7 +59,7 @@ private:
 	bool hasTriggered = false;
 
 public:
-	MeleeAttack(sf::Vector2i pos, sf::Vector2i target, object_type type, anim_state state, sf::Time start_t, Board& b_state);
+	MeleeAttack(sf::Vector2i pos, sf::Vector2i target, object_type type, anim_state state, sf::Time start_t, Level& level);
 	//virtual bool isFinished(sf::Time current) override;
 	virtual EntityUpdate getUpdate(sf::Time current) override;
 	virtual std::vector<AnimationSeg> getAnimSegs() override;

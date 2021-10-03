@@ -1,10 +1,12 @@
 #include "RealTime.h"
 
-RealTime::RealTime(sf::Time start_t, Board& state_) :start_time(start_t), state(&state_) {};
-RealTime::RealTime(Board& state_) : start_time(), state(&state_) {};
+using std::cout;
+using std::endl;
+RealTime::RealTime(sf::Time start_t, Level& level) :start_time(start_t), level_(&level) {};
+RealTime::RealTime(Level& level) : start_time(), level_(&level) {};
 
 //start time unused for now
-GridMove::GridMove(std::vector<sf::Vector2i>&& path, object_type type, sf::Time speed, sf::Time start_t, Board& b_state) :RealTime(b_state), type_(type), path_(path), speed_(speed) {
+GridMove::GridMove(std::vector<sf::Vector2i>&& path, object_type type, sf::Time speed, sf::Time start_t, Level& level) :RealTime(level), type_(type), path_(path), speed_(speed) {
 	std::cout << "Path established: " << std::endl;
 	for (auto& i : path) {
 		std::cout << i.x << " " << i.y << ", ";
@@ -17,15 +19,7 @@ std::vector<AnimationSeg> GridMove::getAnimSegs() {
 }
 
 
-//bool GridMove::isFinished(sf::Time current) {
-//	/*std::cout << "RealTime finished?" << std::endl;
-//	std::cout << (current - start_time).asSeconds() << std::endl;
-//	std::cout << (static_cast<sf::Int64>(path_.size()) * speed_).asSeconds() << std::endl;*/
-//
-//	return (current - start_time) / speed_ > path_.size() - 1;
-//}
-using std::cout;
-using std::endl;
+
 EntityUpdate GridMove::getUpdate(sf::Time current) {
 	std::optional<int> dir = std::nullopt;
 	if (start_time == sf::Time()) {
@@ -53,12 +47,13 @@ std::optional<sf::Vector2i> GridMove::getCoords(unsigned index) {
 
 
 std::optional<sf::Vector2f> GridMove::getSpritePos(float pos, unsigned index) {
+	auto& state = level_->state;
 	unsigned end_index = std::min(index + 1, path_.size() - 1);
-	sf::Vector2f startcoords = squarePosFromCoords(path_[index], state->board.width());
-	sf::Vector2f endcoords = squarePosFromCoords(path_[end_index], state->board.width());
+	sf::Vector2f startcoords = squarePosFromCoords(path_[index], state.board.width());
+	sf::Vector2f endcoords = squarePosFromCoords(path_[end_index], state.board.width());
 	//std::cout << pos << ", " << index << std::endl;
-	float start_h = state->heightmap.at(path_[index]);
-	float end_h = state->heightmap.at(path_[end_index]);
+	float start_h = state.heightmap.at(path_[index]);
+	float end_h = state.heightmap.at(path_[end_index]);
 	float fraction = (pos - index);
 	startcoords = startcoords + (endcoords - startcoords) * fraction;
 	startcoords.y += (fraction >= .5 ? end_h : start_h);
@@ -66,10 +61,10 @@ std::optional<sf::Vector2f> GridMove::getSpritePos(float pos, unsigned index) {
 	return startcoords;
 }
 
-Board& RealTime::getBoard() const { return *state; }
+Level& RealTime::getBoard() const { return *level_; }
 
 
-MeleeAttack::MeleeAttack(sf::Vector2i pos, sf::Vector2i target, object_type type, anim_state a_state, sf::Time start_t, Board& b_state) :RealTime(b_state), start_pos(squarePosFromCoords(pos, state->board.width())), target_(target), dir(target - pos),
+MeleeAttack::MeleeAttack(sf::Vector2i pos, sf::Vector2i target, object_type type, anim_state a_state, sf::Time start_t, Level& level) :RealTime(level), start_pos(squarePosFromCoords(pos, level_->state.board.width())), target_(target), dir(target - pos),
 anim_info(animation_manager::instance()->get_basic_anim(type, a_state, 1)) {}
 
 
@@ -86,14 +81,7 @@ EntityUpdate MeleeAttack::getUpdate(sf::Time current) {
 	cout << "fraction " << fraction << endl;
 	if (fraction >= .5 && !hasTriggered) {
 		hasTriggered = true;
-		action = [=, this](Entity* e) {
-			UnitComponent* me = e->uc();
-			UnitComponent* enemy = (*state).board.at(target_).unit_uc();
-			assert(me && enemy);
-			bool dead = enemy->damage(me->stats().damage);
-			cout << enemy->hp() << endl;
-			cout << "enemy dead? " << dead << endl;
-		};
+		action = [=, this](Entity* e) {actions::attack(*level_, target_, e); };
 	}
 	if (fraction >= 1) return EntityUpdate(true, false, 1, target_ - dir, start_pos);
 	fraction = .5 - std::abs(.5 - fraction);
