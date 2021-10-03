@@ -2,8 +2,10 @@
 #include "UnitComponent.h"
 #include "Command.h"
 #include "PlayerState.h"
-
-static void handleInput(Level<char>& level, sf::RenderWindow& window, sf::Time now, PlayerState& p_state, sf::Event& event) {
+static void handleEsc(PlayerState& p_state) {
+	if (p_state.command) p_state.deSelect();
+}
+static void handleInput(Level& level, sf::RenderWindow& window, sf::Time now, PlayerState& p_state, sf::Event& event) {
 	auto& squares = level.state.board;
 	if (event.type == sf::Event::MouseButtonPressed)
 	{
@@ -18,10 +20,12 @@ static void handleInput(Level<char>& level, sf::RenderWindow& window, sf::Time n
 			}
 			else {
 				Entity* unit = level.entityClickedOn(window, coords, sf::Vector2i(event.mouseButton.x, event.mouseButton.y));
-				if (unit) {
+				UnitComponent* unit_uc = unit->uc();
+				if (unit && !isEnemy(unit_uc, &p_state) && unit_uc->movestate != UnitComponent::move_state::HAS_ACTED) {
 					p_state.selected = unit;
 					std::cout << "switching command" << std::endl;
-					p_state.switchCommand(new AttackMove(unit, level));
+					if (unit_uc->movestate == UnitComponent::move_state::FREE)
+						p_state.switchCommand(new AttackMove(unit, level));
 					p_state.command->showTargeter();
 				}
 			}
@@ -62,6 +66,8 @@ static void handleInput(Level<char>& level, sf::RenderWindow& window, sf::Time n
 			}
 			break;
 		}
+		case sf::Keyboard::Key::Escape: {
+			handleEsc(p_state);
+		}
 		}
 	}
-}
