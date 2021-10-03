@@ -9,7 +9,7 @@
 class Level;
 //typedef std::function<void(Entity*, sf::Vector2i, Board&)> entity_action;
 typedef std::function<void(Entity*)> entity_action;
-typedef std::function<void(Entity*, sf::Vector2i target_)> entity_target_action;
+typedef std::function<void(sf::Vector2i target_, Entity*)> entity_target_action;
 
 struct EntityUpdate
 {
@@ -57,10 +57,11 @@ private:
 	sf::Vector2i dir;
 	sf::Vector2i target_;
 	std::vector<AnimationSeg> anim_info;
+	entity_target_action action;
 	bool hasTriggered = false;
 
 public:
-	MeleeAttack(sf::Vector2i pos, sf::Vector2i target, object_type type, anim_state state, sf::Time start_t, Board& board);
+	MeleeAttack(sf::Vector2i pos, sf::Vector2i target, object_type type, anim_state state, sf::Time start_t, Board& board, entity_target_action& a);
 	//virtual bool isFinished(sf::Time current) override;
 	virtual EntityUpdate getUpdate(sf::Time current) override;
 	virtual std::vector<AnimationSeg> getAnimSegs() override;

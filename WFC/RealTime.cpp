@@ -18,8 +18,6 @@ std::vector<AnimationSeg> GridMove::getAnimSegs() {
 	return animation_manager::instance()->get_basic_anim(type_, anim_state::WALKING, path_.size() - 1, speed_.asMilliseconds());
 }
 
-
-
 EntityUpdate GridMove::getUpdate(sf::Time current) {
 	std::optional<int> dir = std::nullopt;
 	if (start_time == sf::Time()) {
@@ -45,7 +43,6 @@ std::optional<sf::Vector2i> GridMove::getCoords(unsigned index) {
 	return path_[index];
 }
 
-
 std::optional<sf::Vector2f> GridMove::getSpritePos(float pos, unsigned index) {
 	unsigned end_index = std::min(index + 1, path_.size() - 1);
 	sf::Vector2f startcoords = squarePosFromCoords(path_[index], board_->board.width());
@@ -63,12 +60,13 @@ std::optional<sf::Vector2f> GridMove::getSpritePos(float pos, unsigned index) {
 Board& RealTime::getBoard() const { return *board_; }
 
 
-MeleeAttack::MeleeAttack(sf::Vector2i pos, sf::Vector2i target, object_type type, anim_state a_state, sf::Time start_t, Board& board) :RealTime(board), start_pos(squarePosFromCoords(pos, board_->board.width())), target_(target), dir(target - pos),
-anim_info(animation_manager::instance()->get_basic_anim(type, a_state, 1)) {}
+
+MeleeAttack::MeleeAttack(sf::Vector2i pos, sf::Vector2i target, object_type type, anim_state a_state, sf::Time start_t, Board& board, entity_target_action& a) :RealTime(board), start_pos(squarePosFromCoords(pos, board_->board.width())), target_(target), dir(target - pos),
+anim_info(animation_manager::instance()->get_basic_anim(type, a_state, 1)), action(a) {}
 
 
 EntityUpdate MeleeAttack::getUpdate(sf::Time current) {
-	std::optional<entity_action> action = std::nullopt;
+	std::optional<entity_action> bound_action = std::nullopt;
 	std::optional<int> move_dir = std::nullopt;
 	if (start_time == sf::Time()) {
 		start_time = current;
@@ -80,7 +78,7 @@ EntityUpdate MeleeAttack::getUpdate(sf::Time current) {
 	cout << "fraction " << fraction << endl;
 	if (fraction >= .5 && !hasTriggered) {
 		hasTriggered = true;
-		action = [=, this](Entity* e) {actions::attack(*board_, target_, e); };
+		bound_action = [=, this](Entity* e) {action(target_, e); };
 	}
 	if (fraction >= 1) return EntityUpdate(true, false, 1, target_ - dir, start_pos);
 	fraction = .5 - std::abs(.5 - fraction);
@@ -95,7 +93,7 @@ EntityUpdate MeleeAttack::getUpdate(sf::Time current) {
 	true_dir.y *= dir.x + dir.y;
 	cout << to_string(dir) << endl;
 	cout << to_string(true_dir) << endl;
-	return EntityUpdate(false, move_dir.value_or(1) == 0, move_dir, adjusted_target, start_pos + true_dir * fraction * lunge, std::move(action));
+	return EntityUpdate(false, move_dir.value_or(1) == 0, move_dir, adjusted_target, start_pos + true_dir * fraction * lunge, std::move(bound_action));
 }
 
 std::vector<AnimationSeg> MeleeAttack::getAnimSegs() {

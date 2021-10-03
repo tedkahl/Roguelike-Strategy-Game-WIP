@@ -3,6 +3,7 @@
 #include "Paths.h"
 #include "Level.h"
 #include "Debug.h"
+#include "Actions.h"
 class Targeter {
 private:
 	Level& level;

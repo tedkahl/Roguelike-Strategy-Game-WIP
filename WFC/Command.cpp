@@ -44,7 +44,8 @@ void AttackMove::execute(sf::Vector2i target, sf::Time now) {
 		agent_->uc()->movestate = UnitComponent::move_state::HAS_MOVED;
 	}
 	if (attack) {
-		agent_->addRT(std::make_unique<MeleeAttack>(move_target, target, static_cast<object_type>(agent_->type_), anim_state::ATTACKING, now, level.state));
+		entity_target_action a = [=, this](sf::Vector2i target_, Entity* e) {actions::attack(level, target_, e);};
+		agent_->addRT(std::make_unique<MeleeAttack>(move_target, target, static_cast<object_type>(agent_->type_), anim_state::ATTACKING, now, level.state, a));
 		agent_->uc()->movestate = UnitComponent::move_state::HAS_ACTED;
 	}
 }
