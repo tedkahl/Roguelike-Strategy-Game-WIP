@@ -53,7 +53,7 @@ public:
 
 	void setAnimation(sf::Time start, std::vector<AnimationSeg>&& segs, bool loop = false, float speed = 1.f);
 	void draw(sf::RenderTarget* target) const;
-	void updateAnimation(sf::Time current);
+	bool updateAnimation(sf::Time current);
 
 	void updateEntityPos(sf::Vector2i newpos, matrix<float>& heightmap);
 	void setSquarePos(sf::Vector2i newpos, matrix<float>& heightmap);

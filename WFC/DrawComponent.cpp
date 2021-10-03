@@ -6,9 +6,12 @@ void DrawComponent::setAnimation(sf::Time start, std::vector<AnimationSeg>&& seg
 	cout << "setting animation" << endl;
 	animation.set(start, std::forward< std::vector<AnimationSeg>>(segs), loop, speed);
 }
-void DrawComponent::updateAnimation(sf::Time current) {
-	if (animation.active())
+bool DrawComponent::updateAnimation(sf::Time current) {
+	if (animation.active()) {
 		setTextureRect(animation.getRect(current, sprite.getTexture()->getSize().x));
+		return true;
+	}
+	return false;
 }
 
 void DrawComponent::set(std::string path, sf::Vector2f& offset, std::shared_ptr<ResourceManager<sf::Texture>> tm, unsigned obj_height, const sf::IntRect& rect, int batch)
