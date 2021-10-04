@@ -16,7 +16,7 @@ void Entity::update(sf::Time current) {
 
 		auto update = rt_actions.front()->getUpdate(current);
 		if (update.move_dir) {
-			cout << "updating move dir" << endl;
+			//cout << "updating move dir" << endl;
 			dc_p->setMoveDirection(update.move_dir.value());
 			dc_.setMoveDirection(update.move_dir.value());
 			if (update.first)
@@ -31,7 +31,7 @@ void Entity::update(sf::Time current) {
 			std::cout << to_string(coords_) << " ";
 		}
 		if (update.sprite_position_) {
-			cout << "setting sprite pos " << to_string(update.sprite_position_.value()) << endl;
+			//cout << "setting sprite pos " << to_string(update.sprite_position_.value()) << endl;
 			dc_p->setSpritePos(update.sprite_position_.value());
 		}
 		if (update.action)

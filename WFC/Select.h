@@ -8,7 +8,7 @@ static void handleEsc(PlayerState& p_state) {
 static void handleInput(Level& level, sf::RenderWindow& window, sf::Time now, PlayerState& p_state, sf::Event& event)
 {
 	auto& squares = level.state.board;
-	if (event.type == sf::Event::MouseButtonPressed)
+	if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left)
 	{
 		auto ret = level.getCoords(window, sf::Vector2i(event.mouseButton.x, event.mouseButton.y));
 		if (ret) {
@@ -21,13 +21,15 @@ static void handleInput(Level& level, sf::RenderWindow& window, sf::Time now, Pl
 			}
 			else {
 				Entity* unit = level.entityClickedOn(window, coords, sf::Vector2i(event.mouseButton.x, event.mouseButton.y));
-				UnitComponent* unit_uc = unit->uc();
+				UnitComponent* unit_uc = unit ? unit->uc() : nullptr;
 				if (unit && !isEnemy(unit_uc, &p_state) && unit_uc->movestate != UnitComponent::move_state::HAS_ACTED) {
 					p_state.selected = unit;
 					std::cout << "switching command" << std::endl;
 					if (unit_uc->movestate == UnitComponent::move_state::FREE)
+					{
 						p_state.switchCommand(new AttackMove(unit, level));
-					p_state.command->showTargeter();
+						p_state.command->showTargeter();
+					}
 				}
 			}
 		}
