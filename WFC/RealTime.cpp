@@ -91,8 +91,8 @@ EntityUpdate MeleeAttack::getUpdate(sf::Time current) {
 	auto true_dir = sf::Vector2f(2.f / 3.f, 1.f / 3.f);
 	true_dir.x *= dir.x - dir.y;
 	true_dir.y *= dir.x + dir.y;
-	cout << to_string(dir) << endl;
-	cout << to_string(true_dir) << endl;
+	//cout << to_string(dir) << endl;
+	//cout << to_string(true_dir) << endl;
 	return EntityUpdate(false, move_dir.value_or(1) == 0, move_dir, adjusted_target, start_pos + true_dir * fraction * lunge, std::move(bound_action));
 }
 
