@@ -24,9 +24,10 @@ struct map_node {
 	sf::Vector2i prev;
 	unsigned search;
 	bool is_edge;
+	bool has_ally;
 	bool attack_only;
-	map_node() :moves_left(0), prev(), search(0), attack_only(false), is_edge(true) {}
-	map_node(int moves_l, sf::Vector2i prev_, unsigned search_, bool no_move = false, bool isedge = true) :moves_left(moves_l), prev(prev_), search(search_), attack_only(no_move), is_edge(isedge) {}
+	map_node() :moves_left(0), prev(), search(0), attack_only(false), is_edge(true), has_ally(false) {}
+	map_node(int moves_l, sf::Vector2i prev_, unsigned search_, bool no_move = false, bool isedge = true) :moves_left(moves_l), prev(prev_), search(search_), attack_only(no_move), is_edge(isedge), has_ally(false) {}
 };
 
 //modify this for allied teams?
@@ -46,8 +47,8 @@ static bool block_attack(int type, sf::Vector2i start, sf::Vector2i end, Board& 
 	return false;
 }
 
-static int getMoveCost(UnitComponent* u, sf::Vector2i& start, sf::Vector2i end, Board& state) {
-	if (state.board.at(end).unit() && isEnemy(u, state.board.at(end).unit()->uc())) return 999;
+static int getMoveCost(UnitComponent* u, int moves_left, sf::Vector2i& start, sf::Vector2i end, Board& state) {
+	if (isEnemy(u, state.board.at(end).unit_uc())) return 999;
 	//std::cout << "getting cost: movetype " << u->stats().movetype << " terrain type " << state.board.at(end).type() << std::endl;
 	return Data<char>::d()->movecosts[u->stats().movetype][state.board.at(end).type()];
 }
@@ -58,7 +59,7 @@ struct pathsGrid {
 	unsigned search;
 	std::optional<std::vector<sf::Vector2i>> getPath(sf::Vector2i& dest);
 	//std::optional<Square> getSquare(sf::Vector2i& loc) { if (on_board(loc - offset, grid)) return grid.at(loc - offset); else return std::nullopt; };
-	bool is_movable(sf::Vector2i& loc) { return is_attackable(loc) && !grid.at(loc - offset).attack_only; }
+	bool is_movable(sf::Vector2i& loc) { return is_attackable(loc) && !grid.at(loc - offset).attack_only && !grid.at(loc - offset).has_ally; }
 	bool is_attackable(sf::Vector2i& loc) { return on_board(loc - offset, grid) && grid.at(loc - offset).search == search; }
 	pathsGrid(matrix<map_node>& g, unsigned minX, unsigned minY, unsigned maxX, unsigned maxY, unsigned search_) :grid(subMatrix(g, minX, minY, maxX - minX + 1, maxY - minY + 1)), offset(minX, minY), search(search_) {}
 	pathsGrid() :grid(), search(0) {}
@@ -89,7 +90,7 @@ static void addAttackRange(matrix<map_node>& grid, UnitComponent* u, int& minX, 
 	auto stats = u->stats();
 	for (int i = minX;i <= maxX;i++) {
 		for (int j = minY;j <= maxY;j++) {
-			if (grid.at(i, j).search == search && grid.at(i, j).is_edge) {
+			if (grid.at(i, j).search == search && grid.at(i, j).is_edge && !grid.at(i, j).has_ally) {
 				getAttackRange(grid, search, minX, minY, maxX, maxY, stats, sf::Vector2i(i, j), state);
 			}
 		}
@@ -128,10 +129,11 @@ static pathsGrid pathFind(UnitComponent* u, Board& state) {
 		to_process.pop_back();
 		//for each direction
 		is_edge = false;
+		curr_node.has_ally = curr_node.has_ally || (state.board.at(curr_pos).unit() && state.board.at(curr_pos).unit_uc() != u);
 		for (auto& i : dir) {
 			if (curr_pos + i != curr_node.prev && on_board(curr_pos + i, state.board)) {
 				sf::Vector2i adj_pos = curr_pos + i;
-				int new_moves_left = curr_node.moves_left - getMoveCost(u, curr_pos, adj_pos, state);
+				int new_moves_left = curr_node.moves_left - getMoveCost(u, curr_node.moves_left, curr_pos, adj_pos, state);
 				//if adjacent square is reachable as easily from another path, don't look further
 				if (grid.at(adj_pos).search == search_counter && grid.at(adj_pos).moves_left >= new_moves_left) continue;
 
