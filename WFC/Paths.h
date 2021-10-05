@@ -1,11 +1,5 @@
 #pragma once
-#include <algorithm>
-#include <array>
-#include <optional>
-#include "Pattern.h"
-#include "Board.h"
-#include "Data.h"
-#include "UnitComponent.h"
+#include "PathsUtil.h"
 const std::array<sf::Vector2i, 4> dir = { sf::Vector2i(0,-1),sf::Vector2i(1,0),sf::Vector2i(0,1),sf::Vector2i(-1,0) };
 
 struct Board;
@@ -14,10 +8,9 @@ static bool on_board(sf::Vector2i loc, matrix<T>& state) {
 	return loc.x >= 0 && loc.x < static_cast<int>(state.width()) && loc.y >= 0 && loc.y < static_cast<int>(state.height());
 }
 
-static bool compV2i(sf::Vector2i& lhs, sf::Vector2i& rhs) {
+static bool operator<(const sf::Vector2i& lhs, const sf::Vector2i& rhs) {
 	return std::tie(lhs.x, lhs.y) < std::tie(rhs.x, rhs.y);
 }
-
 
 struct map_node {
 	int moves_left;
@@ -30,28 +23,9 @@ struct map_node {
 	map_node(int moves_l, sf::Vector2i prev_, unsigned search_, bool no_move = false, bool isedge = true) :moves_left(moves_l), prev(prev_), search(search_), attack_only(no_move), is_edge(isedge), has_ally(false) {}
 };
 
-//modify this for allied teams?
-template<typename T1, typename T2>
-requires requires(T1 t1, T2 t2) {
-	{t1.team()}->std::same_as<int>;
-	{t2.team()}->std::same_as<int>;
-}
-static bool isEnemy(T1* u1, T2* u2) {
-	return u1 && u2 && u1->team() != u2->team();
-}
-//static bool isEnemy(UnitComponent* u1, UnitComponent* u2) {
-//	return u1 && u2 && u1->team() != u2->team();
-//}
 
-static bool block_attack(int type, sf::Vector2i start, sf::Vector2i end, Board& state) {
-	return false;
-}
 
-static int getMoveCost(UnitComponent* u, int moves_left, sf::Vector2i& start, sf::Vector2i end, Board& state) {
-	if (isEnemy(u, state.board.at(end).unit_uc())) return 999;
-	//std::cout << "getting cost: movetype " << u->stats().movetype << " terrain type " << state.board.at(end).type() << std::endl;
-	return Data<char>::d()->movecosts[u->stats().movetype][state.board.at(end).type()];
-}
+
 
 struct pathsGrid {
 	matrix<map_node> grid;
@@ -65,36 +39,59 @@ struct pathsGrid {
 	pathsGrid() :grid(), search(0) {}
 };
 
+struct dist_loc {
+	int distance;
+	sf::Vector2i loc;
+	friend bool operator<(const dist_loc& lhs, const dist_loc& rhs) {
+		return lhs.distance < rhs.distance || (lhs.distance == rhs.distance && lhs.loc < rhs.loc);
+	}
+};
 
-static void getAttackRange(matrix<map_node>& grid, unsigned search, int& minX, int& minY, int& maxX, int& maxY, UnitStats& u, sf::Vector2i pos, Board& state) {
-	sf::Vector2i new_pos;
-	switch (u.attack_type) {
-	case attack_type::MELEE:
-		for (auto i : dir) {
-			new_pos = pos + i;
-			if (!on_board(new_pos, state.board)) continue;
-			if (grid.at(new_pos).search == search && (!grid.at(new_pos).attack_only || grid.at(new_pos).moves_left >= grid.at(pos).moves_left)) continue;
+static matrix<map_node>& djikstraMap(move_type type, int team, std::vector<UnitComponent*> enemy_targets, Board& state) {
+	static matrix<map_node> grid;
+	static unsigned search_counter = 0;
 
-			if (!block_attack(u.attack_type, pos, new_pos, state)) {
-				grid.at(new_pos) = map_node(grid.at(pos).moves_left, pos, search, true, false);
-				minX = std::min(new_pos.x, minX);
-				minY = std::min(new_pos.y, minY);
-				maxX = std::max(new_pos.x, maxX);
-				maxY = std::max(new_pos.y, maxY);
+	// Incrementing search_counter means we ignore results from earlier searches.
+	++search_counter;
+	// Whenever the counter cycles, trash the contents of nodes and restart at 1.
+	if (search_counter == 0) {
+		grid.resize(0, 0);
+		search_counter = 1;
+	}
+
+	sf::Vector2i curr_pos;
+	grid.resize(state.board.height(), state.board.width());
+
+	//works as a heap so that duplicate locations will be processed at the same time, cutting off processing of the slower path 
+	std::vector<dist_loc> to_process(enemy_targets.size());
+	for (int i = 0;i < to_process.size();i++) {
+		curr_pos = enemy_targets[i]->getOwner()->getPos();
+		to_process[i] = dist_loc(getMovesRem(enemy_targets[i]), curr_pos);
+		grid.at(curr_pos) = map_node(getMovesRem(enemy_targets[i]), sf::Vector2i(-1, -1), search_counter);
+	}
+	int num_edges = 0;
+	while (!to_process.empty()) {
+		curr_pos = to_process[0].loc;
+		map_node& curr_node = grid.at(curr_pos);
+		std::pop_heap(to_process.begin(), to_process.end());
+		to_process.pop_back();
+		//for each direction
+
+		for (auto& i : dir) {
+			if (curr_pos + i != curr_node.prev && on_board(curr_pos + i, state.board)) {
+				sf::Vector2i adj_pos = curr_pos + i;
+				int new_dist = curr_node.moves_left + getMoveCost(type, team, curr_node.moves_left, curr_pos, adj_pos, state);
+				//if adjacent square is reachable as easily from another path, don't look further
+				if (grid.at(adj_pos).search == search_counter && grid.at(adj_pos).moves_left >= new_dist) continue;
+
+				grid.at(adj_pos) = map_node(new_dist, curr_pos, search_counter);
+				to_process.push_back(dist_loc(new_dist, adj_pos));
+				std::push_heap(to_process.begin(), to_process.end());
 			}
 		}
 	}
-}
 
-static void addAttackRange(matrix<map_node>& grid, UnitComponent* u, int& minX, int& minY, int& maxX, int& maxY, unsigned search, Board& state) {
-	auto stats = u->stats();
-	for (int i = minX;i <= maxX;i++) {
-		for (int j = minY;j <= maxY;j++) {
-			if (grid.at(i, j).search == search && grid.at(i, j).is_edge && !grid.at(i, j).has_ally) {
-				getAttackRange(grid, search, minX, minY, maxX, maxY, stats, sf::Vector2i(i, j), state);
-			}
-		}
-	}
+	return grid;
 }
 /*What to do: a modified djikstras. We maintain a second board array of "map locations", with the current cost to that square and the previous node of the shortest path. BFS through these
 */
@@ -114,9 +111,8 @@ static pathsGrid pathFind(UnitComponent* u, Board& state) {
 	}
 
 	sf::Vector2i curr_pos = u->getPos();
-	int moves_rem = u->stats().movement;
 	grid.resize(state.board.height(), state.board.width());
-	grid.at(curr_pos) = map_node(moves_rem, sf::Vector2i(-1, -1), search_counter);
+	grid.at(curr_pos) = map_node(getMovesRem(u), sf::Vector2i(-1, -1), search_counter);
 
 	//works as a heap so that duplicate locations will be processed at the same time, cutting off processing of the slower path 
 	std::vector<sf::Vector2i> to_process(1, curr_pos);
@@ -125,7 +121,7 @@ static pathsGrid pathFind(UnitComponent* u, Board& state) {
 	while (!to_process.empty()) {
 		curr_pos = to_process[0];
 		map_node& curr_node = grid.at(curr_pos);
-		std::pop_heap(to_process.begin(), to_process.end(), compV2i);
+		std::pop_heap(to_process.begin(), to_process.end());
 		to_process.pop_back();
 		//for each direction
 		is_edge = false;
@@ -145,7 +141,7 @@ static pathsGrid pathFind(UnitComponent* u, Board& state) {
 					maxX = std::max(maxX, adj_pos.x);
 					maxY = std::max(maxY, adj_pos.y);
 					to_process.push_back(adj_pos);
-					std::push_heap(to_process.begin(), to_process.end(), compV2i);
+					std::push_heap(to_process.begin(), to_process.end());
 				}
 				//if an adjacent square is not reachable due to move cost, we consider this square, for now, as an "edge".
 				else {
