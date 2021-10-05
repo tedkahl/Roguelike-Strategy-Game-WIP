@@ -11,6 +11,7 @@
 #include "Board.h"
 #include "Paths.h"
 #include "Util.h"
+#include "vec2i_util.h"
 using std::cout;
 using std::endl;
 class Entity;

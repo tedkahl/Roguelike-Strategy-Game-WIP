@@ -96,8 +96,7 @@ Entity* Level::entityClickedOn(const sf::RenderWindow& window, sf::Vector2i coor
 				//else do this nonsense
 				sf::FloatRect bounds = u->dc()->getSprite().getGlobalBounds();
 				if (bounds.contains(pixel)) {
-					sf::Vector2i diff = sf::Vector2i(pixel) - sf::Vector2i(bounds.left + bounds.width / 2, bounds.top + bounds.height / 2);
-					int dist_sq = pow(diff.x, 2) + pow(diff.y, 2);
+					int dist_sq = sumSq(sf::Vector2i(pixel) - sf::Vector2i(bounds.left + bounds.width / 2, bounds.top + bounds.height / 2));
 					if ((dist_sq - min_dist_sq) < 300) { //choose the closer sprite unless the click is much centered on the farther one.
 						clicked = u;
 						min_dist_sq = dist_sq;
