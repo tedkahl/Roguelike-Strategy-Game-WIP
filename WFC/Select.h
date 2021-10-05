@@ -5,6 +5,11 @@
 static void handleEsc(PlayerState& p_state) {
 	if (p_state.command) p_state.deSelect();
 }
+
+static void unit_wait(UnitComponent* u) {
+	u->movestate = UnitComponent::move_state::HAS_ACTED;
+}
+
 static void handleInput(Level& level, sf::RenderWindow& window, sf::Time now, PlayerState& p_state, sf::Event& event)
 {
 	auto& squares = level.state.board;
@@ -45,10 +50,17 @@ static void handleInput(Level& level, sf::RenderWindow& window, sf::Time now, Pl
 			}
 			break;
 		}
+		case sf::Keyboard::Key::W:
 		case sf::Keyboard::Key::U: {
 			if (auto coords = level.getCoords(window, sf::Mouse::getPosition(window))) {
 				auto& square = squares.at(coords.value());
-				level.addEntity(rand() % 2 == 0 ? object_type::DUELIST : object_type::WOLF, coords.value());
+				level.addEntity(event.key.code == sf::Keyboard::Key::U ? object_type::DUELIST : object_type::WOLF, coords.value());
+			}
+			break;
+		}
+		case sf::Keyboard::Key::Period: {
+			if (auto unit = p_state.selected) {
+				unit_wait(unit->uc());
 			}
 			break;
 		}
