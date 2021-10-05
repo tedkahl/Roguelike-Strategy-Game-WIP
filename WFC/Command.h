@@ -34,4 +34,5 @@ public:
 	virtual void showTargeter() override;
 	virtual void hideTargeter() override;
 	virtual void execute(sf::Vector2i target, sf::Time now) override;
+	pathsGrid& paths();
 };

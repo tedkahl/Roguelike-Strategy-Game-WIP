@@ -57,3 +57,7 @@ Targeter::Targeter(pathsGrid& paths, Level& level_) : batch(-1), level(level_) {
 Targeter::~Targeter() {
 	level.removeTargeter(batch);
 }
+
+pathsGrid& AttackMove::paths() {
+	return paths;
+}
