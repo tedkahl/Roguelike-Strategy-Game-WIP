@@ -20,17 +20,18 @@ static void handleInput(Level& level, sf::RenderWindow& window, sf::Time now, Pl
 			sf::Vector2i coords = ret.value();
 			if (p_state.command) {
 				std::cout << "executing command" << std::endl;
-				p_state.command->execute(coords, now);
+				auto new_state = p_state.command->execute(coords, now);
+				p_state.setMoveState(p_state.selected->uc(), new_state);
 				p_state.deSelect();
 				p_state.deleteCommand();
 			}
 			else {
 				Entity* unit = level.entityClickedOn(window, coords, sf::Vector2i(event.mouseButton.x, event.mouseButton.y));
 				UnitComponent* unit_uc = unit ? unit->uc() : nullptr;
-				if (unit && Alliance::instance()->getEnmity(unit_uc, &p_state) == enmity::SAME_TEAM && unit_uc->movestate != UnitComponent::move_state::HAS_ACTED) {
+				if (unit && Alliance::instance()->getEnmity(unit_uc, &p_state) == enmity::SAME_TEAM && unit_uc->getMoveState() != UnitComponent::move_state::HAS_ACTED) {
 					p_state.selected = unit;
 					std::cout << "switching command" << std::endl;
-					if (unit_uc->movestate == UnitComponent::move_state::FREE)
+					if (unit_uc->getMoveState() == UnitComponent::move_state::FREE)
 					{
 						p_state.switchCommand(new AttackMove(unit, level));
 						p_state.command->showTargeter();

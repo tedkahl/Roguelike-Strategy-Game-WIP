@@ -14,14 +14,16 @@ struct UnitStats {
 
 class UnitComponent : public Managed {
 private:
+	friend class Player;
 	UnitStats stats_;
 	int current_hp;
 	bool dummy_;
 	int team_;
 	Entity* owner_;
+	uint8_t movestate;
 public:
 	enum move_state { FREE, HAS_MOVED, HAS_ACTED };
-	uint8_t movestate;
+	move_state getMoveState() { return static_cast<move_state>(movestate); }
 	inline bool dummy() { return dummy_; }
 	inline int team() { return team_; }
 	inline int hp() { return current_hp; }
