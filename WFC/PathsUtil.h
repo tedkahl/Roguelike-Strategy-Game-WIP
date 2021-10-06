@@ -17,6 +17,16 @@ template<typename T>
 static bool on_board(sf::Vector2i loc, matrix<T>& state) {
 	return loc.x >= 0 && loc.x < static_cast<int>(state.width()) && loc.y >= 0 && loc.y < static_cast<int>(state.height());
 }
+//unused currently
+template<typename T>
+std::vector<T> get_adj(matrix<T>& grid, sf::Vector2i loc) {
+	std::vector<T> ret;
+	for (auto i : dir) {
+		if (on_board(grid, loc + i))
+			ret.push_back(grid.at(loc + i));
+	}
+	return ret;
+}
 
 struct map_node {
 	int moves_left;
@@ -33,7 +43,7 @@ static bool block_attack(int type, sf::Vector2i start, sf::Vector2i end, Board& 
 	return false;
 }
 
-static void getAttackRange(matrix<map_node>& grid, unsigned search, int& minX, int& minY, int& maxX, int& maxY, UnitStats& u, sf::Vector2i pos, Board& state) {
+static void getAttackRange(matrix<map_node>& grid, unsigned search, int& minX, int& minY, int& maxX, int& maxY, const UnitStats u, sf::Vector2i pos, Board& state) {
 	sf::Vector2i new_pos;
 	switch (u.attack_type) {
 	case attack_type::MELEE:
@@ -54,7 +64,7 @@ static void getAttackRange(matrix<map_node>& grid, unsigned search, int& minX, i
 }
 
 static void addAttackRange(matrix<map_node>& grid, UnitComponent* u, int& minX, int& minY, int& maxX, int& maxY, unsigned search, Board& state) {
-	auto stats = u->stats();
+	auto& stats = u->stats();
 	for (int i = minX;i <= maxX;i++) {
 		for (int j = minY;j <= maxY;j++) {
 			if (grid.at(i, j).search == search && grid.at(i, j).is_edge && !grid.at(i, j).has_ally) {
@@ -64,7 +74,7 @@ static void addAttackRange(matrix<map_node>& grid, UnitComponent* u, int& minX, 
 	}
 }
 static int getMovesRem(UnitComponent* u) {
-	if (u->movestate == UnitComponent::move_state::HAS_MOVED) return 0;
+	if (u->getMoveState() == UnitComponent::move_state::HAS_MOVED) return 0;
 	else return u->stats().movement;
 }
 
@@ -75,8 +85,9 @@ static int getMoveCost(UnitComponent* u, int moves_left, sf::Vector2i& start, sf
 	return Data<char>::d()->movecosts[u->stats().movetype][state.board.at(end).type()];
 }
 
+//if team == -1 don't check unit blocking
 static int getMoveCost(move_type type, int team, int moves_left, sf::Vector2i& start, sf::Vector2i end, Board& state) {
-	if (Alliance::instance()->getEnmity(team, state.board.at(end).unit_uc()) > enmity::ALLY) return 999;
+	if (team != -1 && Alliance::instance()->getEnmity(team, state.board.at(end).unit_uc()) > enmity::ALLY) return 999;
 	//std::cout << "getting cost: movetype " << u->stats().movetype << " terrain type " << state.board.at(end).type() << std::endl;
 	return Data<char>::d()->movecosts[type][state.board.at(end).type()];
 }

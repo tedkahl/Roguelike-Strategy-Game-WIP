@@ -42,7 +42,7 @@ static matrix<map_node>& djikstraMap(move_type type, int team, std::vector<UnitC
 
 	//works as a heap so that duplicate locations will be processed at the same time, cutting off processing of the slower path 
 	std::vector<dist_loc> to_process(enemy_targets.size());
-	for (int i = 0;i < to_process.size();i++) {
+	for (unsigned i = 0;i < to_process.size();i++) {
 		curr_pos = enemy_targets[i]->getOwner()->getPos();
 		to_process[i] = dist_loc(getMovesRem(enemy_targets[i]), curr_pos);
 		grid.at(curr_pos) = map_node(getMovesRem(enemy_targets[i]), sf::Vector2i(-1, -1), search_counter);
