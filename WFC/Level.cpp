@@ -1,13 +1,6 @@
 #include "Level.h"
 Level::Level(std::shared_ptr<ResourceManager<sf::Texture>> tm) :tm_(tm) {}
 
-
-void Level::setEntityPos(Entity* e, sf::Vector2i newpos) {
-	auto coords = e->getPos();
-	assert(state.board.at(coords).removeE(e));
-	state.board.at(newpos).addE(e);
-	e->setPos(newpos, state);
-}
 //
 //
 //Square* getSquare(std::pair<unsigned, unsigned> coords)
@@ -147,6 +140,7 @@ void Level::removeTargeter(unsigned batch)
 	dcomponents.deleteBatch(batch);
 }
 
+
 void Level::killUnit(UnitComponent* killer, Entity* target)
 {
 	removeEntity(target);
@@ -162,8 +156,6 @@ bool Level::removeEntity(Entity* e)
 	}
 	return false;
 }
-
-
 
 void Level::setSquares(matrix<char>& WFCOutput)
 {

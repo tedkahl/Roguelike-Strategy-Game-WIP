@@ -19,22 +19,23 @@ class DrawComponent;
 class Square;
 struct Board;
 
+//may be nearing the point where we can rethink this class, move data managers somewhere else, etc
+//for now don't worry too much about encapsulation I think
 class Level
 {
 private:
 	std::shared_ptr<ResourceManager<sf::Texture>> tm_;
 	SortedDManager<DrawComponent> dcomponents;
-	DataManager<UnitComponent> units;
 
 public:
 	DataManager<Entity> entities;
+	DataManager<UnitComponent> units;
 	Board state;
 	Level(std::shared_ptr<ResourceManager<sf::Texture>> tm);
 	Entity* addEntity(object_type t, sf::Vector2i coords);
 	unsigned addTargeter(const pathsGrid& grid);
 	bool removeEntity(Entity* e);
 	void removeTargeter(unsigned batch);
-	void setEntityPos(Entity* e, sf::Vector2i newpos);
 	Entity* entityClickedOn(const sf::RenderWindow& window, sf::Vector2i coords, sf::Vector2i pixel, bool prefer_team = false, int team = 0);
 	void setSquares(matrix<char>& WFCOutput);
 	void update(sf::Time current);
