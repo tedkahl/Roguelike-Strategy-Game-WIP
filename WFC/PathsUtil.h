@@ -7,29 +7,32 @@
 #include "Board.h"
 #include "Data.h"
 #include "UnitComponent.h"
-template <typename T>
-concept hasTeam = requires(T t)
-{
-	{t->team()} -> std::same_as<int>;
-};
-template <typename T1, typename T2>
-static constexpr bool isEnemy(T1 u1, T2 u2)
-{
-	int a, b;
-	if constexpr (hasTeam<T1>)
-		a = u1->team();
-	else {
-		static_assert(std::is_same_v<T1, int>);
-		a = u1;
-	}
-	if constexpr (hasTeam<T2>)
-		b = u2->team();
-	else {
-		static_assert(std::is_same_v<T2, int>);
-		b = u2;
-	}
-	return a == b;
+#include "Team.h"
+
+
+const std::array<sf::Vector2i, 4> dir = { sf::Vector2i(0,-1),sf::Vector2i(1,0),sf::Vector2i(0,1),sf::Vector2i(-1,0) };
+
+struct Board;
+template<typename T>
+static bool on_board(sf::Vector2i loc, matrix<T>& state) {
+	return loc.x >= 0 && loc.x < static_cast<int>(state.width()) && loc.y >= 0 && loc.y < static_cast<int>(state.height());
 }
+
+struct map_node {
+	int moves_left;
+	sf::Vector2i prev;
+	unsigned search;
+	bool is_edge;
+	bool has_ally;
+	bool attack_only;
+	map_node() :moves_left(0), prev(), search(0), attack_only(false), is_edge(true), has_ally(false) {}
+	map_node(int moves_l, sf::Vector2i prev_, unsigned search_, bool no_move = false, bool isedge = true) :moves_left(moves_l), prev(prev_), search(search_), attack_only(no_move), is_edge(isedge), has_ally(false) {}
+};
+
+static bool block_attack(int type, sf::Vector2i start, sf::Vector2i end, Board& state) {
+	return false;
+}
+
 static void getAttackRange(matrix<map_node>& grid, unsigned search, int& minX, int& minY, int& maxX, int& maxY, UnitStats& u, sf::Vector2i pos, Board& state) {
 	sf::Vector2i new_pos;
 	switch (u.attack_type) {
@@ -65,18 +68,15 @@ static int getMovesRem(UnitComponent* u) {
 	else return u->stats().movement;
 }
 
-static bool block_attack(int type, sf::Vector2i start, sf::Vector2i end, Board& state) {
-	return false;
-}
 
 static int getMoveCost(UnitComponent* u, int moves_left, sf::Vector2i& start, sf::Vector2i end, Board& state) {
-	if (isEnemy(u, state.board.at(end).unit_uc())) return 999;
+	if (Alliance::instance()->getEnmity(u, state.board.at(end).unit_uc()) > enmity::ALLY) return 999;
 	//std::cout << "getting cost: movetype " << u->stats().movetype << " terrain type " << state.board.at(end).type() << std::endl;
 	return Data<char>::d()->movecosts[u->stats().movetype][state.board.at(end).type()];
 }
 
 static int getMoveCost(move_type type, int team, int moves_left, sf::Vector2i& start, sf::Vector2i end, Board& state) {
-	if (isEnemy(team, state.board.at(end).unit_uc())) return 999;
+	if (Alliance::instance()->getEnmity(team, state.board.at(end).unit_uc()) > enmity::ALLY) return 999;
 	//std::cout << "getting cost: movetype " << u->stats().movetype << " terrain type " << state.board.at(end).type() << std::endl;
 	return Data<char>::d()->movecosts[type][state.board.at(end).type()];
 }

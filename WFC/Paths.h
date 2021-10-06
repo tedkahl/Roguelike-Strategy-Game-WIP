@@ -1,31 +1,9 @@
 #pragma once
 #include "PathsUtil.h"
-const std::array<sf::Vector2i, 4> dir = { sf::Vector2i(0,-1),sf::Vector2i(1,0),sf::Vector2i(0,1),sf::Vector2i(-1,0) };
 
-struct Board;
-template<typename T>
-static bool on_board(sf::Vector2i loc, matrix<T>& state) {
-	return loc.x >= 0 && loc.x < static_cast<int>(state.width()) && loc.y >= 0 && loc.y < static_cast<int>(state.height());
-}
-
-static bool operator<(const sf::Vector2i& lhs, const sf::Vector2i& rhs) {
+static bool compV2i(const sf::Vector2i& lhs, const sf::Vector2i& rhs) {
 	return std::tie(lhs.x, lhs.y) < std::tie(rhs.x, rhs.y);
 }
-
-struct map_node {
-	int moves_left;
-	sf::Vector2i prev;
-	unsigned search;
-	bool is_edge;
-	bool has_ally;
-	bool attack_only;
-	map_node() :moves_left(0), prev(), search(0), attack_only(false), is_edge(true), has_ally(false) {}
-	map_node(int moves_l, sf::Vector2i prev_, unsigned search_, bool no_move = false, bool isedge = true) :moves_left(moves_l), prev(prev_), search(search_), attack_only(no_move), is_edge(isedge), has_ally(false) {}
-};
-
-
-
-
 
 struct pathsGrid {
 	matrix<map_node> grid;
@@ -43,7 +21,7 @@ struct dist_loc {
 	int distance;
 	sf::Vector2i loc;
 	friend bool operator<(const dist_loc& lhs, const dist_loc& rhs) {
-		return lhs.distance < rhs.distance || (lhs.distance == rhs.distance && lhs.loc < rhs.loc);
+		return lhs.distance < rhs.distance || (lhs.distance == rhs.distance && compV2i(lhs.loc, rhs.loc));
 	}
 };
 
@@ -121,7 +99,7 @@ static pathsGrid pathFind(UnitComponent* u, Board& state) {
 	while (!to_process.empty()) {
 		curr_pos = to_process[0];
 		map_node& curr_node = grid.at(curr_pos);
-		std::pop_heap(to_process.begin(), to_process.end());
+		std::pop_heap(to_process.begin(), to_process.end(), compV2i);
 		to_process.pop_back();
 		//for each direction
 		is_edge = false;
@@ -141,7 +119,7 @@ static pathsGrid pathFind(UnitComponent* u, Board& state) {
 					maxX = std::max(maxX, adj_pos.x);
 					maxY = std::max(maxY, adj_pos.y);
 					to_process.push_back(adj_pos);
-					std::push_heap(to_process.begin(), to_process.end());
+					std::push_heap(to_process.begin(), to_process.end(), compV2i);
 				}
 				//if an adjacent square is not reachable due to move cost, we consider this square, for now, as an "edge".
 				else {

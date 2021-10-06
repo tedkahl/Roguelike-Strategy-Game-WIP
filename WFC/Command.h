@@ -1,5 +1,6 @@
 #pragma once
 #include "UnitComponent.h"
+#include "Team.h"
 #include "Paths.h"
 #include "Level.h"
 #include "Debug.h"
@@ -34,5 +35,5 @@ public:
 	virtual void showTargeter() override;
 	virtual void hideTargeter() override;
 	virtual void execute(sf::Vector2i target, sf::Time now) override;
-	pathsGrid& paths();
+	pathsGrid& getPaths();
 };

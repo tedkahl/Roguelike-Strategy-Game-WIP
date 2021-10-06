@@ -29,9 +29,8 @@ void AttackMove::execute(sf::Vector2i target, sf::Time now) {
 	bool attack = false;
 	cout << "target " << to_string(target) << endl;
 	cout << paths.is_attackable(target) << endl;
-	cout << isEnemy(level.state.board.at(target).unit_uc(), agent_->uc()) << endl;
 
-	if (paths.is_attackable(target) && isEnemy(level.state.board.at(target).unit_uc(), agent_->uc())) {
+	if (paths.is_attackable(target) && Alliance::instance()->getEnmity(level.state.board.at(target).unit_uc(), agent_->uc()) >= enmity::NEUTRAL) {
 		cout << "Moving to attack!" << endl;
 		move_target = paths.grid.at(target - paths.offset).prev;
 		attack = true;
@@ -58,6 +57,6 @@ Targeter::~Targeter() {
 	level.removeTargeter(batch);
 }
 
-pathsGrid& AttackMove::paths() {
+pathsGrid& AttackMove::getPaths() {
 	return paths;
 }

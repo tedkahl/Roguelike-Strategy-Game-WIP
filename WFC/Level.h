@@ -17,7 +17,7 @@ using std::endl;
 class Entity;
 class DrawComponent;
 class Square;
-class Board;
+struct Board;
 
 class Level
 {

@@ -44,6 +44,7 @@ void matrix<T>::set(size_t w, size_t h, const T& val) {
 	width_ = w;
 }
 
+//This is very misleading and only good for resizing to zero to clear. Todo: remove or fix
 template<typename T>
 void matrix<T>::resize(size_t w, size_t h) {
 	data.resize(h * w);
