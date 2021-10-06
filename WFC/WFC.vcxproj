@@ -134,6 +134,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Actions.cpp" />
+    <ClCompile Include="AI.cpp" />
+    <ClCompile Include="AIComponent.cpp" />
     <ClCompile Include="Board.cpp" />
     <ClCompile Include="Command.cpp" />
     <ClCompile Include="Entity.cpp" />
@@ -144,10 +146,13 @@
     <ClCompile Include="Paths.cpp" />
     <ClCompile Include="PlayerState.cpp" />
     <ClCompile Include="Square.cpp" />
+    <ClCompile Include="Team.cpp" />
     <ClCompile Include="UnitComponent.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actions.h" />
+    <ClInclude Include="AI.h" />
+    <ClInclude Include="AIComponent.h" />
     <ClInclude Include="Animation.h" />
     <ClInclude Include="AnimationManager.h" />
     <ClInclude Include="DCSortable.h" />
@@ -157,6 +162,7 @@
     <ClInclude Include="HasDC.h" />
     <ClInclude Include="junk.h" />
     <ClInclude Include="Location.h" />
+    <ClInclude Include="PathsUtil.h" />
     <ClInclude Include="RealTime.h" />
     <ClInclude Include="Paths.h" />
     <ClInclude Include="Level.h" />
@@ -177,11 +183,13 @@
     <ClInclude Include="Select.h" />
     <ClInclude Include="SortedDManager.h" />
     <ClInclude Include="Square.h" />
+    <ClInclude Include="Team.h" />
     <ClInclude Include="TestBoards.h" />
     <ClInclude Include="Tests.h" />
     <ClInclude Include="type_enums.h" />
     <ClInclude Include="UnitComponent.h" />
     <ClInclude Include="Util.h" />
+    <ClInclude Include="vec2i_util.h" />
     <ClInclude Include="WFC.h" />
     <ClInclude Include="WFCOptions.h" />
   </ItemGroup>

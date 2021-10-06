@@ -3,19 +3,19 @@
 #include "DataManager.h"
 #include "Command.h"
 #include <algorithm>
-static void sortByCloseness(Entity* me, std::vector<Entity*>& enemies) {
-	auto entityCmp = [=](const Entity*& e1, const Entity*& e2) {
-		return distSq(me, e1) < distSq(me, e2);
-	};
-	std::sort(enemies.begin(), enemies.end(), entityCmp);
-}
+//static void sortByCloseness(Entity* me, std::vector<Entity*>& enemies) {
+//	auto entityCmp = [=](const Entity*& e1, const Entity*& e2) {
+//		return distSq(me, e1) < distSq(me, e2);
+//	};
+//	std::sort(enemies.begin(), enemies.end(), entityCmp);
+//}
 
 
 static void rushClosest(Entity* me, Level& level, sf::Time wait_time, std::vector<Entity*>& enemies) {
-	//auto clock = sf::Clock();
-	sortByCloseness(me, enemies);
 
-	Entity* closest = getClosestEnemy(me, enemies);
+	//sortByCloseness(me, enemies);
+
+	//Entity* closest = getClosestEnemy(me, enemies);
 	auto attack = new AttackMove(me, level);
 	attack->showTargeter();
 	sf::sleep(wait_time);
@@ -30,6 +30,7 @@ private:
 	Level& level;
 	virtual void getNextMove();
 	virtual void takeTurn();
+	AIPlayer(Level& level);
 };
 
 void AIPlayer::takeTurn() {
