@@ -6,8 +6,10 @@ static void handleEsc(PlayerState& p_state) {
 	if (p_state.command) p_state.deSelect();
 }
 
-static void unit_wait(UnitComponent* u) {
-	u->movestate = UnitComponent::move_state::HAS_ACTED;
+static void unit_wait(PlayerState& p_state, UnitComponent* u) {
+	p_state.setMoveState(p_state.selected->uc(), UnitComponent::move_state::HAS_ACTED);
+	p_state.deSelect();
+	p_state.deleteCommand();
 }
 
 static void handleInput(Level& level, sf::RenderWindow& window, sf::Time now, PlayerState& p_state, sf::Event& event)
@@ -61,7 +63,7 @@ static void handleInput(Level& level, sf::RenderWindow& window, sf::Time now, Pl
 		}
 		case sf::Keyboard::Key::Period: {
 			if (auto unit = p_state.selected) {
-				unit_wait(unit->uc());
+				unit_wait(p_state, unit->uc());
 			}
 			break;
 		}

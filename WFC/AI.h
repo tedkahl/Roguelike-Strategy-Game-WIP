@@ -36,11 +36,11 @@ class AIPlayer :public Player {
 private:
 	//DataManager<UnitComponent>& units;
 	Level& level_;
-	matrix<map_node>& dj_map;
+	matrix<map_node>* dj_map;
 	//virtual void getNextMove();
 	void getMap(move_type type);
 public:
-	virtual void startTurn(DataManager<UnitComponent>& units, sf::Time now);
+	virtual void startTurn(sf::Time now);
 	AIPlayer(Level& level, int team);
 };
 
@@ -50,12 +50,12 @@ AIPlayer::AIPlayer(Level& level, int team) :Player(team), level_(level) {
 
 //initializing dj map this way not really satisfactory but should work for now
 void AIPlayer::getMap(move_type type) {
-	dj_map = djikstraMap(type, team_, enemies, level_.state);
+	dj_map = &djikstraMap(type, team_, enemies, level_.state);
 }
 
-void AIPlayer::startTurn(DataManager<UnitComponent>& units, sf::Time now) {
+void AIPlayer::startTurn(sf::Time now) {
 	getMap(move_type::WALK);
-	getUnits(units);
+	getUnits(level_.units);
 }
 
 
