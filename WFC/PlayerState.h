@@ -7,10 +7,9 @@ struct PlayerState : public Player {
 	Command* command;
 	Entity* selected;
 
-	sel_state state;
-	PlayerState();
+	PlayerState(int team);
 	void deSelect();
 	void switchCommand(Command* new_command);
 	void deleteCommand();
-	void startTurn();
+	void startTurn(DataManager<UnitComponent> units);
 };
