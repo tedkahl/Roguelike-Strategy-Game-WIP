@@ -4,6 +4,7 @@
 #include <thread>
 #include <chrono>
 #include "FrameCounter.h"
+#include "Team.h"
 #include "WFC.h"
 #include "Level.h"
 #include "TestBoards.h"
@@ -15,6 +16,7 @@ auto getOutput(matrix<char>& in, unsigned owidth, unsigned oheight, unsigned n, 
 	WFC<char> w(in, owidth, oheight, n, rotate, reflect);
 	return w.run();
 }
+
 int main()
 {
 	sf::Clock clock;
@@ -28,21 +30,41 @@ int main()
 	auto& squares = level.state.board;
 	window.setView(sf::View(sf::FloatRect(0.f, 0.f, (float)window.getSize().x / 2, (float)window.getSize().y / 2)));
 	level.setSquares(output);
-	window.setFramerateLimit(30);
+	window.setFramerateLimit(300);
 
 	float lastX = -1., lastY = -1.;
 	FrameCounter fc;
-
-	//will be smarter than this eventually
+	GameState g;
+	//AI stuff, placeholder
 	AIPlayer main_enemy(level, 1);
 	while (window.isOpen())
 	{
+		g.now = clock.getElapsedTime();
 		sf::Event event;
 		while (window.pollEvent(event))
 		{
-			if (p_state.getNext() == nullptr) {
-				main_enemy.startTurn(clock.getElapsedTime());
+
+			//AI loop. Hideous, improve
+			//g.now += sf::microseconds(200);
+			if (g.active_player == 0 && p_state.getNext() == nullptr) {
+				cout << "switching active player" << endl;
+				g.active_player = ++g.active_player % Alliance::instance()->numTeams();
+				main_enemy.startTurn();
+				g.last_AI_move = g.now - g.AIMoveInterval;
 				//AI player turn starts
+			}
+			else if (g.active_player == 1 && g.now - g.last_AI_move >= g.AIMoveInterval) {
+				if (main_enemy.getNext() != nullptr) {
+					if (main_enemy.hasSelection())
+						main_enemy.executeSelected(g.now);
+					else
+						main_enemy.selectNext();
+					g.last_AI_move = g.now;
+				}
+				else {
+					g.active_player = ++g.active_player % Alliance::instance()->numTeams();
+					p_state.startTurn(level.units);
+				}
 			}
 			switch (event.type) {
 			case sf::Event::Closed:
@@ -60,7 +82,7 @@ int main()
 			case sf::Event::KeyPressed:
 			case sf::Event::MouseButtonPressed:
 			{
-				handleInput(level, window, clock.getElapsedTime(), p_state, event);
+				handleInput(level, window, g, p_state, event);
 				break;
 			}
 			case sf::Event::MouseMoved:
@@ -77,13 +99,13 @@ int main()
 				break;
 			}
 			}
-			window.clear(sf::Color::Black);
-			level.update(clock.getElapsedTime());
-			level.draw(window);
-			fc.update(clock.getElapsedTime());
-			fc.draw(window);
-			window.display();
 		}
-		return 0;
+		window.clear(sf::Color::Black);
+		level.update(g.now);
+		level.draw(window);
+		fc.update(g.now);
+		fc.draw(window);
+		window.display();
 	}
+	return 0;
 }

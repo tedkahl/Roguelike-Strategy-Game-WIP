@@ -15,7 +15,7 @@
 
 
 //this is actually pretty insufficient when there are changes mid-turn
-sf::Vector2i target_from_map(Entity* me, matrix<map_node>& dj_map) {
+static sf::Vector2i target_from_map(Entity* me, matrix<map_node>& dj_map) {
 	auto pos = me->getPos();
 	int start_score = dj_map.at(pos).moves_left;
 	auto& next_loc = dj_map.at(dj_map.at(pos).prev);
@@ -25,40 +25,22 @@ sf::Vector2i target_from_map(Entity* me, matrix<map_node>& dj_map) {
 	return next_loc.prev;
 }
 
-static void rushClosest(Entity* me, Level& level, sf::Time now, sf::Time wait_time, matrix<map_node>& dj_map) {
-	auto attack = std::make_unique<AttackMove>(me, level);
-	attack->showTargeter();
-	sf::sleep(wait_time);
-	attack->execute(target_from_map(me, dj_map), now + wait_time);
+static void rushClosest(Entity* me, Level& level, sf::Time now, Command* cmd, matrix<map_node>& dj_map) {
+	cmd->execute(target_from_map(me, dj_map), now);
 }
 
 class AIPlayer :public Player {
 private:
-	//DataManager<UnitComponent>& units;
+	std::unique_ptr<Command> currCommand;
+	bool has_selection;
 	Level& level_;
 	matrix<map_node>* dj_map;
 	//virtual void getNextMove();
 	void getMap(move_type type);
 public:
-	virtual void startTurn(sf::Time now);
+	virtual void startTurn();
+	bool hasSelection() { return has_selection; }
+	virtual bool selectNext();
+	virtual void executeSelected(sf::Time now);
 	AIPlayer(Level& level, int team);
 };
-
-AIPlayer::AIPlayer(Level& level, int team) :Player(team), level_(level) {
-
-}
-
-//initializing dj map this way not really satisfactory but should work for now
-void AIPlayer::getMap(move_type type) {
-	dj_map = &djikstraMap(type, team_, enemies, level_.state);
-}
-
-void AIPlayer::startTurn(sf::Time now) {
-	getMap(move_type::WALK);
-	getUnits(level_.units);
-}
-
-
-//for (auto i : my_team) {
-//	rushClosest(i->getOwner(), level_, now, sf::milliseconds(250), dj_map);
-//}
