@@ -9,6 +9,7 @@
 #include "SortedDManager.h"
 #include "matrix.h"
 #include "Board.h"
+#include "Team.h"
 #include "Paths.h"
 #include "Util.h"
 #include "vec2i_util.h"

@@ -3,7 +3,7 @@
 #include <vector>
 #include "assert.h"
 enum enmity {
-	SAME_TEAM, ALLY, NEUTRAL, ENEMY
+	ENMITY_NULL, SAME_TEAM, ALLY, NEUTRAL, ENEMY
 };
 template <typename T>
 concept hasTeam = requires(T t)
@@ -40,25 +40,21 @@ public:
 		enmity[alli_a][alli_b] = new_enmity;
 		enmity[alli_b][alli_a] = new_enmity;
 	}
+	inline int numTeams() const { return teams.size(); }
 
-	//accepts teams or pointers to objects with a team() function
-	template <typename T1, typename T2>
-	constexpr int getEnmity(T1 u1, T2 u2)
-	{
-		int a, b;
-		if constexpr (hasTeam<T1>)
-			a = u1->team();
-		else {
-			static_assert(std::is_same_v<T1, int>);
-			a = u1;
-		}
-		if constexpr (hasTeam<T2>)
-			b = u2->team();
-		else {
-			static_assert(std::is_same_v<T2, int>);
-			b = u2;
-		}
-		return enmity[teams[a]][teams[b]];
+	int getEnmity(int team1, int team2) {
+		return enmity[teams[team1]][teams[team2]];
 	}
-
+	//accepts teams or pointers to objects with a team() function
 };
+
+static constexpr int getEnmity(hasTeam auto u1, hasTeam auto u2)
+{
+	return (u1 == nullptr || u2 == nullptr) ? enmity::ENMITY_NULL : Alliance::instance()->getEnmity(u1->team(), u2->team());
+}
+
+static constexpr int getEnmity(int t1, hasTeam auto u2)
+{
+	return (!u2) ? enmity::ENMITY_NULL : Alliance::instance()->getEnmity(t1, u2->team());
+}
+

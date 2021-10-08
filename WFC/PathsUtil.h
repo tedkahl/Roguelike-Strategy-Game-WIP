@@ -80,14 +80,14 @@ static int getMovesRem(UnitComponent* u) {
 
 
 static int getMoveCost(UnitComponent* u, int moves_left, sf::Vector2i& start, sf::Vector2i end, Board& state) {
-	if (Alliance::instance()->getEnmity(u, state.board.at(end).unit_uc()) > enmity::ALLY) return 999;
+	if (getEnmity(u, state.board.at(end).unit_uc()) > enmity::ALLY) return 999;
 	//std::cout << "getting cost: movetype " << u->stats().movetype << " terrain type " << state.board.at(end).type() << std::endl;
 	return Data<char>::d()->movecosts[u->stats().movetype][state.board.at(end).type()];
 }
 
 //if team == -1 don't check unit blocking
 static int getMoveCost(move_type type, int team, int moves_left, sf::Vector2i& start, sf::Vector2i end, Board& state) {
-	if (team != -1 && Alliance::instance()->getEnmity(team, state.board.at(end).unit_uc()) > enmity::ALLY) return 999;
+	if (team != -1 && getEnmity(team, state.board.at(end).unit_uc()) > enmity::ALLY) return 999;
 	//std::cout << "getting cost: movetype " << u->stats().movetype << " terrain type " << state.board.at(end).type() << std::endl;
 	return Data<char>::d()->movecosts[type][state.board.at(end).type()];
 }

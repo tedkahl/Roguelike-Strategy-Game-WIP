@@ -31,7 +31,7 @@ void Entity::update(sf::Time current) {
 			std::cout << to_string(coords_) << " ";
 		}
 		if (update.sprite_position_) {
-			//cout << "setting sprite pos " << to_string(update.sprite_position_.value()) << endl;
+			cout << "setting sprite pos " << to_string(update.sprite_position_.value()) << endl;
 			dc_p->setSpritePos(update.sprite_position_.value());
 		}
 		if (update.action)
@@ -43,6 +43,7 @@ void Entity::update(sf::Time current) {
 				rt_actions.front()->getBoard().moveEntity(this, coords_); //bad
 			rt_actions.pop();
 		}
+		cout << "fixing changed values" << endl;
 		manager->fixChangedVal(dc_p);
 	}
 

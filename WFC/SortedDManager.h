@@ -11,7 +11,8 @@
 //	t1 < t2;
 //	T::Accessor;
 //};
-
+using std::cout;
+using std::endl;
 static const size_t S_MAX = 2000;
 template<typename T>
 //requires accessible<T>
@@ -69,6 +70,7 @@ T* SortedDManager<T>::get(T::SortType a) {
 template<typename T>
 //requires accessible<T>
 void SortedDManager<T>::sort() {
+	//cout << "sorting" << endl;
 	if (!deactivated.empty()) sortDeleted();
 	if (unsorted_ > 0 && unsorted_ <= SWAPSIZE) sortNew();
 	if (unsorted_ > SWAPSIZE) std::sort(begin(), end()); //else quicksort

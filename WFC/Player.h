@@ -11,7 +11,7 @@ protected:
 	std::vector<UnitComponent*> my_team;
 	std::vector<UnitComponent*> enemies;
 public:
-	Player(int team) : team_(team), my_team(), enemies() {}
+	Player(int team) : team_(team), my_team(), enemies(), num_moved(0) {}
 	void getUnits(DataManager<UnitComponent>& units);
 	int team() { return team_; }
 	UnitComponent* getNext();

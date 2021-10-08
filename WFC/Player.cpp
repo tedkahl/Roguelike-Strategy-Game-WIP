@@ -19,7 +19,7 @@ void Player::getUnits(DataManager<UnitComponent>& units) {
 	int en;
 	num_moved = 0;
 	for (auto& i : units) {
-		en = Alliance::instance()->getEnmity(team_, &i);
+		en = getEnmity(team_, &i);
 		if (en == enmity::ENEMY) {
 			enemies.push_back(&i);
 		}

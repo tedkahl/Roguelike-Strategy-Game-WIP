@@ -14,10 +14,10 @@ static UnitComponent* makeUnit(DataManager<UnitComponent>& units, int team, obje
 		return units.declareNew(UnitStats(move_type::WALK, attack_type::MELEE, 1, 4, 18 + roll(2, 2), 6), 0);
 	}
 	case object_type::ROCK: {
-		return units.declareNew(UnitStats(move_type::WALK, attack_type::NO_ATTACK, 0, 0, 50, 0), 100);
+		return units.declareNew(UnitStats(move_type::WALK, attack_type::NO_ATTACK, 0, 0, 50, 0), 2);
 	}
 	case object_type::CACTUS: {
-		return units.declareNew(UnitStats(move_type::WALK, attack_type::NO_ATTACK, 0, 0, 30, 0), 100);
+		return units.declareNew(UnitStats(move_type::WALK, attack_type::NO_ATTACK, 0, 0, 30, 0), 2);
 	}
 	default: return nullptr;
 	}

@@ -213,7 +213,10 @@
       <Filter>Header Files\Commands</Filter>
     </ClInclude>
     <ClInclude Include="Team.h">
-      <Filter>Header Files\Commands</Filter>
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GameState.h">
+      <Filter>Header Files\Turn flow</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

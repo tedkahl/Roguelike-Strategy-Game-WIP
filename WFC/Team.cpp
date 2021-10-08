@@ -1,5 +1,5 @@
 #include "Team.h"
-Alliance::Alliance() :enmity({ {enmity::SAME_TEAM,enmity::ENEMY}, {enmity::ENEMY,enmity::SAME_TEAM} }), teams({ 0,1 }) {}
+Alliance::Alliance() :enmity({ {enmity::SAME_TEAM,enmity::ENEMY, enmity::NEUTRAL}, {enmity::ENEMY,enmity::SAME_TEAM, enmity::NEUTRAL},{enmity::SAME_TEAM,enmity::NEUTRAL, enmity::NEUTRAL} }), teams({ 0,1,2 }) {}
 
 int Alliance::addAlliance(std::vector<int>&& new_relations) {
 	size_t new_index = enmity.size();

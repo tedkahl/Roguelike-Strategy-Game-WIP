@@ -20,11 +20,13 @@ std::vector<AnimationSeg> GridMove::getAnimSegs() {
 
 EntityUpdate GridMove::getUpdate(sf::Time current) {
 	std::optional<int> dir = std::nullopt;
+	//cout << "updating move" << endl;
 	if (start_time == sf::Time()) {
 		//cout << "setting start time" << endl;
 		start_time = current;
 		dir = 0;
 	}
+	cout << start_time.asMilliseconds() << " " << current.asMilliseconds() << endl;
 	float pos = (current - start_time) / speed_;
 	//cout << "start time established pos " << pos << endl;
 	unsigned index = static_cast<unsigned>(pos);

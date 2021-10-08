@@ -28,6 +28,7 @@ std::optional<sf::Vector2i> Level::getCoords(sf::RenderWindow& window, sf::Vecto
 
 void Level::update(sf::Time current)
 {
+	//cout << current.asMilliseconds() << endl;
 	for (auto& i : entities) {
 		i.update(current);
 	}
@@ -75,7 +76,9 @@ Entity* Level::entityClickedOn(const sf::RenderWindow& window, sf::Vector2i coor
 			{
 				std::cout << "unit found" << std::endl;
 				Entity* u = state.board.at(start + i).unit();
+				assert(u != nullptr);
 				//if prefer_ally is set, choose the sprite of the correct team
+
 				if (prefer_team && clicked) {
 					bool is_ally_1 = (clicked->uc()->team() == team);
 					bool is_ally_2 = (u->uc()->team() == team);
