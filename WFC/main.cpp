@@ -21,7 +21,7 @@ int main()
 {
 	sf::Clock clock;
 	PlayerState p_state(0);
-	auto output = getOutput(input0, 20, 20, 3, true, true);
+	auto output = getOutput(input, 20, 20, 3, true, true);
 
 	sf::RenderWindow window(sf::VideoMode(1200, 800), "Dungeon Delve");
 
@@ -37,6 +37,7 @@ int main()
 	GameState g;
 	//AI stuff, placeholder
 	AIPlayer main_enemy(level, 1);
+	bool blocked = false;
 	while (window.isOpen())
 	{
 		g.now = clock.getElapsedTime();
@@ -48,12 +49,12 @@ int main()
 			//g.now += sf::microseconds(200);
 			if (g.active_player == 0 && p_state.getNext() == nullptr) {
 				cout << "switching active player" << endl;
-				g.active_player = ++g.active_player % Alliance::instance()->numTeams();
+				g.active_player = ++g.active_player % (Alliance::instance()->numTeams() - 1);
 				main_enemy.startTurn();
 				g.last_AI_move = g.now - g.AIMoveInterval;
 				//AI player turn starts
 			}
-			else if (g.active_player == 1 && g.now - g.last_AI_move >= g.AIMoveInterval) {
+			else if (g.active_player == 1 && g.now - g.last_AI_move >= g.AIMoveInterval && !blocked) {
 				if (main_enemy.getNext() != nullptr) {
 					if (main_enemy.hasSelection())
 						main_enemy.executeSelected(g.now);
@@ -62,7 +63,7 @@ int main()
 					g.last_AI_move = g.now;
 				}
 				else {
-					g.active_player = ++g.active_player % Alliance::instance()->numTeams();
+					g.active_player = ++g.active_player % (Alliance::instance()->numTeams() - 1);
 					p_state.startTurn(level.units);
 				}
 			}
@@ -101,7 +102,7 @@ int main()
 			}
 		}
 		window.clear(sf::Color::Black);
-		level.update(g.now);
+		blocked = level.update(g.now);
 		level.draw(window);
 		fc.update(g.now);
 		fc.draw(window);

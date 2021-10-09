@@ -26,15 +26,17 @@ std::optional<sf::Vector2i> Level::getCoords(sf::RenderWindow& window, sf::Vecto
 }
 
 
-void Level::update(sf::Time current)
+bool Level::update(sf::Time current)
 {
 	//cout << current.asMilliseconds() << endl;
+	bool block = false;
 	for (auto& i : entities) {
-		i.update(current);
+		block = block || i.update(current);
 	}
 	for (auto& i : dcomponents) {
 		i.updateAnimation(current);
 	}
+	return block;
 }
 
 void Level::draw(sf::RenderWindow& window) {
@@ -62,7 +64,6 @@ void Level::draw(sf::RenderWindow& window) {
 
 Entity* Level::entityClickedOn(const sf::RenderWindow& window, sf::Vector2i coords, sf::Vector2i pixel_, bool prefer_team, int team)
 {
-	dcomponents.sort();
 	sf::Vector2f pixel = window.mapPixelToCoords(pixel_);
 	std::vector<sf::Vector2i> cols{ sf::Vector2i(0,0), sf::Vector2i(1,0), sf::Vector2i(0,1) };
 
@@ -92,7 +93,7 @@ Entity* Level::entityClickedOn(const sf::RenderWindow& window, sf::Vector2i coor
 				//else do this nonsense
 				sf::FloatRect bounds = u->dc()->getSprite().getGlobalBounds();
 				if (bounds.contains(pixel)) {
-					int dist_sq = sumSq(sf::Vector2i(pixel) - sf::Vector2i(bounds.left + bounds.width / 2, bounds.top + bounds.height / 2));
+					int dist_sq = sumSq(sf::Vector2i(pixel) - getCenter(bounds));
 					if ((dist_sq - min_dist_sq) < 300) { //choose the closer sprite unless the click is much centered on the farther one.
 						clicked = u;
 						min_dist_sq = dist_sq;
@@ -109,10 +110,16 @@ Entity* Level::entityClickedOn(const sf::RenderWindow& window, sf::Vector2i coor
 
 Entity* Level::addEntity(object_type type, sf::Vector2i coords)
 {
-	UnitComponent* uc = makeUnit(units, 0, type);
-	if (uc && state.board.at(coords).unit()) {
-		std::cerr << "space already full\n";
-		return nullptr;
+	UnitComponent* uc = nullptr;
+	assert(on_board(coords, state.board));
+	if (isUnit(type)) {
+		if (state.board.at(coords).unit()) {
+			std::cerr << "space already full\n";
+			return nullptr;
+		}
+		else {
+			uc = makeUnit(units, 0, type);
+		}
 	}
 	DrawComponent* dc = getObjDC(dcomponents, tm_, type);
 	Entity* entity = entities.declareNew(type, &dcomponents, dc, uc, coords, state);

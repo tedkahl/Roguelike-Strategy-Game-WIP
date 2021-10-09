@@ -32,6 +32,7 @@ public:
 	DataManager<Entity> entities;
 	DataManager<UnitComponent> units;
 	Board state;
+	explicit Level() {}
 	Level(std::shared_ptr<ResourceManager<sf::Texture>> tm);
 	Entity* addEntity(object_type t, sf::Vector2i coords);
 	unsigned addTargeter(const pathsGrid& grid);
@@ -39,7 +40,7 @@ public:
 	void removeTargeter(unsigned batch);
 	Entity* entityClickedOn(const sf::RenderWindow& window, sf::Vector2i coords, sf::Vector2i pixel, bool prefer_team = false, int team = 0);
 	void setSquares(matrix<char>& WFCOutput);
-	void update(sf::Time current);
+	bool update(sf::Time current);
 	void draw(sf::RenderWindow& window);
 	void killUnit(UnitComponent* killer, Entity* target);
 

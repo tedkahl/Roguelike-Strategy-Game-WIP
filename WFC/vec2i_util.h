@@ -7,3 +7,8 @@ static int sumSq(sf::Vector2i val) {
 static int distSq(const Entity* a, const Entity* b) {
 	return sumSq(a->getPos() - b->getPos());
 }
+
+template<typename T>
+static sf::Vector2i getCenter(sf::Rect<T> rect) {
+	return sf::Vector2i(static_cast<int>(rect.left + rect.width / 2), static_cast<int>(rect.top + rect.height / 2));
+}
