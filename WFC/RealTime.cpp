@@ -1,4 +1,7 @@
 #include "RealTime.h"
+#include "Board.h"
+#include "DrawComponent.h"
+#include "AnimationManager.h"
 
 using std::cout;
 using std::endl;
@@ -78,12 +81,12 @@ EntityUpdate MeleeAttack::getUpdate(sf::Time current) {
 	float ms = (current - start_time).asMilliseconds();
 	float fraction = ms / anim_info[0].loop_length;
 	//cout << "fraction " << fraction << endl;
-	if (fraction >= .5 && !hasTriggered) {
+	if (fraction >= .5f && !hasTriggered) {
 		hasTriggered = true;
 		bound_action = [=, this](Entity* e) {action(target_, e); };
 	}
 	if (fraction >= 1) return EntityUpdate(true, false, 1, target_ - dir, start_pos);
-	fraction = .5 - std::abs(.5 - fraction);
+	fraction = .5f - std::abs(.5f - fraction);
 	//cout << "which becomes " << fraction << endl;
 	/*up = <0, -1> = <.66, -.33>
 		right = <1, 0> = <.66, .33>

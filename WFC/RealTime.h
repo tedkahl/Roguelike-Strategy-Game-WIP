@@ -2,10 +2,10 @@
 #include <SFML/Graphics.hpp>
 #include <optional>
 #include <functional>
-#include "AnimationManager.h"
-#include "Board.h"
-#include "DrawComponent.h"
+#include "type_enums.h"
+#include "Animation.h"
 struct Board;
+class Entity;
 //typedef std::function<void(Entity*, sf::Vector2i, Board&)> entity_action;
 typedef std::function<void(Entity*)> entity_action;
 typedef std::function<void(sf::Vector2i target_, Entity*)> entity_target_action;
