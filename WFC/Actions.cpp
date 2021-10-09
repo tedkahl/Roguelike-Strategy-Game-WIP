@@ -1,4 +1,6 @@
 #include "Actions.h"
+#include "Entity.h"
+#include "UnitComponent.h"
 
 void actions::attack(Level& level, sf::Vector2i target, Entity* e) {
 	UnitComponent* me = e->uc();

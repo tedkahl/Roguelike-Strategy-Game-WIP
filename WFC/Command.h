@@ -1,10 +1,12 @@
 #pragma once
 #include "UnitComponent.h"
 #include "Team.h"
+#include "PlayerState.h"
 #include "Paths.h"
 #include "Level.h"
 #include "Debug.h"
 #include "Actions.h"
+struct PlayerState;
 class Targeter {
 private:
 	Level& level;
@@ -24,7 +26,7 @@ public:
 	Command(Entity* agent, Level& level_);
 	virtual void showTargeter() = 0;
 	virtual void hideTargeter() = 0;
-	virtual std::optional<UnitComponent::move_state> execute(sf::Vector2i target, sf::Time now) = 0; //target can be changed to its own class if necessary
+	virtual std::optional<unit::move_state> execute(sf::Vector2i target, sf::Time now, PlayerState* p_state) = 0; //target can be changed to its own class if necessary
 };
 
 class AttackMove :public Command {
@@ -34,6 +36,6 @@ public:
 	AttackMove(Entity* agent, Level& level_);
 	virtual void showTargeter() override;
 	virtual void hideTargeter() override;
-	virtual std::optional<UnitComponent::move_state> execute(sf::Vector2i target, sf::Time now) override;
+	virtual std::optional<unit::move_state> execute(sf::Vector2i target, sf::Time now, PlayerState* p_state) override;
 	pathsGrid& getPaths();
 };

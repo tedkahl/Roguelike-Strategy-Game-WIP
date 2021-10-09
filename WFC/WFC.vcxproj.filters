@@ -5,13 +5,13 @@
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
       <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
-    <Filter Include="Header Files">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hh;hpp;hxx;hm;inl;inc;ipp;xsd</Extensions>
-    </Filter>
     <Filter Include="Resource Files">
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;ipp;xsd</Extensions>
     </Filter>
     <Filter Include="Header Files\WFC">
       <UniqueIdentifier>{88478a8e-bbb9-4593-879c-e05713892dd6}</UniqueIdentifier>
@@ -36,6 +36,9 @@
     </Filter>
     <Filter Include="Header Files\Commands">
       <UniqueIdentifier>{dab15584-80be-4635-8399-c9b8d46c0986}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Pathing">
+      <UniqueIdentifier>{1c7cb896-9e9d-49ad-9fa7-086e6492308f}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -113,9 +116,6 @@
     <ClInclude Include="matrix.h">
       <Filter>Header Files\WFC</Filter>
     </ClInclude>
-    <ClInclude Include="Paths.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Data.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -170,9 +170,6 @@
     <ClInclude Include="vec2i_util.h">
       <Filter>Header Files\Utility</Filter>
     </ClInclude>
-    <ClInclude Include="PathsUtil.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Select.h">
       <Filter>Header Files\Turn flow</Filter>
     </ClInclude>
@@ -217,6 +214,12 @@
     </ClInclude>
     <ClInclude Include="GameState.h">
       <Filter>Header Files\Turn flow</Filter>
+    </ClInclude>
+    <ClInclude Include="Paths.h">
+      <Filter>Header Files\Pathing</Filter>
+    </ClInclude>
+    <ClInclude Include="PathsUtil.h">
+      <Filter>Header Files\Pathing</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -3,7 +3,7 @@ void DrawComponent::draw(sf::RenderTarget* target) const {
 	target->draw(sprite);
 }
 void DrawComponent::setAnimation(sf::Time start, std::vector<AnimationSeg>&& segs, bool loop, float speed) {
-	cout << "setting animation" << endl;
+	//cout << "setting animation" << endl;
 	animation.set(start, std::forward< std::vector<AnimationSeg>>(segs), loop, speed);
 }
 bool DrawComponent::updateAnimation(sf::Time current) {

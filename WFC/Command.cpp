@@ -23,7 +23,7 @@ AttackMove::AttackMove(Entity* agent, Level& board_) : Command(agent, board_), p
 	//}
 }
 
-std::optional<UnitComponent::move_state> AttackMove::execute(sf::Vector2i target, sf::Time now) {
+std::optional<unit::move_state> AttackMove::execute(sf::Vector2i target, sf::Time now, PlayerState* p_state) {
 	hideTargeter();
 	sf::Vector2i move_target = target;
 	bool attack = false;
@@ -36,20 +36,22 @@ std::optional<UnitComponent::move_state> AttackMove::execute(sf::Vector2i target
 		attack = true;
 	}
 	auto move_path = paths.getPath(move_target);
-	int ret;
+	unit::move_state ret;
 	if (move_path)
 	{
 		agent_->addRT(std::make_unique<GridMove>(std::move(move_path.value()), static_cast<object_type>(agent_->type_), sf::seconds(.2), now, level.state));
-		ret = UnitComponent::move_state::HAS_MOVED;
+		p_state->setMoveState(agent_->uc(), unit::move_state::HAS_MOVED);
+		ret = unit::move_state::HAS_MOVED;
 	}
 	else
 		return std::nullopt;
 	if (attack) {
 		entity_target_action a = [=, this](sf::Vector2i target_, Entity* e) {actions::attack(level, target_, e);};
 		agent_->addRT(std::make_unique<MeleeAttack>(move_target, target, static_cast<object_type>(agent_->type_), anim_state::ATTACKING, now, level.state, a));
-		ret = UnitComponent::move_state::HAS_ACTED;
+		p_state->setMoveState(agent_->uc(), unit::move_state::HAS_ACTED);
+		ret = unit::move_state::HAS_ACTED;
 	}
-	return static_cast<UnitComponent::move_state>(ret);
+	return static_cast<unit::move_state>(ret);
 }
 
 Targeter::Targeter(pathsGrid& paths, Level& level_) : batch(-1), level(level_) {

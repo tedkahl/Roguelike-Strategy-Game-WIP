@@ -1,4 +1,8 @@
 #include "Entity.h"
+#include "Square.h"
+#include "Board.h"
+#include "Debug.h"
+#include "UnitComponent.h"
 
 DrawComponent* Entity::dc() const { assert(dc_); return manager->get(dc_.sortVal()); }
 void Entity::setDC(DCSortable& dc) { dc_ = dc; }
@@ -8,7 +12,7 @@ void Entity::setUC(UnitComponent* uc) { uc_ = uc; }
 void Entity::addRT(std::unique_ptr<RealTime>&& rt) {
 	rt_actions.push(std::move(rt));
 }
-void Entity::update(sf::Time current) {
+bool Entity::update(sf::Time current) {
 
 	if (!rt_actions.empty()) {
 		//cout << "performing action" << endl;
@@ -31,7 +35,7 @@ void Entity::update(sf::Time current) {
 			std::cout << to_string(coords_) << " ";
 		}
 		if (update.sprite_position_) {
-			cout << "setting sprite pos " << to_string(update.sprite_position_.value()) << endl;
+			//cout << "setting sprite pos " << to_string(update.sprite_position_.value()) << endl;
 			dc_p->setSpritePos(update.sprite_position_.value());
 		}
 		if (update.action)
@@ -45,11 +49,13 @@ void Entity::update(sf::Time current) {
 		}
 		cout << "fixing changed values" << endl;
 		manager->fixChangedVal(dc_p);
+		return true;
 	}
+	return false;
 
 }
 
-void Entity::set(unsigned type, SortedDManager<DrawComponent>* m, DrawComponent* dcs, UnitComponent* uc, sf::Vector2i pos, Board& state, unsigned index) {
+void Entity::set(object_type type, SortedDManager<DrawComponent>* m, DrawComponent* dcs, UnitComponent* uc, sf::Vector2i pos, Board& state, unsigned index) {
 	type_ = type;
 	manager = m;
 	uc_ = uc;
