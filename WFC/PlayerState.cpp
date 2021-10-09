@@ -1,9 +1,8 @@
 #include "PlayerState.h"
 
-PlayerState::PlayerState(int team) :Player(team), command(nullptr), selected(nullptr) {}
+PlayerState::PlayerState(int team) :Player(team), selected(nullptr) {}
 void PlayerState::switchCommand(Command* new_command) {
-	if (command) delete command;
-	command = new_command;
+	command.reset(new_command);
 }
 
 void PlayerState::startTurn(DataManager<UnitComponent> units) {
@@ -11,10 +10,15 @@ void PlayerState::startTurn(DataManager<UnitComponent> units) {
 }
 
 void PlayerState::deleteCommand() {
-	delete command;
 	command = nullptr;
 }
 
 void PlayerState::deSelect() {
 	selected = nullptr;
+}
+
+void PlayerState::unit_wait(UnitComponent* u) {
+	setMoveState(selected->uc(), unit::move_state::HAS_ACTED);
+	deSelect();
+	deleteCommand();
 }

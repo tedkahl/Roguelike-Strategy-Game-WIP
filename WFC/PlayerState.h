@@ -2,9 +2,9 @@
 #include "Command.h"
 #include "UnitComponent.h"
 #include "Player.h"
-enum class sel_state { DEFAULT, MOVING };
+class Command;
 struct PlayerState : public Player {
-	Command* command;
+	std::unique_ptr<Command> command;
 	Entity* selected;
 
 	PlayerState(int team);
@@ -12,4 +12,5 @@ struct PlayerState : public Player {
 	void switchCommand(Command* new_command);
 	void deleteCommand();
 	void startTurn(DataManager<UnitComponent> units);
+	void unit_wait(UnitComponent* u);
 };

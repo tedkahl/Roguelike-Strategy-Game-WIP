@@ -1,9 +1,9 @@
 #include "Player.h"
-void Player::setMoveState(UnitComponent* u, std::optional<UnitComponent::move_state> new_state) {
+void Player::setMoveState(UnitComponent* u, std::optional<unit::move_state> new_state) {
 	if (!new_state) return;
-	if (u->movestate != UnitComponent::move_state::HAS_ACTED && new_state == UnitComponent::move_state::HAS_ACTED)
+	if (u->movestate != unit::move_state::HAS_ACTED && new_state.value() == unit::move_state::HAS_ACTED)
 		num_moved++;
-	else if (u->movestate == UnitComponent::move_state::HAS_ACTED && new_state != UnitComponent::move_state::HAS_ACTED)
+	else if (u->movestate == unit::move_state::HAS_ACTED && new_state.value() != unit::move_state::HAS_ACTED)
 		num_moved--;
 	u->movestate = new_state.value();
 }
@@ -24,7 +24,7 @@ void Player::getUnits(DataManager<UnitComponent>& units) {
 			enemies.push_back(&i);
 		}
 		else if (en == enmity::SAME_TEAM) {
-			i.movestate = UnitComponent::move_state::FREE;
+			i.movestate = unit::move_state::FREE;
 			my_team.push_back(&i);
 		}
 	}
