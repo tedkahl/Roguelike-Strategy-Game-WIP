@@ -26,9 +26,12 @@ public:
 	Data(const Data<T>&) = delete;
 	Data& operator= (const Data<T>) = delete;
 	std::map < T, std::tuple<terrain_type, object_type>> glyphs;
-	std::map <unsigned, std::tuple<std::string, sf::Vector2f, sf::IntRect>> squareinfo; //path, offset, texture rect
-	std::map <unsigned, std::tuple<std::string, sf::Vector2f, sf::IntRect>> entityinfo;
-	std::array<std::array<int, terrain_type::TERRAIN_END>, move_type::MOVE_END> movecosts;
+	std::map <terrain_type, std::tuple<std::string, sf::Vector2f, sf::IntRect>> squareinfo; //path, offset, texture rect
+	std::map <object_type, std::tuple<std::string, sf::Vector2f, sf::IntRect>> entityinfo;
+	std::array<std::array<int, static_cast<int>(terrain_type::TERRAIN_END)>, static_cast<int>(move_type::MOVE_END)> movecosts;
+	int getMoveCost(move_type m, terrain_type t) {
+		return movecosts[static_cast<int>(m)][static_cast<int>(t)];
+	}
 };
 
 template<typename T>
@@ -42,12 +45,14 @@ static void combine_vectors(std::vector<T>& first, std::vector<std::vector<T>>&&
 template<typename T>
 Data<T>::Data()
 {
-	movecosts[move_type::FLY].fill(1);
-	movecosts[move_type::WALK] = { 1,2,1,1,1,999,2 };
+	movecosts[static_cast<int>(move_type::FLY)].fill(1);
+	movecosts[static_cast<int>(move_type::WALK)] = { 1,2,1,1,1,999,2 };
 
 	glyphs.emplace(std::make_pair('.', std::make_tuple(terrain_type::LAVA, object_type::NONE)));
 	glyphs.emplace(std::make_pair('x', std::make_tuple(terrain_type::PAVEDSTONE, object_type::NONE)));
 	glyphs.emplace(std::make_pair('C', std::make_tuple(terrain_type::PAVEDSTONE, object_type::ROCK)));
+	glyphs.emplace(std::make_pair('D', std::make_tuple(terrain_type::PAVEDSTONE, object_type::DUELIST)));
+	glyphs.emplace(std::make_pair('W', std::make_tuple(terrain_type::PAVEDSTONE, object_type::WOLF)));
 	glyphs.emplace(std::make_pair('T', std::make_tuple(terrain_type::PAVEDSTONE_TALL, object_type::NONE)));
 	glyphs.emplace(std::make_pair('R', std::make_tuple(terrain_type::PAVEDSTONE_TALL, object_type::ROCK)));
 	glyphs.emplace(std::make_pair('w', std::make_tuple(terrain_type::WATER, object_type::NONE)));

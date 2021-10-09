@@ -1,7 +1,7 @@
 #include "Square.h"
-#include "DrawComponent.h"
+#include "ResourceManager.h"
 #include "Entity.h"
-Square::Square(unsigned terrain_t, SortedDManager<DrawComponent>* m, DrawComponent* dcs, sf::Vector2i newpos, matrix<float>& heightmap) : pos(newpos.x, newpos.y), manager(m), dc_(dcs->sortable()), type_(terrain_t), unit_(nullptr) {
+Square::Square(terrain_type terrain_t, SortedDManager<DrawComponent>* m, DrawComponent* dcs, sf::Vector2i newpos, matrix<float>& heightmap) : pos(newpos.x, newpos.y), manager(m), dc_(dcs->sortable()), type_(terrain_t), unit_(nullptr) {
 	dcs->setOwner(this);
 	dcs->setSquarePos(newpos, heightmap);
 	dcs->updateCoords(newpos);

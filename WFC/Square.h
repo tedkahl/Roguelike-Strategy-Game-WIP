@@ -2,10 +2,10 @@
 #include <iostream>
 #include <string>
 #include <vector>
-#include "ResourceManager.h"
 #include "DCSortable.h"
 #include "DrawComponent.h"
 #include "assert.h"
+#include "type_enums.h"
 //#include "Data.h"
 
 class DrawComponent;
@@ -15,7 +15,7 @@ class DCSortable;
 class Square
 {
 private:
-	unsigned type_;
+	terrain_type type_;
 	SortedDManager<DrawComponent>* manager;
 	DCSortable dc_;
 	Entity* unit_;
@@ -27,13 +27,13 @@ public:
 	const DCSortable& dcSortable()const;
 	Entity* unit();
 	UnitComponent* unit_uc();
-	inline unsigned type() { return type_; }
+	inline terrain_type type() { return type_; }
 	//void setDC(const DCAccessor& dc);
 	bool removeE(Entity* e);
 	void addE(Entity* e);
 	void replaceE(Entity* olde, Entity* newe);
 	//std::vector<Entity*>& getEntities() { return entities; }
-	Square(unsigned terrain_t, SortedDManager<DrawComponent>* m, DrawComponent* dcs, sf::Vector2i newpos, matrix<float>& heightmap);
+	Square(terrain_type terrain_t, SortedDManager<DrawComponent>* m, DrawComponent* dcs, sf::Vector2i newpos, matrix<float>& heightmap);
 
 };
 

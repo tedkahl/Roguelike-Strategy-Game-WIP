@@ -1,11 +1,32 @@
 #pragma once
 #include "Animation.h"
 #include "type_enums.h"
-constexpr int num_units = object_type::OBJECT_END - firstunit;
+constexpr int num_units = static_cast<int>(object_type::OBJECT_END) - firstunit;
 const int sprite_dim = 72;
 constexpr int x = unitIndex(object_type::DUELIST);
 
 const int S = 3;
+struct simple_unit_anim
+{
+private:
+	struct anim_info
+	{
+		uint8_t row;
+		uint8_t frames;
+	};
+	bool is_set = false;
+	std::array<anim_info, static_cast<int>(anim_state::ANIM_STATE_END)> anim_rows_frames;
+public:
+	void set(std::array<anim_info, static_cast<int>(anim_state::ANIM_STATE_END)> data)
+	{
+		anim_rows_frames = data;
+		is_set = true;
+	}
+	anim_info& get(anim_state state) {
+		return anim_rows_frames[static_cast<int>(state)];
+	}
+};
+
 class animation_manager {
 private:
 	animation_manager() {
@@ -14,27 +35,7 @@ private:
 		anims[unitIndex(object_type::WOLF)].set({ 0, 1, 0, 1, 0, 1, 0, 1, 0, 1 });
 	}
 	inline static std::unique_ptr<animation_manager> instance_;
-	struct simple_unit_anim
-	{
-	private:
-		struct anim_info
-		{
-			uint8_t row;
-			uint8_t frames;
-		};
-		bool is_set = false;
-		std::array<anim_info, ANIM_STATE_END> anim_rows_frames;
-	public:
-		void set(std::array<anim_info, ANIM_STATE_END> data)
-		{
-			anim_rows_frames = data;
-			is_set = true;
-		}
-		anim_info& get(anim_state state) {
-			return anim_rows_frames[state];
-		}
-	};
-	std::array<simple_unit_anim, OBJECT_END - firstunit> anims;
+	std::array<simple_unit_anim, static_cast<int>(object_type::OBJECT_END) - firstunit> anims;
 public:
 
 	static animation_manager* instance() {

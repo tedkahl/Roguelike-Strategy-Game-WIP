@@ -6,6 +6,7 @@
 #include "UnitComponent.h"
 
 static UnitComponent* makeUnit(DataManager<UnitComponent>& units, int team, object_type t) {
+	assert(isUnitOrObj(t));
 	switch (t) {
 	case object_type::WOLF: {
 		return units.declareNew(UnitStats(move_type::WALK, attack_type::MELEE, 1, 6, 10 + roll(1, 3), 4), 1);
@@ -19,8 +20,9 @@ static UnitComponent* makeUnit(DataManager<UnitComponent>& units, int team, obje
 	case object_type::CACTUS: {
 		return units.declareNew(UnitStats(move_type::WALK, attack_type::NO_ATTACK, 0, 0, 30, 0), 2);
 	}
-	default: return nullptr;
+	default: assert(false);
 	}
+	return nullptr;
 }
 
 static DrawComponent* getObjDC(SortedDManager<DrawComponent>& dcomponents, std::shared_ptr<ResourceManager<sf::Texture>> tm, object_type t) {

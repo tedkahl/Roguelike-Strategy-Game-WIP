@@ -1,11 +1,14 @@
 #pragma once
 #include <SFML/Graphics.hpp>
 #include "Managed.h"
-
+#include "type_enums.h"
+namespace unit {
+	enum class move_state { FREE, HAS_MOVED, HAS_ACTED };
+};
 class Entity;
 struct UnitStats {
-	unsigned movetype;
-	int attack_type;
+	move_type movetype;
+	attack_type attack_type;
 	int attack_range;
 	int movement;
 	int max_hp;
@@ -20,10 +23,9 @@ private:
 	bool dummy_;
 	int team_;
 	Entity* owner_;
-	uint8_t movestate;
+	unit::move_state movestate;
 public:
-	enum move_state { FREE, HAS_MOVED, HAS_ACTED };
-	move_state getMoveState() { return static_cast<move_state>(movestate); }
+	unit::move_state getMoveState() { return movestate; }
 	inline bool dummy() { return dummy_; }
 	inline int team() { return team_; }
 	inline int hp() { return current_hp; }

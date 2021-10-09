@@ -1,34 +1,38 @@
 #pragma once
 
-enum terrain_type {
+enum class terrain_type {
 	GRASS, WATER, PAVEDSTONE, PAVEDSTONE_TALL, ROUGHSTONE, LAVA, SAND, TERRAIN_END
 };
 
-enum object_type {
+enum class object_type {
 	NONE, MOVESELECT, ATTACKSELECT,
 	ROCK, CACTUS,
 	DUELIST, WOLF, OBJECT_END
 };
 
-enum move_type {
+enum class move_type {
 	WALK, FLY, MOVE_END
 };
 
-enum attack_type {
+enum class attack_type {
 	NO_ATTACK, MELEE, RANGED_LOS, RANGED_ARROW
 };
 
-enum anim_state {
+enum class anim_state {
 	DEFAULT, WALKING, ATTACKING, DEFENDING, DYING, ANIM_STATE_END
 };
 
 enum obj_height { SQUARE, FLAT, TALL };
-const int firstunit = object_type::DUELIST;
+constexpr int firstunit = static_cast<int>(object_type::DUELIST);
+constexpr int firstobj = static_cast<int>(object_type::ROCK);
 static constexpr int unitIndex(object_type u) {
-	return u - firstunit;
+	return static_cast<int>(u) - firstunit;
 }
 static constexpr bool isUnit(object_type t) {
-	return t >= firstunit;
+	return static_cast<int>(t) >= firstunit;
+}
+static constexpr bool isUnitOrObj(object_type t) {
+	return static_cast<int>(t) >= firstobj;
 }
 static constexpr bool isTall(object_type t) {
 	return t > object_type::MOVESELECT;

@@ -43,7 +43,6 @@ private:
 	unsigned short time_mod; //time taken by previous segments
 	std::array<AnimationSeg, SEG_MAX> animation;
 public:
-	Animation() = default;
 	void set(sf::Time start, std::vector<AnimationSeg>&& segs, bool loop = false, float speed = 1.f) {
 		start_time = start;
 		segments = segs.size();
@@ -54,11 +53,11 @@ public:
 		speed_mult = speed;
 		time_mod = 0;
 		index = 0;
-		cout << "initiating animation" << endl;
+		/*cout << "initiating animation" << endl;
 		int i = 0;
 		for (int i = 0;i < segments;i++) {
 			animation[i].print();
-		}
+		}*/
 	}
 
 	bool active() { return segments != 0; }
@@ -67,7 +66,7 @@ public:
 		segments = 0;loop_ = false;
 	}
 	sf::IntRect getRect(sf::Time current, int sheet_width) {
-		int position = (ms(current) / animation[index].frame_duration());
+		int position = static_cast<int>((ms(current) / animation[index].frame_duration()));
 		//cout << "position " << position << endl;
 		//cout << "frames " << (int)animation[index].frames << endl;
 		//cout << "loops " << (int)animation[index].loops << endl;
