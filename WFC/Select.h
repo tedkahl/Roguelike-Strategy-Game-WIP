@@ -7,11 +7,6 @@ static void handleEsc(PlayerState& p_state) {
 	if (p_state.command) p_state.deSelect();
 }
 
-static void unit_wait(PlayerState& p_state, UnitComponent* u) {
-	p_state.setMoveState(p_state.selected->uc(), UnitComponent::move_state::HAS_ACTED);
-	p_state.deSelect();
-	p_state.deleteCommand();
-}
 
 static void handleInput(Level& level, sf::RenderWindow& window, GameState& g, PlayerState& p_state, sf::Event& event)
 {
@@ -23,7 +18,7 @@ static void handleInput(Level& level, sf::RenderWindow& window, GameState& g, Pl
 			sf::Vector2i coords = ret.value();
 			if (p_state.command) {
 				std::cout << "executing command" << std::endl;
-				auto new_state = p_state.command->execute(coords, g.now);
+				auto new_state = p_state.command->execute(coords, g.now, &p_state);
 				p_state.setMoveState(p_state.selected->uc(), new_state);
 				p_state.deSelect();
 				p_state.deleteCommand();
@@ -31,10 +26,10 @@ static void handleInput(Level& level, sf::RenderWindow& window, GameState& g, Pl
 			else {
 				Entity* unit = level.entityClickedOn(window, coords, sf::Vector2i(event.mouseButton.x, event.mouseButton.y));
 				UnitComponent* unit_uc = unit ? unit->uc() : nullptr;
-				if (unit && getEnmity(unit_uc, &p_state) == enmity::SAME_TEAM && unit_uc->getMoveState() != UnitComponent::move_state::HAS_ACTED) {
+				if (unit && getEnmity(unit_uc, &p_state) == enmity::SAME_TEAM && unit_uc->getMoveState() != unit::move_state::HAS_ACTED) {
 					p_state.selected = unit;
 					std::cout << "switching command" << std::endl;
-					if (unit_uc->getMoveState() == UnitComponent::move_state::FREE)
+					if (unit_uc->getMoveState() == unit::move_state::FREE)
 					{
 						p_state.switchCommand(new AttackMove(unit, level));
 						p_state.command->showTargeter();
@@ -64,13 +59,14 @@ static void handleInput(Level& level, sf::RenderWindow& window, GameState& g, Pl
 		}
 		case sf::Keyboard::Key::Period: {
 			if (auto unit = p_state.selected) {
-				unit_wait(p_state, unit->uc());
+				p_state.unit_wait(unit->uc());
 			}
 			break;
 		}
 		case sf::Keyboard::Key::Q: {
 			if (g.active_player == -1) {
 				g.active_player = 0;
+				p_state.startTurn(level.units);
 			}
 			break;
 		}
