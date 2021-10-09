@@ -39,7 +39,15 @@ struct map_node {
 	map_node(int moves_l, sf::Vector2i prev_, unsigned search_, bool no_move = false, bool isedge = true) :moves_left(moves_l), prev(prev_), search(search_), attack_only(no_move), is_edge(isedge), has_ally(false) {}
 };
 
-static bool block_attack(int type, sf::Vector2i start, sf::Vector2i end, Board& state) {
+struct dj_map_node {
+	int moves_left;
+	sf::Vector2i prev;
+	unsigned search;
+	dj_map_node() :moves_left(0), prev(), search(0) {}
+	dj_map_node(int moves_l, sf::Vector2i prev_, unsigned search_) :moves_left(moves_l), prev(prev_), search(search_) {}
+};
+
+static bool block_attack(attack_type type, sf::Vector2i start, sf::Vector2i end, Board& state) {
 	return false;
 }
 
@@ -74,7 +82,7 @@ static void addAttackRange(matrix<map_node>& grid, UnitComponent* u, int& minX, 
 	}
 }
 static int getMovesRem(UnitComponent* u) {
-	if (u->getMoveState() == UnitComponent::move_state::HAS_MOVED) return 0;
+	if (u->getMoveState() == unit::move_state::HAS_MOVED) return 0;
 	else return u->stats().movement;
 }
 
@@ -82,12 +90,12 @@ static int getMovesRem(UnitComponent* u) {
 static int getMoveCost(UnitComponent* u, int moves_left, sf::Vector2i& start, sf::Vector2i end, Board& state) {
 	if (getEnmity(u, state.board.at(end).unit_uc()) > enmity::ALLY) return 999;
 	//std::cout << "getting cost: movetype " << u->stats().movetype << " terrain type " << state.board.at(end).type() << std::endl;
-	return Data<char>::d()->movecosts[u->stats().movetype][state.board.at(end).type()];
+	return Data<char>::d()->getMoveCost(u->stats().movetype, state.board.at(end).type());
 }
 
 //if team == -1 don't check unit blocking
 static int getMoveCost(move_type type, int team, int moves_left, sf::Vector2i& start, sf::Vector2i end, Board& state) {
 	if (team != -1 && getEnmity(team, state.board.at(end).unit_uc()) > enmity::ALLY) return 999;
 	//std::cout << "getting cost: movetype " << u->stats().movetype << " terrain type " << state.board.at(end).type() << std::endl;
-	return Data<char>::d()->movecosts[type][state.board.at(end).type()];
+	return Data<char>::d()->getMoveCost(type, state.board.at(end).type());
 }

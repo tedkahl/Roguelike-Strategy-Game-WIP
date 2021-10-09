@@ -25,8 +25,8 @@ struct dist_loc {
 	}
 };
 
-static matrix<map_node>& djikstraMap(move_type type, int team, std::vector<UnitComponent*> enemy_targets, Board& state) {
-	static matrix<map_node> grid;
+static matrix<dj_map_node>& djikstraMap(move_type type, int team, std::vector<UnitComponent*> enemy_targets, Board& state) {
+	static matrix<dj_map_node> grid;
 	static unsigned search_counter = 0;
 
 	// Incrementing search_counter means we ignore results from earlier searches.
@@ -44,31 +44,35 @@ static matrix<map_node>& djikstraMap(move_type type, int team, std::vector<UnitC
 	std::vector<dist_loc> to_process(enemy_targets.size());
 	for (unsigned i = 0;i < to_process.size();i++) {
 		curr_pos = enemy_targets[i]->getOwner()->getPos();
-		to_process[i] = dist_loc(getMovesRem(enemy_targets[i]), curr_pos);
-		grid.at(curr_pos) = map_node(getMovesRem(enemy_targets[i]), sf::Vector2i(-1, -1), search_counter);
+		to_process[i] = dist_loc(0, curr_pos);
+		grid.at(curr_pos) = dj_map_node(0, sf::Vector2i(-1, -1), search_counter);
 	}
-	int num_edges = 0;
+	int counter = 0;
 	while (!to_process.empty()) {
 		curr_pos = to_process[0].loc;
-		map_node& curr_node = grid.at(curr_pos);
+		dj_map_node& curr_node = grid.at(curr_pos);
 		std::pop_heap(to_process.begin(), to_process.end());
 		to_process.pop_back();
 		//for each direction
 
 		for (auto& i : dir) {
+			counter++;
 			if (curr_pos + i != curr_node.prev && on_board(curr_pos + i, state.board)) {
 				sf::Vector2i adj_pos = curr_pos + i;
 				int new_dist = curr_node.moves_left + getMoveCost(type, team, curr_node.moves_left, curr_pos, adj_pos, state);
+				if (new_dist > 50) continue;
 				//if adjacent square is reachable as easily from another path, don't look further
-				if (grid.at(adj_pos).search == search_counter && grid.at(adj_pos).moves_left >= new_dist) continue;
+				if (grid.at(adj_pos).search == search_counter && (grid.at(adj_pos).moves_left == 0 || grid.at(adj_pos).moves_left <= new_dist)) continue;
+				//cout << grid.at(adj_pos).search << " " << search_counter << endl;
+				//cout << "update " << to_string(adj_pos) << " " << grid.at(adj_pos).moves_left << " to " << new_dist << endl;
 
-				grid.at(adj_pos) = map_node(new_dist, curr_pos, search_counter);
+				grid.at(adj_pos) = dj_map_node(new_dist, curr_pos, search_counter);
 				to_process.push_back(dist_loc(new_dist, adj_pos));
 				std::push_heap(to_process.begin(), to_process.end());
 			}
 		}
 	}
-
+	std::cout << counter << std::endl;
 	return grid;
 }
 /*What to do: a modified djikstras. We maintain a second board array of "map locations", with the current cost to that square and the previous node of the shortest path. BFS through these
