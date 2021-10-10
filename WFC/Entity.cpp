@@ -1,3 +1,4 @@
+#pragma once
 #include "Entity.h"
 #include "Square.h"
 #include "Board.h"

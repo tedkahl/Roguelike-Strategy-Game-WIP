@@ -41,32 +41,32 @@ int main()
 	while (window.isOpen())
 	{
 		g.now = clock.getElapsedTime();
+		//AI loop. Hideous, improve
+		if (g.active_player == 0 && p_state.getNext() == nullptr) {
+			cout << "switching active player" << endl;
+			g.active_player = ++g.active_player % (Alliance::instance()->numTeams() - 1);
+			main_enemy.startTurn();
+			g.last_AI_move = g.now - g.AIMoveInterval;
+			//AI player turn starts
+		}
+		else if (g.active_player == 1 && g.now - g.last_AI_move >= g.AIMoveInterval && !blocked) {
+			if (main_enemy.getNext() != nullptr) {
+				if (main_enemy.hasSelection())
+					main_enemy.executeSelected(g.now);
+				else
+					main_enemy.selectNext();
+				g.last_AI_move = g.now;
+			}
+			else {
+				g.active_player = ++g.active_player % (Alliance::instance()->numTeams() - 1);
+				p_state.startTurn(level.units);
+			}
+		}
 		sf::Event event;
 		while (window.pollEvent(event))
 		{
 
-			//AI loop. Hideous, improve
-			//g.now += sf::microseconds(200);
-			if (g.active_player == 0 && p_state.getNext() == nullptr) {
-				cout << "switching active player" << endl;
-				g.active_player = ++g.active_player % (Alliance::instance()->numTeams() - 1);
-				main_enemy.startTurn();
-				g.last_AI_move = g.now - g.AIMoveInterval;
-				//AI player turn starts
-			}
-			else if (g.active_player == 1 && g.now - g.last_AI_move >= g.AIMoveInterval && !blocked) {
-				if (main_enemy.getNext() != nullptr) {
-					if (main_enemy.hasSelection())
-						main_enemy.executeSelected(g.now);
-					else
-						main_enemy.selectNext();
-					g.last_AI_move = g.now;
-				}
-				else {
-					g.active_player = ++g.active_player % (Alliance::instance()->numTeams() - 1);
-					p_state.startTurn(level.units);
-				}
-			}
+
 			switch (event.type) {
 			case sf::Event::Closed:
 			{

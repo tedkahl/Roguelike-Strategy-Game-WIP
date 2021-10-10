@@ -51,12 +51,12 @@ public:
 	//accepts teams or pointers to objects with a team() function
 };
 
-static constexpr enmity_t getEnmity(hasTeam auto u1, hasTeam auto u2)
+static enmity_t getEnmity(hasTeam auto u1, hasTeam auto u2)
 {
 	return (u1 == nullptr || u2 == nullptr) ? enmity_t::ENMITY_NULL : Alliance::instance()->getEnmity(u1->team(), u2->team());
 }
 
-static constexpr enmity_t getEnmity(int t1, hasTeam auto u2)
+static enmity_t getEnmity(int t1, hasTeam auto u2)
 {
 	return (!u2) ? enmity_t::ENMITY_NULL : Alliance::instance()->getEnmity(t1, u2->team());
 }

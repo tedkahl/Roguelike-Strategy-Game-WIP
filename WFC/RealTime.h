@@ -32,6 +32,7 @@ public:
 	RealTime(Board& board_);
 	virtual EntityUpdate getUpdate(sf::Time current) = 0;
 	virtual std::vector<AnimationSeg> getAnimSegs() = 0;
+	virtual ~RealTime() {}
 	Board& getBoard() const;
 };
 

@@ -1,3 +1,4 @@
+#pragma once
 #include "Actions.h"
 #include "Entity.h"
 #include "UnitComponent.h"

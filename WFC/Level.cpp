@@ -174,9 +174,12 @@ void Level::setSquares(matrix<char>& WFCOutput)
 	Entity* e;
 	for (unsigned y = 0;y < WFCOutput.height();y++) {
 		for (unsigned x = 0;x < WFCOutput.width();x++) {
+			cout << x << ", " << y << endl;
 			char val = WFCOutput.at(x, y);
 			auto [terrain_t, entity_t] = Data<char>::d()->glyphs.at(val);
-			auto [path, offset, rect] = Data<char>::d()->squareinfo.at(terrain_t);
+			cout << "terrain and entity t retrieved" << endl;
+			auto& [path, offset, rect] = Data<char>::d()->squareinfo.at(terrain_t);
+			cout << path << ", " << to_string(offset) << ", " << to_str(rect) << endl;
 			state.heightmap.at(x, y) = offset.y;
 			state.board.at(x, y) = Square(terrain_t, &dcomponents, dcomponents.declareNew(path, offset, tm_, 0, rect), sf::Vector2i(x, y), state.heightmap);
 			if (entity_t != object_type::NONE) {
