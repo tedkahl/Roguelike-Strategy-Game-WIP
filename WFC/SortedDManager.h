@@ -81,6 +81,7 @@ template<typename T>
 //requires accessible<T>
 void SortedDManager<T>::sortNew()//if just a few elements were added during normal gameplay, sort in O(n)
 {
+	std::copy(end() - unsorted_, end(), swap.begin());
 	std::sort(swap.begin(), swap.begin() + unsorted_);
 	unsigned i = active_ - 1;
 	while (unsorted_ > 0) {
@@ -121,7 +122,7 @@ void SortedDManager<T>::fixChangedVal(T* to_fix) {
 		index--;
 	}
 
-	while (index < static_cast<int>(active_ - 1) && data[index + 1] < data[index]) {
+	while (index < active_ - 1 && data[index + 1] < data[index]) {
 		std::swap(data[index], data[index + 1]);
 		index++;
 	}
@@ -158,14 +159,10 @@ template<typename ...T_>
 T* SortedDManager<T>::declareNew(T_&&... args)
 {
 	active_++;
-	assert(active_ <= S_MAX);
-	if (unsorted_ == SWAPSIZE) {
-		sortNew();
-		unsorted_ = 0;
-	}
-	swap[unsorted_].set(std::forward<T_>(args)...);
 	unsorted_++;
-	return &swap[unsorted_ - 1];
+	assert(active_ <= S_MAX);
+	data[active_ - 1].set(std::forward<T_>(args)...);
+	return &data[active_ - 1];
 }
 
 template<typename T>
