@@ -26,7 +26,7 @@ static void handleInput(Level& level, sf::RenderWindow& window, GameState& g, Pl
 			else {
 				Entity* unit = level.entityClickedOn(window, coords, sf::Vector2i(event.mouseButton.x, event.mouseButton.y));
 				UnitComponent* unit_uc = unit ? unit->uc() : nullptr;
-				if (unit && getEnmity(unit_uc, &p_state) == enmity::SAME_TEAM && unit_uc->getMoveState() != unit::move_state::HAS_ACTED) {
+				if (unit && getEnmity(unit_uc, &p_state) == enmity_t::SAME_TEAM && unit_uc->getMoveState() != unit::move_state::HAS_ACTED) {
 					p_state.selected = unit;
 					std::cout << "switching command" << std::endl;
 					if (unit_uc->getMoveState() == unit::move_state::FREE)

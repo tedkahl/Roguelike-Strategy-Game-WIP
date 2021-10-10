@@ -30,7 +30,7 @@ std::optional<unit::move_state> AttackMove::execute(sf::Vector2i target, sf::Tim
 	cout << "target " << to_string(target) << endl;
 	cout << paths.is_attackable(target) << endl;
 
-	if (paths.is_attackable(target) && getEnmity(level.state.board.at(target).unit_uc(), agent_->uc()) >= enmity::NEUTRAL) {
+	if (paths.is_attackable(target) && getEnmity(level.state.board.at(target).unit_uc(), agent_->uc()) >= enmity_t::NEUTRAL) {
 		cout << "Moving to attack!" << endl;
 		move_target = paths.grid.at(target - paths.offset).prev;
 		attack = true;

@@ -16,14 +16,14 @@ UnitComponent* Player::getNext() {
 }
 
 void Player::getUnits(DataManager<UnitComponent>& units) {
-	int en;
+
 	num_moved = 0;
 	for (auto& i : units) {
-		en = getEnmity(team_, &i);
-		if (en == enmity::ENEMY) {
+		auto en = getEnmity(team_, &i);
+		if (en == enmity_t::ENEMY) {
 			enemies.push_back(&i);
 		}
-		else if (en == enmity::SAME_TEAM) {
+		else if (en == enmity_t::SAME_TEAM) {
 			i.movestate = unit::move_state::FREE;
 			my_team.push_back(&i);
 		}
