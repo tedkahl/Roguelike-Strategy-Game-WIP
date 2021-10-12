@@ -12,3 +12,6 @@ template<typename T>
 static sf::Vector2i getCenter(sf::Rect<T> rect) {
 	return sf::Vector2i(static_cast<int>(rect.left + rect.width / 2), static_cast<int>(rect.top + rect.height / 2));
 }
+static bool compV2i(const sf::Vector2i& lhs, const sf::Vector2i& rhs) {
+	return std::tie(lhs.x, lhs.y) < std::tie(rhs.x, rhs.y);
+}

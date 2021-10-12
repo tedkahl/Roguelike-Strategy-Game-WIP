@@ -17,21 +17,22 @@ bool Entity::update(sf::Time current) {
 
 	if (!rt_actions.empty()) {
 		//cout << "performing action" << endl;
-		DrawComponent* dc_p = dc();
 
 		auto update = rt_actions.front()->getUpdate(current);
+		if (update.action)
+			update.action.value()(this);
+		DrawComponent* dc_p = dc();
 		if (update.move_dir) {
 			//cout << "updating move dir" << endl;
-			dc_p->setMoveDirection(update.move_dir.value());
-			dc_.setMoveDirection(update.move_dir.value());
+			dc_p->setMoveDirection(update.move_dir.value(), dc_);
+			dc_.setMoveDirection(update.move_dir.value(), dc_);
 			if (update.first)
 				dc_p->setAnimation(current, rt_actions.front()->getAnimSegs());
 		}
 
 		if (update.coords_ && update.coords_.value() != coords_) {
 			cout << "updating coords" << endl;
-			dc_p->updateCoords(update.coords_.value());
-			dc_.updateCoords(update.coords_.value());
+			dc_p->updateCoords(update.coords_.value(), dc_);
 			coords_ = update.coords_.value();
 			std::cout << to_string(coords_) << " ";
 		}
@@ -39,16 +40,14 @@ bool Entity::update(sf::Time current) {
 			//cout << "setting sprite pos " << to_string(update.sprite_position_.value()) << endl;
 			dc_p->setSpritePos(update.sprite_position_.value());
 		}
-		if (update.action)
-			update.action.value()(this);
 
 		if (update.finished) {
 			std::cout << "Action finished" << std::endl;
 			if (coords_ != owner_->pos)
-				rt_actions.front()->getBoard().moveEntity(this, coords_); //bad
+				rt_actions.front()->getBoard().moveEntity(this, coords_); //ugly
 			rt_actions.pop();
 		}
-		cout << "fixing changed values" << endl;
+		//cout << "fixing changed values" << endl;
 		manager->fixChangedVal(dc_p);
 		return true;
 	}

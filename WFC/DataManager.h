@@ -8,14 +8,15 @@ class DataManager {
 private:
 	std::array<T, MAX> data;
 	unsigned active_ = 0;
+	bool dirty_flag = false;
 public:
 	T* firstInvalidPtr() { return &data[active_]; }
 	T* get(unsigned index) { return &data[index]; }
 	//unsigned activate();
-
+	bool isChanged() const { return dirty_flag; }
+	void setChanged(bool d) { dirty_flag = d; }
 	template<typename ...T_>
 	T* declareNew(T_&&... args);
-
 	void deactivate(unsigned index);
 	inline size_t active() const { return active_; }
 	typedef std::array<T, MAX>::iterator iterator;
@@ -27,6 +28,7 @@ template<typename T>
 template<typename ...T_>
 T* DataManager<T>::declareNew(T_&&... args)
 {
+	dirty_flag = true;
 	active_++;
 	assert(active_ <= MAX);
 	data[active_ - 1].set(std::forward<T_>(args)..., active_ - 1);
@@ -36,6 +38,7 @@ T* DataManager<T>::declareNew(T_&&... args)
 
 template<typename T>
 void DataManager<T>::deactivate(unsigned index) {
+	dirty_flag = true;
 	assert(index < active_);
 	std::swap(data[index], data[active_ - 1]);
 	data[index].setIndex(index);

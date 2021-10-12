@@ -1,14 +1,6 @@
 #include "Level.h"
 Level::Level(std::shared_ptr<ResourceManager<sf::Texture>> tm) :tm_(tm) {}
 
-//
-//
-//Square* getSquare(std::pair<unsigned, unsigned> coords)
-//{
-//	if (0 <= x_pos && x_pos < state.board.width() && 0 <= y_pos && y_pos < state.board.height())
-//		return &state.board.at((unsigned)x_pos, (unsigned)y_pos);
-//	return nullptr;
-//}
 
 
 std::optional<sf::Vector2i> Level::getCoords(sf::RenderWindow& window, sf::Vector2i pixel) {
@@ -134,7 +126,10 @@ unsigned Level::addTargeter(const pathsGrid& paths)
 	for (unsigned i = 0;i < paths.grid.width();i++) {
 		for (unsigned j = 0;j < paths.grid.height();j++) {
 			if (paths.grid.at(i, j).search == paths.search) {
-				auto type = paths.grid.at(i, j).attack_only ? object_type::ATTACKSELECT : object_type::MOVESELECT;
+				auto type = paths.grid.at(i, j).movable ? object_type::MOVESELECT : object_type::ATTACKSELECT;
+				if (type == object_type::ATTACKSELECT) {
+					assert(paths.grid.at(i, j).attackable);
+				}
 				obj_dc = getObjDCBatched(dcomponents, tm_, type, batch); //add all dcomponents
 				//std::cout << "Adding target square at " << to_string(sf::Vector2i(i, j) + paths.offset) << std::endl;
 				obj_dc->updateEntityPos(sf::Vector2i(i, j) + paths.offset, state.heightmap);
@@ -174,12 +169,9 @@ void Level::setSquares(matrix<char>& WFCOutput)
 	Entity* e;
 	for (unsigned y = 0;y < WFCOutput.height();y++) {
 		for (unsigned x = 0;x < WFCOutput.width();x++) {
-			cout << x << ", " << y << endl;
 			char val = WFCOutput.at(x, y);
 			auto [terrain_t, entity_t] = Data<char>::d()->glyphs.at(val);
-			cout << "terrain and entity t retrieved" << endl;
 			auto& [path, offset, rect] = Data<char>::d()->squareinfo.at(terrain_t);
-			cout << path << ", " << to_string(offset) << ", " << to_str(rect) << endl;
 			state.heightmap.at(x, y) = offset.y;
 			state.board.at(x, y) = Square(terrain_t, &dcomponents, dcomponents.declareNew(path, offset, tm_, 0, rect), sf::Vector2i(x, y), state.heightmap);
 			if (entity_t != object_type::NONE) {

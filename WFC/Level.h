@@ -27,7 +27,6 @@ class Level
 private:
 	std::shared_ptr<ResourceManager<sf::Texture>> tm_;
 	SortedDManager<DrawComponent> dcomponents;
-
 public:
 	DataManager<Entity> entities;
 	DataManager<UnitComponent> units;

@@ -25,7 +25,7 @@ void DrawComponent::set(std::string path, sf::Vector2f& offset, std::shared_ptr<
 	default_rect = sprite.getTextureRect();
 
 	obj_height_ = obj_height;
-	setMoveDirection(1);
+	setMoveDirection(1, sortable());
 	batch_ = batch;
 }
 
@@ -39,7 +39,7 @@ void DrawComponent::setOwner(Square* owner) { owner_ = owner; }
 void DrawComponent::setOwner(Entity* owner) { owner_ = owner; }
 
 void DrawComponent::updateEntityPos(sf::Vector2i newpos, matrix<float>& heightmap) {
-	updateCoords(newpos);
+	updateCoords(newpos, sortable());
 	float sq_h = heightmap.at(newpos);
 	square_height_ = static_cast<uint8_t>(-sq_h + 10);
 
@@ -48,24 +48,7 @@ void DrawComponent::updateEntityPos(sf::Vector2i newpos, matrix<float>& heightma
 }
 
 void DrawComponent::setSquarePos(sf::Vector2i newpos, matrix<float>& heightmap) {
-	updateCoords(newpos);
+	updateCoords(newpos, sortable());
 	square_height_ = static_cast<uint8_t>(-(sprite_offset.y) + 10);
 	setSpritePos(squarePosFromCoords(newpos, heightmap.width()));
 }
-
-//DCAccessor::DCAccessor() :zval(-1), manager(nullptr) {}
-//DCAccessor::DCAccessor(DrawComponent* dc, SortedDManager<DrawComponent>* m) : zval(dc->zval()), manager(m) {}
-//
-//DrawComponent* DCAccessor::operator->() {
-//	assert(*this); //accessor is not empty
-//	return manager->get(*this);
-//}
-//
-//void DCAccessor::setZval(unsigned new_zv)
-//{
-//	assert(*this); //accessor is not empty
-//	DrawComponent* tochange = manager->get(*this);
-//	tochange->setZval(new_zv);
-//	manager->fixChangedVal(tochange);
-//	zval = new_zv;
-//}
