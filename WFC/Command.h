@@ -9,16 +9,16 @@
 struct PlayerState;
 class Targeter {
 private:
-	Level& level;
+	Level* level;
 	unsigned batch;
 public:
-	Targeter(pathsGrid& paths, Level& level);
+	Targeter(pathsGrid& paths, Level* level);
 	~Targeter();
 };
 
 class Command {
 protected:
-	Level& level;
+	Level* level;
 
 	Entity* agent_;
 	std::unique_ptr<Targeter> targeter;
@@ -27,6 +27,7 @@ public:
 	virtual void showTargeter() = 0;
 	virtual void hideTargeter() = 0;
 	virtual std::optional<unit::move_state> execute(sf::Vector2i target, sf::Time now, PlayerState* p_state) = 0; //target can be changed to its own class if necessary
+	virtual pathsGrid& getPaths() = 0;
 };
 
 class AttackMove :public Command {
@@ -37,5 +38,5 @@ public:
 	virtual void showTargeter() override;
 	virtual void hideTargeter() override;
 	virtual std::optional<unit::move_state> execute(sf::Vector2i target, sf::Time now, PlayerState* p_state) override;
-	pathsGrid& getPaths();
+	virtual pathsGrid& getPaths();
 };
