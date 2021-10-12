@@ -4,7 +4,7 @@
 Square::Square(terrain_type terrain_t, SortedDManager<DrawComponent>* m, DrawComponent* dcs, sf::Vector2i newpos, matrix<float>& heightmap) : pos(newpos.x, newpos.y), manager(m), dc_(dcs->sortable()), type_(terrain_t), unit_(nullptr) {
 	dcs->setOwner(this);
 	dcs->setSquarePos(newpos, heightmap);
-	dcs->updateCoords(newpos);
+	dcs->updateCoords(newpos, dc_);
 }
 const DCSortable& Square::dcSortable() const {
 	return dc_;
@@ -39,13 +39,3 @@ void Square::addE(Entity* e) {
 }
 Entity* Square::unit() { return unit_; }
 UnitComponent* Square::unit_uc() { return unit_ ? unit_->uc() : nullptr; }
-
-//Square& Square::operator=(const Square& other) 
-//{
-//	type_ = std::move(other.type_);
-//	manager = std::move(other.manager);
-//	dc_ = std::move(other.dc_);
-//	unit_ = std::move(other.unit_);
-//	entities = std::move(other.entities);
-//	return *this;
-//}
