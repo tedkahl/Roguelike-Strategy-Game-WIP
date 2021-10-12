@@ -166,6 +166,8 @@ static pathsGrid pathFind(UnitComponent* u, Board& state, AttackFxn<map_node> at
 			adj_node.movable = true;
 			assert(!(grid.at(adj_pos).search == search_counter && grid.at(adj_pos).prev.x == -1));
 			bind_min_max(minX, maxX, minY, maxY, adj_pos);
+			//then push the new square to the heap unless it's at the end of our movement range
+			if (new_moves_left == 0) continue;
 			to_process.push_back(adj_pos);
 			std::push_heap(to_process.begin(), to_process.end(), compV2i);
 			//cout << "Replacing " << to_string(adj_pos) << " with: moves_l " << new_moves_left << " prev " << to_string(curr_pos) << endl;
