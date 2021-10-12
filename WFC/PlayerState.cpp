@@ -5,8 +5,8 @@ void PlayerState::switchCommand(Command* new_command) {
 	command.reset(new_command);
 }
 
-void PlayerState::startTurn(DataManager<UnitComponent> units) {
-	getUnits(units);
+void PlayerState::startTurn(DataManager<UnitComponent>& units) {
+	p_start_turn(units);
 }
 
 void PlayerState::deleteCommand() {

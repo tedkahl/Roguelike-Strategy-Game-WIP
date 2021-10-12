@@ -11,6 +11,7 @@
 #include "Board.h"
 #include "Data.h"
 #include "DCSortable.h"
+#include "Debug.h"
 class Entity;
 struct Board;
 class Square;

@@ -1,10 +1,8 @@
 #pragma once
 #include "PathsUtil.h"
 #include "Attacks.h"
+#include "vec2i_util.h"
 
-static bool compV2i(const sf::Vector2i& lhs, const sf::Vector2i& rhs) {
-	return std::tie(lhs.x, lhs.y) < std::tie(rhs.x, rhs.y);
-}
 
 struct pathsGrid {
 	matrix<map_node> grid;
@@ -41,19 +39,22 @@ static matrix<dj_map_node>& djikstraMap(move_type type, int team, std::vector<Un
 	sf::Vector2i curr_pos;
 	grid.resize(state.board.height(), state.board.width());
 
-	//works as a heap so that duplicate locations will be processed at the same time, cutting off processing of the slower path 
 	std::vector<dist_loc> to_process;
+	//mark a spot as able to attack the current enemy target, and push it to the heap. If a spot can reach multiple targets mark all of them.
 	auto mark_and_add = [&](sf::Vector2i pos) {
 		if (grid.at(pos).search != search_counter) {
-			grid.at(pos) = dj_map_node(0, curr_pos, search_counter);
+			grid.at(pos) = dj_map_node(0, curr_pos, { curr_pos }, search_counter);
 			to_process.push_back(dist_loc(0, pos));
+		}
+		else {
+			grid.at(pos).reachable_targets.push_back(curr_pos);
 		}
 	};
 
 	for (unsigned i = 0;i < enemy_targets.size();i++) {
 		curr_pos = enemy_targets[i]->getOwner()->getPos();
+		grid.at(curr_pos) = dj_map_node(0, sf::Vector2i(-1, -1), {}, search_counter);
 		to_process.push_back(dist_loc(0, curr_pos));
-		grid.at(curr_pos) = dj_map_node(0, sf::Vector2i(-1, -1), search_counter);
 		attackfxn(grid, curr_pos, state, mark_and_add);
 	}
 
@@ -70,13 +71,13 @@ static matrix<dj_map_node>& djikstraMap(move_type type, int team, std::vector<Un
 			if (curr_pos + i != curr_node.prev && on_board(curr_pos + i, state.board)) {
 				sf::Vector2i adj_pos = curr_pos + i;
 				int new_dist = curr_node.moves_left + getMoveCost(type, team, adj_pos, state);
-				if (new_dist > 50) continue;
+				if (new_dist > 75) continue;
 				//if adjacent square is reachable as easily from another path, don't look further
 				if (grid.at(adj_pos).search == search_counter && (grid.at(adj_pos).moves_left == 0 || grid.at(adj_pos).moves_left <= new_dist)) continue;
 				//cout << grid.at(adj_pos).search << " " << search_counter << endl;
 				//cout << "update " << to_string(adj_pos) << " " << grid.at(adj_pos).moves_left << " to " << new_dist << endl;
 
-				grid.at(adj_pos) = dj_map_node(new_dist, curr_pos, search_counter);
+				grid.at(adj_pos) = dj_map_node(new_dist, curr_pos, {}, search_counter);
 				to_process.push_back(dist_loc(new_dist, adj_pos));
 				std::push_heap(to_process.begin(), to_process.end());
 			}

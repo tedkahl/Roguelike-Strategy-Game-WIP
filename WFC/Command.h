@@ -28,6 +28,7 @@ public:
 	virtual void hideTargeter() = 0;
 	virtual std::optional<unit::move_state> execute(sf::Vector2i target, sf::Time now, PlayerState* p_state) = 0; //target can be changed to its own class if necessary
 	virtual pathsGrid& getPaths() = 0;
+	virtual ~Command() {}
 };
 
 class AttackMove :public Command {
