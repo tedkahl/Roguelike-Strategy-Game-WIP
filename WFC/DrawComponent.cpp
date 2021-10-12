@@ -1,6 +1,19 @@
 #include "DrawComponent.h"
 void DrawComponent::draw(sf::RenderTarget* target) const {
 	target->draw(sprite);
+	if (health >= 0) {
+		sf::RectangleShape outer({ 40.f, 10.f });
+		outer.setOrigin(sprite.getPosition() + sprite_offset + sf::Vector2f{ 0.f, 20.f });
+		outer.setFillColor(sf::Color::Black);
+		outer.setOutlineColor(sf::Color::Black);
+		outer.setOutlineThickness(2.f);
+
+		sf::RectangleShape inner({ health * 40.f, 10.f });
+		inner.setOrigin(sprite.getPosition() + sprite_offset + sf::Vector2f{ 0.f, 20.f });
+		inner.setFillColor(sf::Color::Red);
+		target->draw(outer);
+		target->draw(inner);
+	}
 }
 void DrawComponent::setAnimation(sf::Time start, std::vector<AnimationSeg>&& segs, bool loop, float speed) {
 	//cout << "setting animation" << endl;
@@ -16,6 +29,7 @@ bool DrawComponent::updateAnimation(sf::Time current) {
 
 void DrawComponent::set(std::string path, sf::Vector2f& offset, std::shared_ptr<ResourceManager<sf::Texture>> tm, unsigned obj_height, const sf::IntRect& rect, int batch)
 {
+	if (obj_height == 0) health = -1.f;
 	tm_ = tm;
 	sprite_offset = offset;
 	sprite = std::move(sf::Sprite(tm_->get(path)));

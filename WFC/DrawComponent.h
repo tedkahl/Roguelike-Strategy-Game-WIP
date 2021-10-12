@@ -27,6 +27,7 @@ private:
 	sf::IntRect default_rect;
 	std::variant<Entity*, Square*> owner_;
 	Animation<max_seg> animation;
+	float health = .8;
 public:
 	DrawComponent() = default;
 	DrawComponent(std::string path, sf::Vector2f& offset, std::shared_ptr<ResourceManager<sf::Texture>> tm);
