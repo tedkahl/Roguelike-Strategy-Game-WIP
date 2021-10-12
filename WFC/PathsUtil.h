@@ -43,46 +43,16 @@ struct map_node {
 struct dj_map_node {
 	int moves_left;
 	sf::Vector2i prev;
+	std::vector<sf::Vector2i> reachable_targets; //inefficiency of this hopefully justified by relatively few reachable targets
 	unsigned search;
-	dj_map_node() :moves_left(0), prev(), search(0) {}
-	dj_map_node(int moves_l, sf::Vector2i prev_, unsigned search_) :moves_left(moves_l), prev(prev_), search(search_) {}
+	dj_map_node() :moves_left(0), prev({ -1,-1 }), search(0) {}
+	dj_map_node(int moves_l, sf::Vector2i prev_, std::vector<sf::Vector2i>&& reachable, unsigned search_) :moves_left(moves_l), prev(prev_), reachable_targets(reachable), search(search_) {}
 };
 
-static bool block_attack(attack_type type, sf::Vector2i start, sf::Vector2i end, Board& state) {
-	return false;
-}
+//static bool block_attack(attack_type type, sf::Vector2i start, sf::Vector2i end, Board& state) {
+//	return false;
+//}
 
-//}
-//static void getAttackRange(matrix<map_node>& grid, unsigned search, int& minX, int& minY, int& maxX, int& maxY, const UnitStats u, sf::Vector2i pos, Board& state) {
-//	sf::Vector2i new_pos;
-//	switch (u.attack_type) {
-//	case attack_type::MELEE:
-//		for (auto i : dir) {
-//			new_pos = pos + i;
-//			if (!on_board(new_pos, state.board)) continue;
-//			if (grid.at(new_pos).search == search && (!grid.at(new_pos).attack_only || grid.at(new_pos).moves_left >= grid.at(pos).moves_left)) continue;
-//
-//			if (!block_attack(u.attack_type, pos, new_pos, state)) {
-//				grid.at(new_pos) = map_node(grid.at(pos).moves_left, pos, search, true, false);
-//				minX = std::min(new_pos.x, minX);
-//				minY = std::min(new_pos.y, minY);
-//				maxX = std::max(new_pos.x, maxX);
-//				maxY = std::max(new_pos.y, maxY);
-//			}
-//		}
-//	}
-//}
-//
-//static void addAttackRange(matrix<map_node>& grid, UnitComponent* u, int& minX, int& minY, int& maxX, int& maxY, unsigned search, Board& state) {
-//	auto& stats = u->stats();
-//	for (int i = minX;i <= maxX;i++) {
-//		for (int j = minY;j <= maxY;j++) {
-//			if (grid.at(i, j).search == search && grid.at(i, j).is_edge && !grid.at(i, j).has_ally) {
-//				getAttackRange(grid, search, minX, minY, maxX, maxY, stats, sf::Vector2i(i, j), state);
-//			}
-//		}
-//	}
-//}
 static int getMovesRem(UnitComponent* u) {
 	if (u->getMoveState() == unit::move_state::HAS_MOVED) return 0;
 	else return u->stats().movement;
