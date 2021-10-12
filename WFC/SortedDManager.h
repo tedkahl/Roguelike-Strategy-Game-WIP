@@ -102,9 +102,9 @@ void SortedDManager<T>::sortDeleted()
 
 	unsigned count = 0;
 	for (unsigned i = 0;i < active_ - count;i++) {
-		if (i + count == deactivated[count]) {
+		if (count < deactivated.size() && i + count == deactivated[count]) {
 			count++;
-			std::cout << "deleted element found at " << i + count << std::endl;
+			//std::cout << "deleted element found at " << i + count << std::endl;
 		}
 		data[i] = data[i + count];
 	}
