@@ -1,5 +1,6 @@
 #pragma once
 #include "PathsUtil.h"
+#include "Attacks.h"
 
 static bool compV2i(const sf::Vector2i& lhs, const sf::Vector2i& rhs) {
 	return std::tie(lhs.x, lhs.y) < std::tie(rhs.x, rhs.y);
@@ -11,8 +12,8 @@ struct pathsGrid {
 	unsigned search;
 	std::optional<std::vector<sf::Vector2i>> getPath(sf::Vector2i& dest);
 	//std::optional<Square> getSquare(sf::Vector2i& loc) { if (on_board(loc - offset, grid)) return grid.at(loc - offset); else return std::nullopt; };
-	bool is_movable(sf::Vector2i& loc) { return is_attackable(loc) && !grid.at(loc - offset).attack_only && !grid.at(loc - offset).has_ally; }
-	bool is_attackable(sf::Vector2i& loc) { return on_board(loc - offset, grid) && grid.at(loc - offset).search == search; }
+	bool is_movable(sf::Vector2i loc) { return on_board(loc - offset, grid) && grid.at(loc - offset).search == search && grid.at(loc - offset).movable; }
+	bool is_attackable(sf::Vector2i loc) { return  on_board(loc - offset, grid) && grid.at(loc - offset).search == search && grid.at(loc - offset).attackable; }
 	pathsGrid(matrix<map_node>& g, unsigned minX, unsigned minY, unsigned maxX, unsigned maxY, unsigned search_) :grid(subMatrix(g, minX, minY, maxX - minX + 1, maxY - minY + 1)), offset(minX, minY), search(search_) {}
 	pathsGrid() :grid(), search(0) {}
 };
@@ -25,7 +26,7 @@ struct dist_loc {
 	}
 };
 
-static matrix<dj_map_node>& djikstraMap(move_type type, int team, std::vector<UnitComponent*> enemy_targets, Board& state) {
+static matrix<dj_map_node>& djikstraMap(move_type type, int team, std::vector<UnitComponent*> enemy_targets, Board& state, AttackFxn<dj_map_node> attackfxn) {
 	static matrix<dj_map_node> grid;
 	static unsigned search_counter = 0;
 
@@ -41,12 +42,21 @@ static matrix<dj_map_node>& djikstraMap(move_type type, int team, std::vector<Un
 	grid.resize(state.board.height(), state.board.width());
 
 	//works as a heap so that duplicate locations will be processed at the same time, cutting off processing of the slower path 
-	std::vector<dist_loc> to_process(enemy_targets.size());
-	for (unsigned i = 0;i < to_process.size();i++) {
+	std::vector<dist_loc> to_process;
+	auto mark_and_add = [&](sf::Vector2i pos) {
+		if (grid.at(pos).search != search_counter) {
+			grid.at(pos) = dj_map_node(0, curr_pos, search_counter);
+			to_process.push_back(dist_loc(0, pos));
+		}
+	};
+
+	for (unsigned i = 0;i < enemy_targets.size();i++) {
 		curr_pos = enemy_targets[i]->getOwner()->getPos();
-		to_process[i] = dist_loc(0, curr_pos);
+		to_process.push_back(dist_loc(0, curr_pos));
 		grid.at(curr_pos) = dj_map_node(0, sf::Vector2i(-1, -1), search_counter);
+		attackfxn(grid, curr_pos, state, mark_and_add);
 	}
+
 	int counter = 0;
 	while (!to_process.empty()) {
 		curr_pos = to_process[0].loc;
@@ -59,7 +69,7 @@ static matrix<dj_map_node>& djikstraMap(move_type type, int team, std::vector<Un
 			counter++;
 			if (curr_pos + i != curr_node.prev && on_board(curr_pos + i, state.board)) {
 				sf::Vector2i adj_pos = curr_pos + i;
-				int new_dist = curr_node.moves_left + getMoveCost(type, team, curr_node.moves_left, curr_pos, adj_pos, state);
+				int new_dist = curr_node.moves_left + getMoveCost(type, team, adj_pos, state);
 				if (new_dist > 50) continue;
 				//if adjacent square is reachable as easily from another path, don't look further
 				if (grid.at(adj_pos).search == search_counter && (grid.at(adj_pos).moves_left == 0 || grid.at(adj_pos).moves_left <= new_dist)) continue;
@@ -75,10 +85,21 @@ static matrix<dj_map_node>& djikstraMap(move_type type, int team, std::vector<Un
 	std::cout << counter << std::endl;
 	return grid;
 }
+
+static void bind_min_max(int& minX, int& maxX, int& minY, int& maxY, sf::Vector2i new_pos) {
+	if (new_pos.x < minX)
+		minX = new_pos.x;
+	else if (new_pos.x > maxX)
+		maxX = new_pos.x;
+	if (new_pos.y < minY)
+		minY = new_pos.y;
+	else if (new_pos.y > maxY)
+		maxY = new_pos.y;
+}
 /*What to do: a modified djikstras. We maintain a second board array of "map locations", with the current cost to that square and the previous node of the shortest path. BFS through these
 */
-static pathsGrid pathFind(UnitComponent* u, Board& state) {
-	std::cout << "calling getMoveRange" << std::endl;
+static pathsGrid pathFind(UnitComponent* u, Board& state, AttackFxn<map_node> attackfxn) {
+	std::cout << "calling pathFind" << std::endl;
 	static matrix<map_node> grid;
 	static unsigned search_counter = 0;
 	auto [minX, minY] = u->getPos();
@@ -91,51 +112,64 @@ static pathsGrid pathFind(UnitComponent* u, Board& state) {
 		grid.resize(0, 0);
 		search_counter = 1;
 	}
-
 	sf::Vector2i curr_pos = u->getPos();
 	grid.resize(state.board.height(), state.board.width());
-	grid.at(curr_pos) = map_node(getMovesRem(u), sf::Vector2i(-1, -1), search_counter);
+	map_node& orig_pos = grid.at(curr_pos);
+	grid.at(curr_pos) = map_node(getMovesRem(u), sf::Vector2i(-1, -1), search_counter, true, false);
+
+	auto mark_attackable = [&](sf::Vector2i pos) {
+		grid.at(pos).attackable = true;
+		bind_min_max(minX, maxX, minY, maxY, pos);
+		if (grid.at(pos).search != search_counter || (!grid.at(pos).movable && (grid.at(pos).moves_left < grid.at(curr_pos).moves_left))) {
+			//cout << "In attack function: replacing " << to_string(pos) << " with: moves_l " << grid.at(curr_pos).moves_left << " prev " << to_string(curr_pos) << endl;
+			grid.at(pos) = map_node(grid.at(curr_pos).moves_left, curr_pos, search_counter, false, true);
+			return;
+		}
+		grid.at(pos).search = search_counter;
+	};
 
 	//works as a heap so that duplicate locations will be processed at the same time, cutting off processing of the slower path 
 	std::vector<sf::Vector2i> to_process(1, curr_pos);
-	int num_edges = 0;
-	bool is_edge;
 	while (!to_process.empty()) {
 		curr_pos = to_process[0];
 		map_node& curr_node = grid.at(curr_pos);
 		std::pop_heap(to_process.begin(), to_process.end(), compV2i);
 		to_process.pop_back();
-		//for each direction
-		is_edge = false;
-		curr_node.has_ally = curr_node.has_ally || (state.board.at(curr_pos).unit() && state.board.at(curr_pos).unit_uc() != u);
-		for (auto& i : dir) {
-			if (curr_pos + i != curr_node.prev && on_board(curr_pos + i, state.board)) {
-				sf::Vector2i adj_pos = curr_pos + i;
-				int new_moves_left = curr_node.moves_left - getMoveCost(u, curr_node.moves_left, curr_pos, adj_pos, state);
-				//if adjacent square is reachable as easily from another path, don't look further
-				if (grid.at(adj_pos).search == search_counter && grid.at(adj_pos).moves_left >= new_moves_left) continue;
 
-				if (new_moves_left >= 0)
-				{
-					grid.at(adj_pos) = map_node(new_moves_left, curr_pos, search_counter);
-					minX = std::min(minX, adj_pos.x);
-					minY = std::min(minY, adj_pos.y);
-					maxX = std::max(maxX, adj_pos.x);
-					maxY = std::max(maxY, adj_pos.y);
-					to_process.push_back(adj_pos);
-					std::push_heap(to_process.begin(), to_process.end(), compV2i);
-				}
-				//if an adjacent square is not reachable due to move cost, we consider this square, for now, as an "edge".
-				else {
-					is_edge = true;
-				}
+		//for each direction from our current location
+		for (auto& i : dir) {
+			//if the square is where we came from or not on the board, continue
+			if (curr_pos + i == curr_node.prev || !on_board(curr_pos + i, state.board)) continue;
+
+			sf::Vector2i adj_pos = curr_pos + i;
+			int new_moves_left = curr_node.moves_left - getMoveCost(u, adj_pos, state);
+			//if the square is unreachable, continue
+			if (new_moves_left < 0) continue;
+			map_node& adj_node = grid.at(adj_pos);
+
+			//if we've moved to this node before check if we had a better path before, and continue if so
+			if (adj_node.search == search_counter && adj_node.movable) {
+				if (grid.at(adj_pos).moves_left >= new_moves_left) continue;
 			}
+			else {
+				//if we haven't moved to this node before, mark if it contains an allied unit
+				adj_node.has_ally = (state.board.at(adj_pos).unit() && state.board.at(adj_pos).unit_uc() != u);
+				//then if not, get attack range from that square
+				if (!adj_node.has_ally)
+					attackfxn(grid, adj_pos, state, mark_attackable);
+			}
+			//then set remaining values, update min and max range, and add the new node to the heap
+			adj_node.moves_left = new_moves_left;
+			adj_node.prev = curr_pos;
+			adj_node.search = search_counter;
+			adj_node.movable = true;
+			assert(!(grid.at(adj_pos).search == search_counter && grid.at(adj_pos).prev.x == -1));
+			bind_min_max(minX, maxX, minY, maxY, adj_pos);
+			to_process.push_back(adj_pos);
+			std::push_heap(to_process.begin(), to_process.end(), compV2i);
+			//cout << "Replacing " << to_string(adj_pos) << " with: moves_l " << new_moves_left << " prev " << to_string(curr_pos) << endl;
 		}
-		if (is_edge) num_edges++;
-		curr_node.is_edge = curr_node.is_edge && is_edge;
 	}
-	std::cout << "Edges considered: " << num_edges << std::endl;
-	addAttackRange(grid, u, minX, minY, maxX, maxY, search_counter, state);
 	return pathsGrid(grid, minX, minY, maxX, maxY, search_counter);
 }
 
