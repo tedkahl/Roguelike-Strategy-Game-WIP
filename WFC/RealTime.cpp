@@ -18,7 +18,7 @@ GridMove::GridMove(std::vector<sf::Vector2i>&& path, object_type type, sf::Time 
 }
 
 std::vector<AnimationSeg> GridMove::getAnimSegs() {
-	return animation_manager::instance()->get_basic_anim(type_, anim_state::WALKING, path_.size() - 1, speed_.asMilliseconds());
+	return animation_manager::instance()->get_basic_anim(type_, anim_state::WALKING, static_cast<uint8_t>(path_.size() - 1), speed_.asMilliseconds());
 }
 
 EntityUpdate GridMove::getUpdate(sf::Time current) {
@@ -29,7 +29,7 @@ EntityUpdate GridMove::getUpdate(sf::Time current) {
 		start_time = current;
 		dir = 0;
 	}
-	cout << start_time.asMilliseconds() << " " << current.asMilliseconds() << endl;
+	//cout << start_time.asMilliseconds() << " " << current.asMilliseconds() << endl;
 	float pos = (current - start_time) / speed_;
 	//cout << "start time established pos " << pos << endl;
 	unsigned index = static_cast<unsigned>(pos);

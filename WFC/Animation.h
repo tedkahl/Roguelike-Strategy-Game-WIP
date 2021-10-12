@@ -4,15 +4,10 @@
 #include <array>
 #include <iostream>
 #include <algorithm>
-#include <sstream>
+#include "Debug.h"
 using std::cout;
 using std::endl;
 
-static std::string to_str(sf::IntRect rect) {
-	std::stringstream s;
-	s << rect.left << " " << rect.top << " " << rect.width << " " << rect.height << endl;
-	return s.str();
-}
 //start at a given rect, and move right (mod width) for a certain number of frames
 struct AnimationSeg {
 	sf::IntRect starting;
@@ -46,7 +41,7 @@ public:
 	void set(sf::Time start, std::vector<AnimationSeg>&& segs, bool loop = false, float speed = 1.f) {
 		start_time = start;
 		segments = segs.size();
-		for (int i = 0;i < segs.size();i++) {
+		for (unsigned i = 0;i < segs.size();i++) {
 			animation[i] = segs[i];
 		}
 		loop_ = loop;

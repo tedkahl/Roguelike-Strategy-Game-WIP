@@ -51,7 +51,7 @@ public:
 	std::vector<AnimationSeg> get_pause_anim(sf::IntRect rect, int duration) {
 		return std::vector<AnimationSeg>(1, AnimationSeg(rect, duration, 1, 1));
 	}
-	std::vector<AnimationSeg> get_basic_anim(object_type otype, anim_state state, uint8_t loops, int loop_length = 0) {
+	std::vector<AnimationSeg> get_basic_anim(object_type otype, anim_state state, uint8_t loops, unsigned short loop_length = 0) {
 		auto& info = anims[unitIndex(otype)].get(state);
 		cout << "row: " << (int)info.row << " frames " << (int)info.frames << endl;
 		if (loop_length == 0)
