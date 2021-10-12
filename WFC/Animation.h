@@ -8,6 +8,7 @@
 using std::cout;
 using std::endl;
 
+const int max_seg = 3;
 //start at a given rect, and move right (mod width) for a certain number of frames
 struct AnimationSeg {
 	sf::IntRect starting;

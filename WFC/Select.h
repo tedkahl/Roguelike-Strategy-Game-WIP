@@ -19,7 +19,6 @@ static void handleInput(Level& level, sf::RenderWindow& window, GameState& g, Pl
 			if (p_state.command) {
 				std::cout << "executing command" << std::endl;
 				auto new_state = p_state.command->execute(coords, g.now, &p_state);
-				p_state.setMoveState(p_state.selected->uc(), new_state);
 				p_state.deSelect();
 				p_state.deleteCommand();
 			}
@@ -29,11 +28,8 @@ static void handleInput(Level& level, sf::RenderWindow& window, GameState& g, Pl
 				if (unit && getEnmity(unit_uc, &p_state) == enmity_t::SAME_TEAM && unit_uc->getMoveState() != unit::move_state::HAS_ACTED) {
 					p_state.selected = unit;
 					std::cout << "switching command" << std::endl;
-					if (unit_uc->getMoveState() == unit::move_state::FREE)
-					{
-						p_state.switchCommand(new AttackMove(unit, level));
-						p_state.command->showTargeter();
-					}
+					p_state.switchCommand(new AttackMove(unit, level));
+					p_state.command->showTargeter();
 				}
 			}
 		}

@@ -171,9 +171,11 @@
     <ClInclude Include="AIComponent.h" />
     <ClInclude Include="Animation.h" />
     <ClInclude Include="AnimationManager.h" />
+    <ClInclude Include="Attacks.h" />
     <ClInclude Include="DCSortable.h" />
     <ClInclude Include="Command.h" />
     <ClInclude Include="Debug.h" />
+    <ClInclude Include="EventQueue.h" />
     <ClInclude Include="FrameCounter.h" />
     <ClInclude Include="GameState.h" />
     <ClInclude Include="HasDC.h" />

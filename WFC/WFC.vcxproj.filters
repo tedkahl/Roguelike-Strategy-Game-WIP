@@ -224,5 +224,11 @@
     <ClInclude Include="WFC_lib.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="EventQueue.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Attacks.h">
+      <Filter>Header Files\Pathing</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

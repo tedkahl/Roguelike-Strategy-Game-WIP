@@ -42,7 +42,7 @@ int main()
 	{
 		g.now = clock.getElapsedTime();
 		//AI loop. Hideous, improve
-		if (g.active_player == 0 && p_state.getNext() == nullptr) {
+		if (g.active_player == 0 && p_state.getNext(level.units) == nullptr) {
 			cout << "switching active player" << endl;
 			g.active_player = ++g.active_player % (Alliance::instance()->numTeams() - 1);
 			main_enemy.startTurn();
@@ -59,6 +59,7 @@ int main()
 			}
 			else {
 				g.active_player = ++g.active_player % (Alliance::instance()->numTeams() - 1);
+				cout << "switching active player" << endl;
 				p_state.startTurn(level.units);
 			}
 		}
