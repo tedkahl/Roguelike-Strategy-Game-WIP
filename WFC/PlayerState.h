@@ -11,6 +11,7 @@ struct PlayerState : public Player {
 	void deSelect();
 	void switchCommand(Command* new_command);
 	void deleteCommand();
-	void startTurn(DataManager<UnitComponent> units);
+	virtual void startTurn(DataManager<UnitComponent>& units);
 	void unit_wait(UnitComponent* u);
+	virtual ~PlayerState() {}
 };
