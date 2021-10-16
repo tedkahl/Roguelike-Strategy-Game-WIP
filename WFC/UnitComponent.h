@@ -2,6 +2,7 @@
 #include <SFML/Graphics.hpp>
 #include "Managed.h"
 #include "type_enums.h"
+#include "AIComponent.h"
 namespace unit {
 	enum class move_state { FREE, HAS_MOVED, HAS_ACTED };
 };
@@ -23,18 +24,22 @@ private:
 	bool dummy_;
 	int team_;
 	Entity* owner_;
+	std::unique_ptr<AIComponent> AI_;
 	unit::move_state movestate;
 public:
 	unit::move_state getMoveState() { return movestate; }
 	inline bool dummy() { return dummy_; }
-	inline int team() { return team_; }
-	inline int hp() { return current_hp; }
-	sf::Vector2i getPos();
-	Entity* getOwner();
+	inline int team() const { return team_; }
+	inline int hp() const { return current_hp; }
+	sf::Vector2i getPos() const;
+	Entity* getOwner() const;
+	AIComponent* AI() const;
 	bool damage(int attack) {
 		current_hp -= attack;
 		return current_hp < 0;
 	}
+
+	object_type type() const { return getOwner()->type(); };
 	void setOwner(Entity* owner);
 	UnitStats const& stats() const { return stats_; };
 	UnitComponent() = default;
