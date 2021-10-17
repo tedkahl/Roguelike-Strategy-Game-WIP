@@ -31,41 +31,38 @@ EntityUpdate:
 struct EntityUpdate
 {
 	bool finished;
-	std::optional<int> move_dir;
+	uint8_t move_dir_;
 	std::optional<sf::Vector2i> coords_;
 	std::optional<sf::Vector2f> sprite_position_;
 	std::optional<Animation> animation_;
 	std::optional<entity_action> action;
 	EntityUpdate() = default;
-	EntityUpdate(bool done, std::optional<int> dir, const std::optional<sf::Vector2i>&& coords, const std::optional<sf::Vector2f>&& sprite_position,
-		const std::optional<Animation>&& animation = std::nullopt, const std::optional<entity_action>&& e_action = std::nullopt) : finished(done), move_dir(dir), coords_(coords), sprite_position_(sprite_position), animation_(animation), action(e_action) {}
+	EntityUpdate(bool done, uint8_t move_dir, const std::optional<sf::Vector2i>&& coords, const std::optional<sf::Vector2f>&& sprite_position,
+		const std::optional<Animation>&& animation = std::nullopt, const std::optional<entity_action>&& e_action = std::nullopt) : finished(done), move_dir_(move_dir), coords_(coords), sprite_position_(sprite_position), animation_(animation), action(e_action) {}
 };
 
+//a sort of coroutine, which attaches to an entity and returns entityupdates based on current time
 class RealTime
 {
 protected:
 	Board* board_;
 	sf::Time start_time;
-	virtual std::optional<sf::Vector2i> getCoords(unsigned index) { return std::nullopt; }
+	virtual std::optional<sf::Vector2i> getCoords(unsigned index) = 0;
 	inline bool isFirst(sf::Time current);
-	inline unsigned getIndex(sf::Time current);
 public:
-	RealTime(Board& board_);
+	RealTime(Board& board);
 	virtual EntityUpdate getUpdate(sf::Time current) = 0;
 	virtual ~RealTime() {}
 	Board& getBoard() const;
 };
 
-class Lunge : public RealTime {
-private:
-	const float lunge = 15.f;
-	sf::Vector2f start_pos;
-	sf::Vector2i dir;
-	sf::Vector2i target_;
-	entity_action action;
-	bool hasTriggered = false;
-
+//a RealTime composed of multiple other RealTimes
+class CompositeRT : public RealTime {
+protected:
+	std::deque<std::unique_ptr<RealTime>> queue;
 public:
-	Lunge(sf::Vector2i pos, sf::Vector2i target, object_type type, anim_state state, sf::Time start_t, Board& board, entity_action& a);
+	using RealTime::RealTime;
+	CompositeRT(std::deque<std::unique_ptr<RealTime>>&& init, Board& board);
 	virtual EntityUpdate getUpdate(sf::Time current) override;
+	virtual ~CompositeRT() {}
 };
