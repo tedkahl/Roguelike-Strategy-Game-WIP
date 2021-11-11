@@ -11,9 +11,9 @@ static matrix<T> subMatrix(matrix<T>& mat, size_t xoffset, size_t yoffset, size_
 	assert(xoffset + width <= mat.width());
 	assert(yoffset + height <= mat.height());
 	matrix<T> submatrix(width, height);
-	for (size_t i = 0; i < width; i++) {
-		for (size_t j = 0; j < height; j++) {
-			submatrix.at(i, j) = mat.at(xoffset + i, yoffset + j);
+	for (size_t y = 0; y < height; y++) {
+		for (size_t x = 0; x < width; x++) {
+			submatrix.at(x, y) = mat.at(xoffset + x, yoffset + y);
 		}
 	}
 	return submatrix;

@@ -89,21 +89,21 @@ std::optional<std::pair<size_t, size_t>> Propagator::findLowestEntropy()
 {
 	double lowestEntropy = DBL_MAX;
 	std::vector<std::pair<size_t, size_t>> squares = {};
-	for (size_t i = 0; i < wave.width(); i++)
+	for (size_t y = 0; y < wave.height(); y++)
 	{
-		for (size_t j = 0; j < wave.height(); j++)
+		for (size_t x = 0; x < wave.width(); x++)
 		{
-			if (collapsed.at(i, j))
+			if (collapsed.at(x, y))
 				continue; //ignore already collapsed squares
-			if (entropy.at(i, j) < lowestEntropy)
+			if (entropy.at(x, y) < lowestEntropy)
 			{
 				squares.clear();
-				squares.emplace_back(i, j);
-				lowestEntropy = entropy.at(i, j);
+				squares.emplace_back(x, y);
+				lowestEntropy = entropy.at(x, y);
 			}
-			else if (entropy.at(i, j) == lowestEntropy)
+			else if (entropy.at(x, y) == lowestEntropy)
 			{
-				squares.emplace_back(i, j);
+				squares.emplace_back(x, y);
 			}
 		}
 	}
