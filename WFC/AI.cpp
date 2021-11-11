@@ -1,53 +1,61 @@
 #include "AI.h"
 #include "Attacks.h"
+#include "Team.h"
 
-//bool operator<(const sf::Vector2i& l, const sf::Vector2i& r) { return std::tie(l.x, l.y) < std::tie(r.x, r.y); }
-auto actualTargets(matrix<dj_map_node>& dj_map, std::vector<sf::Vector2i>& move_targets) {
-	auto cmp = [](const sf::Vector2i& lhs, const sf::Vector2i& rhs) {return compV2i(lhs, rhs);};
-	std::set<sf::Vector2i, decltype(cmp)> ret;
-	for (auto& i : move_targets) {
-		for (auto j : dj_map.at(i).reachable_targets) {
-			ret.insert(j);
+//just for movement right now
+float getCompositeScore(std::vector<preference>& state, const std::map<preference_type, dj_map>& maps, sf::Vector2i loc) {
+	std::partition(state.begin(), state.end(), [](const preference& p) {return !p.additive_;});
+	float score = FLT_MAX;
+	for (auto& i : state) {
+		auto& node = maps.at(i.type_).map.at(loc);
+		if (!i.additive_) {
+			score = std::min(node.score, score);
 		}
+		else
+			score += node.score;
 	}
-	return ret;
-}
-void AIPlayer::decideFinalTarget(Entity* e, matrix<dj_map_node>& dj_map, std::vector<sf::Vector2i>& move_targets) {
-	auto t = actualTargets(dj_map, move_targets);
-	command.reset(new AttackMove(e, level_));
-	target = *t.begin();
+	return score;
 }
 
 //select the best move locations from djikstra map
-static std::vector<sf::Vector2i> moveTargetsFromMap(Entity* me, matrix<dj_map_node>& dj_map, pathsGrid& paths, Board& board) {
+static sf::Vector2i targetFromMap(Entity* me, const std::map<preference_type, dj_map>& maps, pathsGrid& paths, Board& board) {
 	auto pos = me->getPos();
-	int min_score = INT_MAX;
-	std::vector<sf::Vector2i> move_targets(1, pos);
+	float min_score = FLT_MAX;
+	sf::Vector2i target;
 	sf::Vector2i sq;
-	for (int i = 0;i < paths.grid.width();i++) {
-		for (int j = 0;j < paths.grid.height();j++) {
-			if (paths.grid.at(i, j).search == paths.search) {
-				sq = sf::Vector2i{ i,j } + paths.offset;
+	std::vector<preference> state{ preference{preference_type::ANY_ENEMY}, preference{preference_type::BREAK_ROCK, -.1f, true} };
 
-				if (paths.grid.at(i, j).movable && !paths.grid.at(i, j).has_ally) {
-					if (dj_map.at(sq).moves_left < min_score) {
-						move_targets = { sq };
-						min_score = dj_map.at(sq).moves_left;
-					}
-					else if (dj_map.at(sq).moves_left == min_score) {
-						move_targets.push_back(sq);
-					}
+	for (int i = 0;i < paths.grid.height();i++) {
+		for (int j = 0;j < paths.grid.width();j++) {
+			if (paths.grid.at(j, i).search == paths.search) {
+				sq = sf::Vector2i{ j,i } + paths.offset;
+				auto new_score = (getCompositeScore(state, maps, sq));
+				if (paths.grid.at(j, i).movable || paths.grid.at(j, i).attackable && new_score < min_score) {
+					target = sq;
+					min_score = new_score;
 				}
 			}
 		}
 	}
-	return move_targets;
+	return target;
 }
+//get preferences for current unit and retrieve maps if necessary.
+/*
+* WARNING PLACEHOLDER BUGS HERE
+*/
+void AIPlayer::getMaps(UnitComponent* unit) {
+	//get state from unit->AIComponent.state()
+	std::vector<preference> state{ preference{preference_type::ANY_ENEMY}, preference{preference_type::BREAK_ROCK, -.1f, true} };
+	for (auto& i : state) {
+		auto [ref, inserted] = maps.emplace(std::make_pair(i.type_, dj_map()));
+		auto dirty = getTargets(i.type_, team_, *level_.units, *level_.entities, (ref->second).targets);
 
-AIPlayer::AIPlayer(Level& level, int team) :PlayerState(team), level_(level), dj_map(nullptr) {
-
+		//if 
+		if (inserted || dirty) {
+			(ref->second).map = djikstraMap(move_type::WALK, team_, (ref->second).targets, level_.state);
+		}
+	}
 }
-
 // select unit
 // get paths
 // choose target and command
@@ -57,37 +65,41 @@ bool AIPlayer::selectNext() {
 	auto u = getNext();
 	if (u) {
 		selected = u->getOwner();
-		auto paths = pathFind(selected->uc(), level_.state, getAttack<map_node>(u->stats().attack_type));
-		std::vector<sf::Vector2i> targets = moveTargetsFromMap(selected, *dj_map, paths, level_.state);
-		decideFinalTarget(selected, *dj_map, targets);
+		getMaps(u);
+		auto paths = pathFind(selected->uc(), level_.state, getAttack(u->stats().attack_type));
+		auto target = targetFromMap(selected, maps, paths, level_.state);
+
 		command->showTargeter();
 		return true;
 	}
 	return false;
 }
 
-
 void AIPlayer::executeSelected(sf::Time now) {
 	command->execute(target, now, this);
 	deSelect();
 	deleteCommand();
 }
+//dj_map = &djikstraMap(type, team_, enemies, level_.state, getAttack(attack_type::MELEE));
 
-//initializing dj map this way not really satisfactory but should work for now
-void AIPlayer::getMap(move_type type) {
-	dj_map = &djikstraMap(type, team_, enemies, level_.state, getAttack<dj_map_node>(attack_type::MELEE));
-	for (unsigned i = 0;i < dj_map->height();i++) {
-		for (unsigned j = 0;j < dj_map->width();j++) {
-			cout << dj_map->at(j, i).moves_left;
-			if (dj_map->at(j, i).moves_left < 10) cout << '_';
-			cout << " ";
+void AIPlayer::printMap(preference_type type) {
+	auto& dj_map = maps[type].map;
+	for (unsigned i = 0;i < dj_map.height();i++) {
+		for (unsigned j = 0;j < dj_map.width();j++) {
+			cout << dj_map.at(j, i).score;
+			/*if (dj_map.at(j, i).score < 10) cout << '_';
+			cout << " ";*/
 
 		}
 		cout << endl;
 	}
 }
 
-void AIPlayer::startTurn() {
-	p_start_turn(level_.units);
-	getMap(move_type::WALK);
+bool AIPlayer::hasSelection() { return selected != nullptr; }
+//debug function. Get a map to display visually
+dj_map& AIPlayer::peekMap() {
+	getMaps(getNext());
+	auto map = maps.begin();
+	printMap(map->first);
+	return map->second;
 }

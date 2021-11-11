@@ -1,25 +1,26 @@
 #pragma once
 #include <algorithm>
-#include "PlayerState.h"
+#include <map>
+#include "Player.h"
 #include "UnitComponent.h"
 #include "DataManager.h"
-#include "Team.h"
+#include "AIComponent.h"
+#include "AIPreference.h"
+#include "AIutil.h"
 #include "Paths.h"
 #include "Command.h"
-
-class AIPlayer :public PlayerState {
+class AIPlayer :public Player {
 private:
-	Level& level_;
-	matrix<dj_map_node>* dj_map;
+	int turn;
+	std::map<preference_type, dj_map> maps;
 	sf::Vector2i target;
-	void getMap(move_type type);
+	void printMap(preference_type type);
 public:
-	void startTurn();
-	virtual void startTurn(DataManager<UnitComponent>& units) override { assert(units.active() == UINT32_MAX); };
-	UnitComponent* getNext() { return static_cast<Player*>(this)->getNext(level_.units); }
-	bool hasSelection() { return selected == nullptr; }
+	void getMaps(UnitComponent* unit);
+	dj_map& peekMap();
+	bool hasSelection();
 	virtual bool selectNext();
 	virtual void executeSelected(sf::Time now);
-	void decideFinalTarget(Entity* e, matrix<dj_map_node>& dj_map, std::vector<sf::Vector2i>& move_targets);
-	AIPlayer(Level& level, int team);
+	//void decideFinalTarget(Entity* e, matrix<dj_map_node>& dj_map, std::vector<sf::Vector2i>& move_targets);
+	using Player::Player;
 };

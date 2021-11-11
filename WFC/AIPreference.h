@@ -1,12 +1,13 @@
 #pragma once
-#include "Board.h"
 #include <vector>
 #include <SFML/Graphics.hpp>
+#include <concepts>
+#include <functional>
+#include "Board.h"
 #include "UnitComponent.h"
 #include "DataManager.h"
-#include <concepts>
+#include "UnitManager.h"
 #include "type_enums.h"
-#include <functional>
 #include "AIutil.h"
 /*types of preferences:
 1. pursue a map objective
@@ -24,7 +25,30 @@ enum class preference_type {
 	//example ally objective
 	LOW_HP_ALLY
 };
+//typedef std::function<void(getTargetInput input, std::vector<map_target>&)> TargetFxn;
+template <typename T>
+using PrefFxn = std::function<float(T&)>;
 
+template<typename T>
+static bool TrueFxn(const T& t) {
+	return true;
+}
+
+template<typename T, object_type type>
+//requires requires(T t) { {t.type()}->std::same_as<object_type>; }
+static bool PickType(const T& t) {
+	return t.type() == type;
+}
+
+template<typename T>
+static float OneFxn(const T& t) {
+	return 1.f;
+}
+
+static float preferLowHP(const UnitComponent& unit) {
+	return .5 + (static_cast<float>(unit.hp()) / unit.stats().max_hp);
+}
+//lower multiplier (more negative for additive maps) means stronger preference
 struct preference {
 public:
 	preference_type type_;
@@ -33,49 +57,15 @@ public:
 	preference(preference_type type, float multiplier = 1.f, bool additive = false) :type_(type), multiplier_(multiplier), additive_(additive) {}
 };
 
-typedef std::function<void(getTargetInput input, std::vector<map_target>&)> TargetFxn;
 
-//filter a list of possible targets according to predicate "p", and score them according to preference function "pref". Store the results in target vector
-template<typename T>
-requires requires(T t) { t->getPos(); }
-const static std::function <void(std::vector<T*>&)> filter = [](std::vector<T*>& possible_targets, std::vector<map_target>& targets, Predicate p = TrueFxn, PrefFxn<T> pref = OneFxn) {
-	for (unsigned i = 0;i < possible_targets.size();i++) {
-		if (p(possible_targets[i]))
-			targets.push_back({ possible_targets[i]->getPos(), pref(possible_targets[i]) });
-	}
-};
+void findTargets(preference_type type, int team, UnitManager& units, DataManager<Entity>& entities, std::vector<map_target>& targets);
 //get list of targets from a preference and current state. Return whether the corresponding map must be updated/recalculated
 //space for optimization here: store the changed values to avoid recalculating map from scratch. 
-static bool getTargets(preference_type type, getTargetInput input, std::vector<map_target>& targets) {
+static bool getTargets(preference_type type, int team, UnitManager& units, DataManager<Entity>& entities, std::vector<map_target>& targets) {
 	std::vector<map_target> new_targets;
 	new_targets.reserve(targets.size());
-	target_function(type)(input, new_targets);
+	findTargets(type, team, units, entities, new_targets);
 	bool dirty = (new_targets != targets);
 	targets = new_targets;
 	return dirty;
-}
-
-//could just store lambdas in an array
-TargetFxn target_function(preference_type type) {
-	switch (type) {
-	case preference_type::ANY_ENEMY:
-		return [](getTargetInput input, std::vector<map_target>& targets) {
-			filter<UnitComponent>(input.enemies, targets);
-		};
-		break;
-	case preference_type::LOW_HP_ENEMY:
-		return [](getTargetInput input, std::vector<map_target>& targets) {
-			filter<UnitComponent>(input.enemies, targets, TrueFxn, preferLowHP);
-		};
-		break;
-	case preference_type::LOW_HP_ALLY:
-		return [](getTargetInput input, std::vector<map_target>& targets) {
-			filter<UnitComponent>(input.allies, targets, TrueFxn, preferLowHP);
-		};
-		break;
-	case preference_type::BREAK_ROCK:
-		return [](getTargetInput input, std::vector<map_target>& targets) {
-			filter<UnitComponent>(input.entities, targets, PickType<Entity, object_type::ROCK>);
-		};
-	}
 }

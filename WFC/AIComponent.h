@@ -16,17 +16,17 @@ class AIComponent
 {
 public:
 	std::vector<preference> state;
-	AIComponent(std::initializer_list<preference> init) :state(init) {}
+	AIComponent(std::initializer_list<preference> init);
 };
 
 class EvilMonster :public AIComponent {
-	EvilMonster() :AIComponent({ preference(preference_type::LOW_HP_ENEMY) }) {}
+	EvilMonster();
 };
 
 class SimpleMonster :public AIComponent {
-	SimpleMonster() :AIComponent({ preference{preference_type::ANY_ENEMY}, preference{preference_type::BREAK_ROCK, 2.f} }) {}
+	SimpleMonster();
 };
 
 class Healer :public AIComponent {
-	Healer() :AIComponent({ preference(preference_type::LOW_HP_ALLY, .6f), preference{preference_type::ANY_ENEMY} }) {}
+	Healer();
 };
