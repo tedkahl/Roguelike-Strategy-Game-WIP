@@ -2,14 +2,21 @@
 #include <SFML/Graphics.hpp>
 #include <optional>
 #include <functional>
+#include <queue>
 #include "type_enums.h"
 #include "Animation.h"
-#include "Actions.h"
+#include "assert.h"
 struct Board;
 class Entity;
-//typedef std::function<void(sf::Vector2i target_, Entity*)> entity_target_action;
 
-
+typedef std::function<void(Entity*)> entity_action;
+namespace actions {
+	static void null_action(Entity* e)
+	{
+		cout << "null action don't call this" << endl;
+		assert(false);
+	}
+}
 /*
 Immediate goal: get abilities working.
 Reasonable suggestion: 1. add animation to entityupdate 2. add function to Entity that takes a single update 3. add
@@ -47,22 +54,25 @@ class RealTime
 protected:
 	Board* board_;
 	sf::Time start_time;
-	virtual std::optional<sf::Vector2i> getCoords(unsigned index) = 0;
-	inline bool isFirst(sf::Time current);
+	sf::Time speed_;
+	inline bool isFirst(sf::Time);
 public:
-	RealTime(Board& board);
+	RealTime() = default;
+	RealTime(Board&);
+	RealTime(Board&, sf::Time);
 	virtual EntityUpdate getUpdate(sf::Time current) = 0;
 	virtual ~RealTime() {}
+	sf::Time speed() const { return speed_; }
 	Board& getBoard() const;
 };
 
 //a RealTime composed of multiple other RealTimes
 class CompositeRT : public RealTime {
 protected:
-	std::deque<std::unique_ptr<RealTime>> queue;
+	std::deque<std::unique_ptr<RealTime>> moves;
 public:
 	using RealTime::RealTime;
 	CompositeRT(std::deque<std::unique_ptr<RealTime>>&& init, Board& board);
 	virtual EntityUpdate getUpdate(sf::Time current) override;
-	virtual ~CompositeRT() {}
+	//virtual ~CompositeRT() {}
 };

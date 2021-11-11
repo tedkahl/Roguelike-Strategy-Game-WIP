@@ -6,6 +6,7 @@
 using std::cout;
 using std::endl;
 RealTime::RealTime(Board& board) : start_time(), board_(&board) {};
+RealTime::RealTime(Board& board, sf::Time speed) : start_time(), board_(&board), speed_(speed) {};
 Board& RealTime::getBoard() const { return *board_; }
 
 bool RealTime::isFirst(sf::Time current) {
@@ -17,15 +18,20 @@ bool RealTime::isFirst(sf::Time current) {
 	return false;
 }
 
-CompositeRT::CompositeRT(std::deque<std::unique_ptr<RealTime>>&& init, Board& board) :RealTime(board), queue(init) {}
+CompositeRT::CompositeRT(std::deque<std::unique_ptr<RealTime>>&& init, Board& board) :RealTime(board), moves(std::move(init)) {}
 
 EntityUpdate CompositeRT::getUpdate(sf::Time current) {
 	EntityUpdate ret;
-	assert(queue.size() > 0);
-	ret = queue.front()->getUpdate(current);
-	if (ret.finished && queue.size() > 1) {
-		ret.finished = false;
-		queue.pop_front();
+	isFirst(current);
+	assert(moves.size() > 0);
+	ret = moves.back()->getUpdate(current);
+	if (ret.finished) {
+		if (moves.size() > 1) {
+			start_time += moves.back()->speed();
+			moves.pop_back();
+			ret = moves.back()->getUpdate(start_time);
+		}
+		else moves.pop_back();
 	}
 	return ret;
 }

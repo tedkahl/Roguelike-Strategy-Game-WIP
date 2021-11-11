@@ -1,5 +1,6 @@
 #include "RTAction.h"
 #include "AnimationManager.h"
+#include "Board.h"
 /*up = <0, -1> = <.66, -.33>
 	right = <1, 0> = <.66, .33>
 	left = <-1, 0> = <-.66, -.33>
@@ -7,7 +8,8 @@
 static sf::Vector2f getTrueDir(sf::Vector2i dir) {
 	return { (2.f / 3.f) * (dir.x - dir.y), (1.f / 3.f) * (dir.x | dir.y) };
 }
-Lunge::Lunge(sf::Vector2i pos, sf::Vector2i target, object_type type, anim_state a_state, sf::Time start_t, Board& board, entity_action& a) : SimpleRT(type, a_state, speed, board, a), start_pos(squarePosFromCoords(pos, board_->board.width())), target_(target), dir(target - pos),
+//speed unused in SimpleRT right now
+Lunge::Lunge(sf::Vector2i pos, sf::Vector2i target, object_type type, anim_state a_state, Board& board, entity_action& a) : SimpleRT(type, a_state, sf::milliseconds(0), board, a), start_pos(squarePosFromCoords(pos, board_->board.width())), target_(target), dir(target - pos),
 action(a) {}
 
 EntityUpdate SimpleRT::getUpdate(sf::Time current) {
@@ -17,7 +19,7 @@ EntityUpdate SimpleRT::getUpdate(sf::Time current) {
 		sent_anim = anim;
 	}
 
-	float fraction = (current - start_time).asMilliseconds() / anim.loop_length;
+	float fraction = static_cast<float>((current - start_time).asMilliseconds()) / anim.loop_length;
 	if (fraction >= delay_ && !hasTriggered) {
 		hasTriggered = true;
 		sent_action = action;
@@ -28,7 +30,7 @@ EntityUpdate SimpleRT::getUpdate(sf::Time current) {
 
 EntityUpdate Lunge::getUpdate(sf::Time current) {
 	auto update = SimpleRT::getUpdate(current);
-	float fraction = (current - start_time).asMilliseconds() / anim.loop_length;
+	float fraction = static_cast<float>((current - start_time).asMilliseconds()) / anim.loop_length;
 	fraction = .5f - std::abs(.5f - fraction);
 	auto true_dir = getTrueDir(dir);
 
@@ -37,7 +39,6 @@ EntityUpdate Lunge::getUpdate(sf::Time current) {
 
 	return EntityUpdate(update);
 }
-SimpleRT::SimpleRT(object_type type, anim_state a_state, sf::Time speed, Board& board, entity_action& a, float delay) : RealTime(board),
-anim(animation_manager::instance()->get_basic_anim(type, a_state, speed.asMilliseconds())), speed_(speed), action(a), delay_(delay) {}
+SimpleRT::SimpleRT(object_type type, anim_state a_state, sf::Time speed, Board& board, const entity_action& a, float delay) : RealTime(board, speed), anim(animation_manager::instance()->get_basic_anim(type, a_state, speed.asMilliseconds())), action(a), delay_(delay) {}
 
 
