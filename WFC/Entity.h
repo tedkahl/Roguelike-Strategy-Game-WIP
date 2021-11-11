@@ -1,11 +1,13 @@
 #pragma once
 #include <SFML/Graphics.hpp>
-#include <queue>
+#include <deque>
 #include "type_enums.h"
 #include "Managed.h"
-#include "RealTime.h"
 #include "DrawComponent.h"
 #include "DCSortable.h"
+#include "RealTime.h"
+#include "GridMove.h"
+#include "RTAction.h"
 //#include "Data.h"
 class DrawComponent;
 struct Board;
@@ -13,6 +15,14 @@ class UnitComponent;
 class Square;
 class RealTime;
 class DCSortable;
+
+template<typename, typename = void>
+constexpr bool is_type_complete_v = false;
+
+template<typename T>
+constexpr bool is_type_complete_v
+<T, std::void_t<decltype(sizeof(T))>> = true;
+
 class Entity : public Managed
 {
 private:
@@ -21,9 +31,13 @@ private:
 	SortedDManager<DrawComponent>* manager;
 	DCSortable dc_;
 	UnitComponent* uc_;
-	std::queue<std::unique_ptr<RealTime>> rt_actions;
-public:
 	object_type type_;
+	std::deque<std::unique_ptr<RealTime >> rt_actions;
+public:
+	object_type type() const {
+		static_assert(is_type_complete_v<RealTime>);
+		return type_;
+	};
 	DrawComponent* dc() const;
 	//DCAccessor& dcAccess();
 	void setDC(DCSortable& dc);
@@ -38,6 +52,10 @@ public:
 	inline sf::Vector2i getPos() const { return coords_; }
 	//Entity() = default;
 	void setPos(sf::Vector2i newpos, Board& state);
-	//Entity(DrawComponent* drawcomponent);
+	Entity(Entity&& other) noexcept;
+	Entity& operator=(Entity&& other) noexcept;
+	Entity() = default;
+	Entity(const Entity&) = delete;
+	friend void swap(Entity& a, Entity& b);
 };
 
