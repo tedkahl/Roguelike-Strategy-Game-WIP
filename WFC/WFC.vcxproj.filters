@@ -260,5 +260,8 @@
     <ClInclude Include="UnitManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="EntityUpdate.h">
+      <Filter>Header Files\Commands</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

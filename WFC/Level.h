@@ -21,16 +21,16 @@ class DrawComponent;
 class Square;
 struct Board;
 
+//struct renderBatch {
+//	int batch;
+//	std::vector<sf::RenderTexture> textures;
+//	SortedDManager<DrawComponent>& DCManager;
+//	renderBatch(int, std::vector<sf::RenderTexture>&&, SortedDManager<DrawComponent>&);
+//	~renderBatch();
+//};
+
 //may be nearing the point where we can rethink this class, move data managers somewhere else, etc
 //for now don't worry too much about encapsulation I think
-struct renderBatch {
-	int batch;
-	std::vector<sf::RenderTexture> textures;
-	SortedDManager<DrawComponent>& DCManager;
-	renderBatch(int, std::vector<sf::RenderTexture>&&, SortedDManager<DrawComponent>&);
-	~renderBatch();
-};
-
 class Level
 {
 private:

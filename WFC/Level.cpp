@@ -47,40 +47,40 @@ void Level::draw(sf::RenderWindow& window) {
 			i.draw(&window);
 	}
 }
-renderBatch::~renderBatch() {
-	DCManager.deleteBatch(batch);
-}
+//renderBatch::~renderBatch() {
+//	DCManager.deleteBatch(batch);
+//}
+//
+//renderBatch::renderBatch(int b, std::vector<sf::RenderTexture>&& txt, SortedDManager<DrawComponent>& dcomponents) : batch(b), textures(txt), DCManager(dcomponents) {}
 
-renderBatch::renderBatch(int b, std::vector<sf::RenderTexture>&& txt, SortedDManager<DrawComponent>& dcomponents) : batch(b), textures(txt), DCManager(dcomponents) {}
-
-void Level::displayDJ(dj_map& test) {
-	static std::unique_ptr<renderBatch> b;
-	if (b != nullptr) {
-		b = nullptr;
-		return;
-	}
-	float max_score = 0;
-	int batch = dcomponents->addBatch();
-	for (auto& i : test.map) {
-		max_score = std::max(max_score, i.score);
-	}
-	sf::Font roboto;
-	roboto.loadFromFile("./Roboto/Roboto-Regular.ttf");
-	DrawComponent* obj_dc;
-	std::vector<sf::RenderTexture> spare_textures;
-	for (unsigned y = 0;y < test.map.height();y++) {
-		for (unsigned x = 0;x < test.map.width();x++) {
-			auto normalized_score = std::min(1.0f, 2 * test.map.at(x, y).score / max_score);
-			auto type = normalized_score < .3 ? object_type::MOVESELECT : object_type::ATTACKSELECT;
-			spare_textures.push_back(get_DJ_Square(roboto, normalized_score, *tm_, type));
-			obj_dc = dcomponents->declareNewBatched(spare_textures.back().getTexture(), sf::Vector2f(), 1, sf::IntRect(), batch);
-
-			//std::cout << "Adding target square at " << to_string(sf::Vector2i(i, j) + paths.offset) << std::endl;
-			obj_dc->updateEntityPos(sf::Vector2i(x, y), state.heightmap);
-		}
-	}
-	b = std::make_unique<renderBatch>(batch, std::move(spare_textures), *dcomponents);
-}
+//void Level::displayDJ(dj_map& test) {
+//	static std::unique_ptr<renderBatch> b;
+//	if (b != nullptr) {
+//		b = nullptr;
+//		return;
+//	}
+//	float max_score = 0;
+//	int batch = dcomponents->addBatch();
+//	for (auto& i : test.map) {
+//		max_score = std::max(max_score, i.score);
+//	}
+//	sf::Font roboto;
+//	roboto.loadFromFile("./Roboto/Roboto-Regular.ttf");
+//	DrawComponent* obj_dc;
+//	std::vector<sf::RenderTexture> spare_textures;
+//	for (unsigned y = 0;y < test.map.height();y++) {
+//		for (unsigned x = 0;x < test.map.width();x++) {
+//			auto normalized_score = std::min(1.0f, 2 * test.map.at(x, y).score / max_score);
+//			auto type = normalized_score < .3 ? object_type::MOVESELECT : object_type::ATTACKSELECT;
+//			spare_textures.push_back(get_DJ_Square(roboto, normalized_score, *tm_, type));
+//			obj_dc = dcomponents->declareNewBatched(spare_textures.back().getTexture(), sf::Vector2f(), 1, sf::IntRect(), batch);
+//
+//			//std::cout << "Adding target square at " << to_string(sf::Vector2i(i, j) + paths.offset) << std::endl;
+//			obj_dc->updateEntityPos(sf::Vector2i(x, y), state.heightmap);
+//		}
+//	}
+//	b = std::make_unique<renderBatch>(batch, std::move(spare_textures), *dcomponents);
+//}
 
 
 //this is pretty goofy. Probably just looping through entities is faster.
@@ -203,7 +203,7 @@ void Level::setSquares(matrix<char>& WFCOutput)
 			auto [terrain_t, entity_t] = Data<char>::d()->glyphs.at(val);
 			auto& [path, offset, rect] = Data<char>::d()->squareinfo.at(terrain_t);
 			state.heightmap.at(x, y) = offset.y;
-			state.board.at(x, y) = Square(terrain_t, dcomponents.get(), dcomponents->declareNew(path, offset, tm_, 0, rect), sf::Vector2i(x, y), state.heightmap);
+			state.board.at(x, y) = Square(terrain_t, dcomponents.get(), dcomponents->declareNew(tm_->get(path), offset, 0, rect), sf::Vector2i(x, y), state.heightmap);
 			if (entity_t != object_type::NONE) {
 				e = addEntity(entity_t, 2, sf::Vector2i(x, y));
 			}

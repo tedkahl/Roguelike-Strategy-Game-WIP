@@ -65,10 +65,10 @@ static void handleInput(Level& level, sf::RenderWindow& window, GameState& g, Pl
 				p_state.startTurn();
 			}
 			break;
-		}
+		}/*
 		case sf::Keyboard::Key::J: {
 			level.displayDJ(enemy.peekMap());
-		}
+		}*/
 		case sf::Keyboard::Key::D: {
 			if (auto coords = level.getCoords(window, sf::Mouse::getPosition(window))) {
 				auto& square = squares.at(coords.value());
