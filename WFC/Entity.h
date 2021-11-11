@@ -28,7 +28,7 @@ class Entity : public Managed
 private:
 	sf::Vector2i coords_;
 	Square* owner_;
-	SortedDManager<DrawComponent>* manager;
+	DCManager* manager;
 	DCSortable dc_;
 	UnitComponent* uc_;
 	object_type type_;

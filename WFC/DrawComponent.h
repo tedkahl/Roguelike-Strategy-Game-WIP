@@ -21,6 +21,7 @@ class DrawComponent : public DCSortable {
 private:
 	static sf::RectangleShape inner;
 	static sf::RectangleShape outer;
+	void setAnimation(sf::Time start, const Animation& anim);
 	sf::Vector2f sprite_offset;
 	sf::Sprite sprite;
 	sf::IntRect default_rect;
@@ -38,14 +39,7 @@ public:
 		//cout << "setting sprite pos " << position.x << " " << position.y << endl;
 		sprite.setPosition(position + sprite_offset);
 	}
-	inline void setTextureRect(const sf::IntRect& rect) {
-		if (rect.left == -1) {
-			sprite.setTextureRect(default_rect);
-			std::cout << "animation done " << to_str(default_rect);
-		}
-		else sprite.setTextureRect(rect);
-		//std::cout << to_str(sprite.getTextureRect());
-	}
+	inline void setTextureRect(const sf::IntRect& rect);
 
 	std::variant<Entity*, Square*> getOwner() const;
 	void setOwner(Square* owner);
@@ -53,12 +47,13 @@ public:
 
 	inline sf::Vector2f getOffset() { return sprite_offset; }
 
-	void setAnimation(sf::Time start, const Animation& anim);
 	void draw(sf::RenderTarget* target);
 	bool updateAnimation(sf::Time current);
+	bool update(const sf::Time& current, const EntityUpdate& update, DCSortable& ref);
 
 	void updateEntityPos(sf::Vector2i newpos, matrix<float>& heightmap);
 	void setSquarePos(sf::Vector2i newpos, matrix<float>& heightmap);
+	operator SortType() const { return sortVal(); }
 	friend bool operator<(const DrawComponent& l, const DrawComponent& r) { return l.sortVal() < r.sortVal(); }
 	friend bool operator<(const DrawComponent& l, const SortType& r) { return l.sortVal() < r; }
 	friend bool operator==(const DrawComponent& l, const SortType& r) {

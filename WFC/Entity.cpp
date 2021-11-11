@@ -21,41 +21,15 @@ bool Entity::update(sf::Time current) {
 		auto update = rt_actions.front()->getUpdate(current);
 		if (update.action)
 			update.action.value()(this);
-		DrawComponent* dc_p = dc();
-		if (update.move_dir_ == 0 && dc_.move_dir() == 1) {
-			dirty = true;
-			//cout << "updating move dir" << endl;
-			dc_p->setMoveDirection(0, dc_);
-		}
-		if (update.animation_)
-			dc_p->setAnimation(current, std::move(update.animation_.value()));
-
-		if (update.coords_ && update.coords_.value() != coords_) {
-			dc_p->updateCoords(update.coords_.value(), dc_);
-			dirty = true;
-			coords_ = update.coords_.value();
-			cout << "updating coords" << endl << to_string(coords_) << endl;
-		}
-		if (update.sprite_position_) {
-			//cout << "setting sprite pos " << to_string(update.sprite_position_.value()) << endl;
-			dc_p->setSpritePos(update.sprite_position_.value());
-		}
-
+		manager->updateAll(current, dc_.sortVal(), dc_, update);
+		coords_ = dc_.coords();
 		if (update.finished) {
 			std::cout << "Action finished" << std::endl;
 			if (coords_ != owner_->pos) {
 				rt_actions.front()->getBoard().moveEntity(this, coords_); //ugly
-
-				if (dc_.move_dir() != 1) {
-					dc_p->setMoveDirection(update.move_dir_, dc_);
-					dirty = true;
-				}
 			}
 			rt_actions.pop_front();
 		}
-		//cout << "fixing changed values" << endl;
-		if (dirty)
-			manager->fixChangedVal(dc_p);
 		return true;
 	}
 	return false;
