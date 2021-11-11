@@ -1,23 +1,20 @@
 #include "DrawComponent.h"
-void DrawComponent::draw(sf::RenderTarget* target) const {
-	target->draw(sprite);
-	if (health >= 0) {
-		sf::RectangleShape outer({ 40.f, 10.f });
-		outer.setOrigin(sprite.getPosition() + sprite_offset + sf::Vector2f{ 0.f, 20.f });
-		outer.setFillColor(sf::Color::Black);
-		outer.setOutlineColor(sf::Color::Black);
-		outer.setOutlineThickness(2.f);
+#include "Board.h"
 
-		sf::RectangleShape inner({ health * 40.f, 10.f });
-		inner.setOrigin(sprite.getPosition() + sprite_offset + sf::Vector2f{ 0.f, 20.f });
-		inner.setFillColor(sf::Color::Red);
+void DrawComponent::draw(sf::RenderTarget* target) {
+	target->draw(sprite);
+	if (health >= 0.f) {
+		inner.setPosition(sprite.getPosition() + sprite_offset + sf::Vector2f{ 16.f, 30.f });
+		outer.setPosition(sprite.getPosition() + sprite_offset + sf::Vector2f{ 16.f, 30.f });
+		inner.setSize({ health * 40.f, 10.f });
 		target->draw(outer);
 		target->draw(inner);
 	}
 }
-void DrawComponent::setAnimation(sf::Time start, std::vector<AnimationSeg>&& segs, bool loop, float speed) {
+void DrawComponent::setAnimation(sf::Time start, const Animation& anim) {
 	//cout << "setting animation" << endl;
-	animation.set(start, std::forward< std::vector<AnimationSeg>>(segs), loop, speed);
+	animation = anim;
+	animation.start(start);
 }
 bool DrawComponent::updateAnimation(sf::Time current) {
 	if (animation.active()) {
@@ -27,12 +24,18 @@ bool DrawComponent::updateAnimation(sf::Time current) {
 	return false;
 }
 
-void DrawComponent::set(std::string path, sf::Vector2f& offset, std::shared_ptr<ResourceManager<sf::Texture>> tm, unsigned obj_height, const sf::IntRect& rect, int batch)
+void DrawComponent::set(const sf::Texture& texture, const sf::Vector2f& offset, unsigned obj_height, const sf::IntRect& rect, int batch)
 {
-	if (obj_height == 0) health = -1.f;
-	tm_ = tm;
+	if (obj_height != 2) health = -1.f;
+	else {
+		outer.setFillColor(sf::Color::Black);
+		outer.setOutlineColor(sf::Color::Black);
+		outer.setOutlineThickness(2.f);
+		inner.setFillColor(sf::Color::Red);
+	}
+
 	sprite_offset = offset;
-	sprite = std::move(sf::Sprite(tm_->get(path)));
+	sprite = sf::Sprite(texture);
 	if (rect != sf::IntRect()) {
 		sprite.setTextureRect(rect);
 	}
@@ -41,11 +44,6 @@ void DrawComponent::set(std::string path, sf::Vector2f& offset, std::shared_ptr<
 	obj_height_ = obj_height;
 	setMoveDirection(1, sortable());
 	batch_ = batch;
-}
-
-DrawComponent::DrawComponent(std::string path, sf::Vector2f& offset, std::shared_ptr<ResourceManager<sf::Texture>> tm) :tm_(tm), sprite_offset(offset)
-{
-	sprite.setTexture(tm_->get(path));
 }
 
 std::variant<Entity*, Square*> DrawComponent::getOwner() const { return owner_; }
@@ -66,3 +64,6 @@ void DrawComponent::setSquarePos(sf::Vector2i newpos, matrix<float>& heightmap) 
 	square_height_ = static_cast<uint8_t>(-(sprite_offset.y) + 10);
 	setSpritePos(squarePosFromCoords(newpos, heightmap.width()));
 }
+
+sf::RectangleShape DrawComponent::inner({ 40.f, 10.f });
+sf::RectangleShape DrawComponent::outer({ 40.f, 10.f });

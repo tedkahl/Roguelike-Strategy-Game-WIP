@@ -8,7 +8,6 @@
 #include "Entity.h"
 #include "Animation.h"
 #include "ResourceManager.h"
-#include "Board.h"
 #include "Data.h"
 #include "DCSortable.h"
 #include "Debug.h"
@@ -16,24 +15,25 @@ class Entity;
 struct Board;
 class Square;
 
-const int max_seg = 3;
 using std::cout;
 using std::endl;
 class DrawComponent : public DCSortable {
 private:
-	std::shared_ptr<ResourceManager<sf::Texture>> tm_;
+	static sf::RectangleShape inner;
+	static sf::RectangleShape outer;
 	sf::Vector2f sprite_offset;
 	sf::Sprite sprite;
 	sf::IntRect default_rect;
 	std::variant<Entity*, Square*> owner_;
-	Animation<max_seg> animation;
-	float health = .8;
+	Animation animation;
+	float health = .8f;
 public:
 	DrawComponent() = default;
-	DrawComponent(std::string path, sf::Vector2f& offset, std::shared_ptr<ResourceManager<sf::Texture>> tm);
 
-	void set(std::string path, sf::Vector2f& offset, std::shared_ptr<ResourceManager<sf::Texture>>, unsigned obj_height, const sf::IntRect& rect, int batch = -1);
+	void set(const sf::Texture& texture, const sf::Vector2f& offset, unsigned obj_height, const sf::IntRect& rect, int batch = -1);
 	inline sf::Sprite const& getSprite() const { return sprite; }
+	inline void setColor(sf::Color&& c) { sprite.setColor(c); }
+
 	inline void setSpritePos(const sf::Vector2f& position) {
 		//cout << "setting sprite pos " << position.x << " " << position.y << endl;
 		sprite.setPosition(position + sprite_offset);
@@ -53,8 +53,8 @@ public:
 
 	inline sf::Vector2f getOffset() { return sprite_offset; }
 
-	void setAnimation(sf::Time start, std::vector<AnimationSeg>&& segs, bool loop = false, float speed = 1.f);
-	void draw(sf::RenderTarget* target) const;
+	void setAnimation(sf::Time start, const Animation& anim);
+	void draw(sf::RenderTarget* target);
 	bool updateAnimation(sf::Time current);
 
 	void updateEntityPos(sf::Vector2i newpos, matrix<float>& heightmap);
