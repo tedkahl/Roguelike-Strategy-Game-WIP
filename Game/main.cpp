@@ -3,12 +3,13 @@
 #include <SFML/Graphics.hpp>
 #include <thread>
 #include <chrono>
+#include <ranges>
 #include "FrameCounter.h"
 #include "Team.h"
 #include "WFC.h"
 #include "Level.h"
 #include "TestBoards.h"
-#include "PlayerState.h"
+#include "Player.h"
 #include "Select.h"
 #include "AI.h"
 
@@ -20,13 +21,14 @@ auto getOutput(matrix<char>& in, unsigned owidth, unsigned oheight, unsigned n, 
 int main()
 {
 	sf::Clock clock;
-	PlayerState p_state(0);
 	auto output = getOutput(input, 20, 20, 3, true, true);
 
 	sf::RenderWindow window(sf::VideoMode(1200, 800), "Dungeon Delve");
 
 	auto tm = std::make_shared<ResourceManager<sf::Texture>>();
 	Level level(tm);
+	Player p_state(level, 0);
+	cout << "level " << sizeof(level);
 	auto& squares = level.state.board;
 	window.setView(sf::View(sf::FloatRect(0.f, 0.f, (float)window.getSize().x / 2, (float)window.getSize().y / 2)));
 	level.setSquares(output);
@@ -37,12 +39,13 @@ int main()
 	GameState g;
 	//AI stuff, placeholder
 	AIPlayer main_enemy(level, 1);
+	cout << "ai player " << sizeof(AIPlayer);
 	bool blocked = false;
 	while (window.isOpen())
 	{
 		g.now = clock.getElapsedTime();
 		//AI loop. Hideous, improve
-		if (g.active_player == 0 && p_state.getNext(level.units) == nullptr) {
+		if (g.active_player == 0 && p_state.is_done()) {
 			cout << "switching active player" << endl;
 			g.active_player = ++g.active_player % (Alliance::instance()->numTeams() - 1);
 			main_enemy.startTurn();
@@ -50,7 +53,7 @@ int main()
 			//AI player turn starts
 		}
 		else if (g.active_player == 1 && g.now - g.last_AI_move >= g.AIMoveInterval && !blocked) {
-			if (main_enemy.getNext() != nullptr) {
+			if (!main_enemy.is_done()) {
 				if (main_enemy.hasSelection())
 					main_enemy.executeSelected(g.now);
 				else
@@ -60,7 +63,7 @@ int main()
 			else {
 				g.active_player = ++g.active_player % (Alliance::instance()->numTeams() - 1);
 				cout << "switching active player" << endl;
-				p_state.startTurn(level.units);
+				p_state.startTurn();
 			}
 		}
 		sf::Event event;
@@ -84,7 +87,7 @@ int main()
 			case sf::Event::KeyPressed:
 			case sf::Event::MouseButtonPressed:
 			{
-				handleInput(level, window, g, p_state, event);
+				handleInput(level, window, g, p_state, main_enemy, event);
 				break;
 			}
 			case sf::Event::MouseMoved:

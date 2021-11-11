@@ -1,14 +1,14 @@
 #pragma once
 #include "UnitComponent.h"
 #include "Command.h"
-#include "PlayerState.h"
+#include "Player.h"
+#include "AI.h"
 #include "GameState.h"
-static void handleEsc(PlayerState& p_state) {
+static void handleEsc(Player& p_state) {
 	if (p_state.command) p_state.deSelect();
 }
 
-
-static void handleInput(Level& level, sf::RenderWindow& window, GameState& g, PlayerState& p_state, sf::Event& event)
+static void handleInput(Level& level, sf::RenderWindow& window, GameState& g, Player& p_state, AIPlayer& enemy, sf::Event& event)
 {
 	auto& squares = level.state.board;
 	if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left)
@@ -40,7 +40,7 @@ static void handleInput(Level& level, sf::RenderWindow& window, GameState& g, Pl
 		case sf::Keyboard::Key::A: {
 			if (auto coords = level.getCoords(window, sf::Mouse::getPosition(window))) {
 				auto& square = squares.at(coords.value());
-				level.addEntity(rand() % 2 == 0 ? object_type::ROCK : object_type::CACTUS, coords.value());
+				level.addEntity(rand() % 2 == 0 ? object_type::ROCK : object_type::CACTUS, 2, coords.value());
 
 			}
 			break;
@@ -49,7 +49,7 @@ static void handleInput(Level& level, sf::RenderWindow& window, GameState& g, Pl
 		case sf::Keyboard::Key::U: {
 			if (auto coords = level.getCoords(window, sf::Mouse::getPosition(window))) {
 				auto& square = squares.at(coords.value());
-				level.addEntity(event.key.code == sf::Keyboard::Key::U ? object_type::DUELIST : object_type::WOLF, coords.value());
+				level.addEntity(event.key.code == sf::Keyboard::Key::U ? object_type::DUELIST : object_type::WOLF, event.key.code != sf::Keyboard::Key::U, coords.value());
 			}
 			break;
 		}
@@ -62,9 +62,12 @@ static void handleInput(Level& level, sf::RenderWindow& window, GameState& g, Pl
 		case sf::Keyboard::Key::Q: {
 			if (g.active_player == -1) {
 				g.active_player = 0;
-				p_state.startTurn(level.units);
+				p_state.startTurn();
 			}
 			break;
+		}
+		case sf::Keyboard::Key::J: {
+			level.displayDJ(enemy.peekMap());
 		}
 		case sf::Keyboard::Key::D: {
 			if (auto coords = level.getCoords(window, sf::Mouse::getPosition(window))) {

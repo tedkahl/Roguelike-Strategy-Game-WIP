@@ -40,6 +40,9 @@
     <Filter Include="Header Files\Pathing">
       <UniqueIdentifier>{1c7cb896-9e9d-49ad-9fa7-086e6492308f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\AI and Player">
+      <UniqueIdentifier>{c06834ad-2672-4b1c-b7a4-1a5e514377ea}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Square.cpp">
@@ -63,7 +66,7 @@
     <ClCompile Include="RealTime.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="PlayerState.cpp">
+    <ClCompile Include="Player.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Board.cpp">
@@ -84,10 +87,22 @@
     <ClCompile Include="Team.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Player.cpp">
+    <ClCompile Include="WFC_lib.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="WFC_lib.cpp">
+    <ClCompile Include="GridMove.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="RTAction.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="AIPreference.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Animation.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="UnitManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -173,18 +188,6 @@
     <ClInclude Include="Select.h">
       <Filter>Header Files\Turn flow</Filter>
     </ClInclude>
-    <ClInclude Include="AI.h">
-      <Filter>Header Files\Turn flow</Filter>
-    </ClInclude>
-    <ClInclude Include="AIComponent.h">
-      <Filter>Header Files\Turn flow</Filter>
-    </ClInclude>
-    <ClInclude Include="Player.h">
-      <Filter>Header Files\Turn flow</Filter>
-    </ClInclude>
-    <ClInclude Include="PlayerState.h">
-      <Filter>Header Files\Turn flow</Filter>
-    </ClInclude>
     <ClInclude Include="Board.h">
       <Filter>Header Files\Level</Filter>
     </ClInclude>
@@ -229,6 +232,33 @@
     </ClInclude>
     <ClInclude Include="Attacks.h">
       <Filter>Header Files\Pathing</Filter>
+    </ClInclude>
+    <ClInclude Include="AI.h">
+      <Filter>Header Files\AI and Player</Filter>
+    </ClInclude>
+    <ClInclude Include="AIComponent.h">
+      <Filter>Header Files\AI and Player</Filter>
+    </ClInclude>
+    <ClInclude Include="AIPreference.h">
+      <Filter>Header Files\AI and Player</Filter>
+    </ClInclude>
+    <ClInclude Include="AIutil.h">
+      <Filter>Header Files\AI and Player</Filter>
+    </ClInclude>
+    <ClInclude Include="GridMove.h">
+      <Filter>Header Files\Commands</Filter>
+    </ClInclude>
+    <ClInclude Include="RTAction.h">
+      <Filter>Header Files\Commands</Filter>
+    </ClInclude>
+    <ClInclude Include="PathingGrids.h">
+      <Filter>Header Files\Pathing</Filter>
+    </ClInclude>
+    <ClInclude Include="Player.h">
+      <Filter>Header Files\AI and Player</Filter>
+    </ClInclude>
+    <ClInclude Include="UnitManager.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

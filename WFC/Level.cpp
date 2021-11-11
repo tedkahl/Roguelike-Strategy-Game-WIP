@@ -1,5 +1,12 @@
 #include "Level.h"
-Level::Level(std::shared_ptr<ResourceManager<sf::Texture>> tm) :tm_(tm) {}
+Level::Level(std::shared_ptr<ResourceManager<sf::Texture>> tm) :tm_(tm), dcomponents(new SortedDManager<DrawComponent >), units(new UnitManager), entities(new DataManager<Entity>) {
+	cout << "dc: " << sizeof(*dcomponents) << endl;
+	cout << "uc: " << sizeof(*units) << endl;
+	cout << "e: " << sizeof(*entities) << endl;
+	cout << "data: " << sizeof(Data<char>::d()) << endl;
+	cout << "uc: " << sizeof(Animation) << endl;
+	cout << "e: " << sizeof(*entities) << endl;
+}
 
 
 
@@ -22,38 +29,61 @@ bool Level::update(sf::Time current)
 {
 	//cout << current.asMilliseconds() << endl;
 	bool block = false;
-	for (auto& i : entities) {
+	for (auto& i : *entities) {
 		block = block || i.update(current);
 	}
-	for (auto& i : dcomponents) {
+	for (auto& i : *dcomponents) {
 		i.updateAnimation(current);
 	}
 	return block;
 }
 
 void Level::draw(sf::RenderWindow& window) {
-
 	auto& view = window.getView();
 	sf::FloatRect v(view.getCenter() - view.getSize() / 2.0f, view.getSize());
-	//std::set<DrawComponent> s;
-	//for (const auto& i : dcomponents) {
-	//	
-	//		s.insert(i);
-	//}
-	dcomponents.sort();
-	/*int count = 0;
-	sf::Font roboto;
-	roboto.loadFromFile("./Roboto/Roboto-Regular.ttf");*/
-	for (const auto& i : dcomponents) {
-		/*sf::Text ftext;
-		ftext = sf::Text(std::to_string(count), roboto, 16);
-		ftext.setPosition(i.getSprite().getPosition() + sf::Vector2f(15, 10));
-		ftext.setFillColor(sf::Color::Black);*/
+	dcomponents->sort();
+	for (auto& i : *dcomponents) {
 		if (i.getSprite().getGlobalBounds().intersects(v))
 			i.draw(&window);
 	}
 }
+renderBatch::~renderBatch() {
+	DCManager.deleteBatch(batch);
+}
 
+renderBatch::renderBatch(int b, std::vector<sf::RenderTexture>&& txt, SortedDManager<DrawComponent>& dcomponents) : batch(b), textures(txt), DCManager(dcomponents) {}
+
+void Level::displayDJ(dj_map& test) {
+	static std::unique_ptr<renderBatch> b;
+	if (b != nullptr) {
+		b = nullptr;
+		return;
+	}
+	float max_score = 0;
+	int batch = dcomponents->addBatch();
+	for (auto& i : test.map) {
+		max_score = std::max(max_score, i.score);
+	}
+	sf::Font roboto;
+	roboto.loadFromFile("./Roboto/Roboto-Regular.ttf");
+	DrawComponent* obj_dc;
+	std::vector<sf::RenderTexture> spare_textures;
+	for (unsigned y = 0;y < test.map.height();y++) {
+		for (unsigned x = 0;x < test.map.width();x++) {
+			auto normalized_score = std::min(1.0f, 2 * test.map.at(x, y).score / max_score);
+			auto type = normalized_score < .3 ? object_type::MOVESELECT : object_type::ATTACKSELECT;
+			spare_textures.push_back(get_DJ_Square(roboto, normalized_score, *tm_, type));
+			obj_dc = dcomponents->declareNewBatched(spare_textures.back().getTexture(), sf::Vector2f(), 1, sf::IntRect(), batch);
+
+			//std::cout << "Adding target square at " << to_string(sf::Vector2i(i, j) + paths.offset) << std::endl;
+			obj_dc->updateEntityPos(sf::Vector2i(x, y), state.heightmap);
+		}
+	}
+	b = std::make_unique<renderBatch>(batch, std::move(spare_textures), *dcomponents);
+}
+
+
+//this is pretty goofy. Probably just looping through entities is faster.
 Entity* Level::entityClickedOn(const sf::RenderWindow& window, sf::Vector2i coords, sf::Vector2i pixel_, bool prefer_team, int team)
 {
 	sf::Vector2f pixel = window.mapPixelToCoords(pixel_);
@@ -100,7 +130,7 @@ Entity* Level::entityClickedOn(const sf::RenderWindow& window, sf::Vector2i coor
 }
 
 
-Entity* Level::addEntity(object_type type, sf::Vector2i coords)
+Entity* Level::addEntity(object_type type, int team, sf::Vector2i coords)
 {
 	UnitComponent* uc = nullptr;
 	assert(on_board(coords, state.board));
@@ -110,18 +140,18 @@ Entity* Level::addEntity(object_type type, sf::Vector2i coords)
 			return nullptr;
 		}
 		else {
-			uc = makeUnit(units, 0, type);
+			uc = makeUnit(*units, team, type);
 		}
 	}
-	DrawComponent* dc = getObjDC(dcomponents, tm_, type);
-	Entity* entity = entities.declareNew(type, &dcomponents, dc, uc, coords, state);
+	DrawComponent* dc = getObjDC(*dcomponents, *tm_, type);
+	Entity* entity = entities->declareNew(type, dcomponents.get(), dc, uc, coords, state);
 	return entity;
 }
 
 
 unsigned Level::addTargeter(const pathsGrid& paths)
 {
-	unsigned batch = dcomponents.addBatch();
+	unsigned batch = dcomponents->addBatch();
 	DrawComponent* obj_dc;
 	for (unsigned i = 0;i < paths.grid.width();i++) {
 		for (unsigned j = 0;j < paths.grid.height();j++) {
@@ -130,7 +160,7 @@ unsigned Level::addTargeter(const pathsGrid& paths)
 				if (type == object_type::ATTACKSELECT) {
 					assert(paths.grid.at(i, j).attackable);
 				}
-				obj_dc = getObjDCBatched(dcomponents, tm_, type, batch); //add all dcomponents
+				obj_dc = getObjDCBatched(*dcomponents, *tm_, type, batch); //add all dcomponents
 				//std::cout << "Adding target square at " << to_string(sf::Vector2i(i, j) + paths.offset) << std::endl;
 				obj_dc->updateEntityPos(sf::Vector2i(i, j) + paths.offset, state.heightmap);
 			}
@@ -140,9 +170,9 @@ unsigned Level::addTargeter(const pathsGrid& paths)
 }
 
 
-void Level::removeTargeter(unsigned batch)
+void Level::removeBatch(unsigned batch)
 {
-	dcomponents.deleteBatch(batch);
+	dcomponents->deleteBatch(batch);
 }
 
 
@@ -154,9 +184,9 @@ void Level::killUnit(UnitComponent* killer, Entity* target)
 bool Level::removeEntity(Entity* e)
 {
 	if (state.board.at(e->getPos()).removeE(e)) {
-		dcomponents.deactivate(e->dc()->sortVal());
-		if (e->uc()) units.deactivate(e->uc()->index());
-		entities.deactivate(e->index());
+		dcomponents->deactivate(e->dc()->sortVal());
+		if (e->uc()) units->deactivate(e->uc()->index());
+		entities->deactivate(e->index());
 		return true;
 	}
 	return false;
@@ -173,9 +203,9 @@ void Level::setSquares(matrix<char>& WFCOutput)
 			auto [terrain_t, entity_t] = Data<char>::d()->glyphs.at(val);
 			auto& [path, offset, rect] = Data<char>::d()->squareinfo.at(terrain_t);
 			state.heightmap.at(x, y) = offset.y;
-			state.board.at(x, y) = Square(terrain_t, &dcomponents, dcomponents.declareNew(path, offset, tm_, 0, rect), sf::Vector2i(x, y), state.heightmap);
+			state.board.at(x, y) = Square(terrain_t, dcomponents.get(), dcomponents->declareNew(path, offset, tm_, 0, rect), sf::Vector2i(x, y), state.heightmap);
 			if (entity_t != object_type::NONE) {
-				e = addEntity(entity_t, sf::Vector2i(x, y));
+				e = addEntity(entity_t, 2, sf::Vector2i(x, y));
 			}
 		}
 	}

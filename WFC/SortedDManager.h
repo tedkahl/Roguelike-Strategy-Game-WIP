@@ -13,12 +13,12 @@
 //};
 using std::cout;
 using std::endl;
-static const size_t S_MAX = 2000;
+static const size_t S_MAX = 3000;
 template<typename T>
 //requires accessible<T>
 class SortedDManager {
-private:
-	static const size_t SWAPSIZE = 200;
+protected:
+	static const size_t SWAPSIZE = 100;
 	std::array<T, S_MAX> data;
 	std::array<T, SWAPSIZE> swap;
 	std::vector<unsigned> batches;

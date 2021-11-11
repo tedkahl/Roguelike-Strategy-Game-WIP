@@ -8,15 +8,28 @@
 #include "Data.h"
 #include "UnitComponent.h"
 #include "Team.h"
-
+#include "Attacks.h"
+struct Board;
 
 const std::array<sf::Vector2i, 4> dir = { sf::Vector2i(0,-1),sf::Vector2i(1,0),sf::Vector2i(0,1),sf::Vector2i(-1,0) };
 
-struct Board;
+
 static enmity_t getEnmity(Square& s, hasTeam auto u2)
 {
-	return (!u2 || !s.unit_uc()) ? enmity_t::ENMITY_NULL : getEnmity(s.unit_uc(), u2->team());
+	return (!u2 || !s.unit_uc()) ? enmity_t::ENMITY_NULL : getEnmity(u2->team(), s.unit_uc());
 }
+
+static void bind_min_max(int& minX, int& maxX, int& minY, int& maxY, sf::Vector2i new_pos) {
+	if (new_pos.x < minX)
+		minX = new_pos.x;
+	else if (new_pos.x > maxX)
+		maxX = new_pos.x;
+	if (new_pos.y < minY)
+		minY = new_pos.y;
+	else if (new_pos.y > maxY)
+		maxY = new_pos.y;
+}
+
 //unused currently
 template<typename T>
 std::vector<T> get_adj(matrix<T>& grid, sf::Vector2i loc) {
@@ -28,26 +41,6 @@ std::vector<T> get_adj(matrix<T>& grid, sf::Vector2i loc) {
 	return ret;
 }
 
-struct map_node {
-	int moves_left;
-	sf::Vector2i prev;
-	bool attackable;
-	unsigned search;
-	bool has_ally;
-	bool movable;
-	map_node() :moves_left(0), prev(), search(0), attackable(false), has_ally(false), movable(false) {}
-	map_node(int moves_l, sf::Vector2i prev_, unsigned search_, bool movable_, bool attackable_) :moves_left(moves_l), prev(prev_), attackable(attackable_), search(search_), movable(movable_), has_ally(false) {
-	}
-};
-
-struct dj_map_node {
-	int moves_left;
-	sf::Vector2i prev;
-	std::vector<sf::Vector2i> reachable_targets; //inefficiency of this hopefully justified by relatively few reachable targets
-	unsigned search;
-	dj_map_node() :moves_left(0), prev({ -1,-1 }), search(0) {}
-	dj_map_node(int moves_l, sf::Vector2i prev_, std::vector<sf::Vector2i>&& reachable, unsigned search_) :moves_left(moves_l), prev(prev_), reachable_targets(reachable), search(search_) {}
-};
 
 //static bool block_attack(attack_type type, sf::Vector2i start, sf::Vector2i end, Board& state) {
 //	return false;

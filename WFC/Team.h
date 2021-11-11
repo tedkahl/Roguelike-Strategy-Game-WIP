@@ -8,6 +8,9 @@ enum class enmity_t {
 static constexpr bool isNE(enmity_t a) {
 	return static_cast<int>(a) >= static_cast<int>(enmity_t::NEUTRAL);
 }
+//static constexpr bool isAlly(enmity_t a) {
+//	return static_cast<int>(a) < static_cast<int>(enmity_t::NEUTRAL);
+//}
 template <typename T>
 concept hasTeam = requires(T t)
 {

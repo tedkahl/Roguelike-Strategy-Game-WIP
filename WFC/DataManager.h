@@ -5,7 +5,7 @@
 const size_t MAX = 300;
 template<typename T>
 class DataManager {
-private:
+protected:
 	std::array<T, MAX> data;
 	unsigned active_ = 0;
 	bool dirty_flag = false;
@@ -40,7 +40,10 @@ template<typename T>
 void DataManager<T>::deactivate(unsigned index) {
 	dirty_flag = true;
 	assert(index < active_);
-	std::swap(data[index], data[active_ - 1]);
+	{
+		using std::swap;
+		swap(data[index], data[active_ - 1]);
+	}
 	data[index].setIndex(index);
 	data[active_ - 1].setIndex(active_ - 1);
 	data[index].updatePointers(data[active_ - 1]);

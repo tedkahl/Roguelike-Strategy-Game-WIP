@@ -5,7 +5,7 @@ enum class terrain_type {
 };
 
 enum class object_type {
-	NONE, MOVESELECT, ATTACKSELECT,
+	NONE, MOVESELECT, ATTACKSELECT, DEFAULTSELECT,
 	ROCK, CACTUS,
 	DUELIST, WOLF, OBJECT_END
 };
@@ -34,6 +34,9 @@ static constexpr bool isUnit(object_type t) {
 static constexpr bool isUnitOrObj(object_type t) {
 	return static_cast<int>(t) >= firstobj;
 }
+static constexpr bool isObj(object_type t) {
+	return isUnitOrObj(t) && !isUnit(t);
+}
 static constexpr bool isTall(object_type t) {
-	return t > object_type::MOVESELECT;
+	return t >= object_type::ROCK;
 }

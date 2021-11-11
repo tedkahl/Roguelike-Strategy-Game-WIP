@@ -1,5 +1,4 @@
 #include "UnitComponent.h"
-#include "Entity.h"
 
 void UnitComponent::updatePointers(UnitComponent& removed) {
 	owner_->setUC(this);
@@ -11,4 +10,4 @@ void UnitComponent::setOwner(Entity* owner) {
 }
 
 sf::Vector2i UnitComponent::getPos() const { return owner_->getPos(); }
-AIComponent* UnitComponent::AI() const { return AI_.get(); }
+//AIComponent* UnitComponent::AI() const { return AI_.get(); }

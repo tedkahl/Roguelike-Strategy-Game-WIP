@@ -4,5 +4,6 @@
 class Entity;
 class Level;
 namespace actions {
-	void attack(Level& level, sf::Vector2i target, Entity* e);
+	void attack(Level& level, sf::Vector2i target, Entity* e, int damage);
+	void heal(Level& level, sf::Vector2i target, Entity* e, int amount);
 }

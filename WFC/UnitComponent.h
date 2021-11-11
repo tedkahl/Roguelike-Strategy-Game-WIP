@@ -2,7 +2,8 @@
 #include <SFML/Graphics.hpp>
 #include "Managed.h"
 #include "type_enums.h"
-#include "AIComponent.h"
+#include "Entity.h"
+//#include "AIComponent.h"
 namespace unit {
 	enum class move_state { FREE, HAS_MOVED, HAS_ACTED };
 };
@@ -24,7 +25,7 @@ private:
 	bool dummy_;
 	int team_;
 	Entity* owner_;
-	std::unique_ptr<AIComponent> AI_;
+	//std::unique_ptr<AIComponent> AI_;
 	unit::move_state movestate;
 public:
 	unit::move_state getMoveState() { return movestate; }
@@ -33,7 +34,7 @@ public:
 	inline int hp() const { return current_hp; }
 	sf::Vector2i getPos() const;
 	Entity* getOwner() const;
-	AIComponent* AI() const;
+	//AIComponent* AI() const;
 	bool damage(int attack) {
 		current_hp -= attack;
 		return current_hp < 0;

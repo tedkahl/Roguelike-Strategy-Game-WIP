@@ -28,8 +28,8 @@ public:
 	Entity* unit();
 	UnitComponent* unit_uc();
 	inline terrain_type type() { return type_; }
-	//void setDC(const DCAccessor& dc);
 	bool removeE(Entity* e);
+	//placeholder, should be a blocking map in board
 	void addE(Entity* e);
 	void replaceE(Entity* olde, Entity* newe);
 	//std::vector<Entity*>& getEntities() { return entities; }
