@@ -17,7 +17,7 @@ protected:
 	unsigned batch_;
 
 	inline void setMoveDirection(uint8_t dir, DCSortable& dc_ref) {
-		move_direction = dir;
+		move_direction = dir && (order_>=25);
 		dc_ref.move_direction = move_direction;
 	}
 public:
