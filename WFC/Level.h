@@ -35,6 +35,7 @@ class Level
 {
 private:
 	std::shared_ptr<ResourceManager<sf::Texture>> tm_;
+	std::shared_ptr<ResourceManager<sf::Font>> fm_;
 	std::unique_ptr<SortedDManager<DrawComponent>> dcomponents;
 public:
 	std::unique_ptr < DataManager<Entity>> entities;
@@ -43,6 +44,8 @@ public:
 	explicit Level() {}
 	Level(std::shared_ptr<ResourceManager<sf::Texture>> tm);
 	Entity* addEntity(object_type t, int team, sf::Vector2i coords);
+	Entity* addEntityTest(object_type t, int team, sf::Vector2i coords);
+	void addChildDC(object_type type, DrawComponent* parent);
 	unsigned addTargeter(const pathsGrid& grid);
 	bool removeEntity(Entity* e);
 	void removeBatch(unsigned batch);

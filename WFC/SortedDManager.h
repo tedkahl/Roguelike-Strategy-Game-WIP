@@ -82,6 +82,7 @@ void SortedDManager<T>::sort() {
 	if (!deactivated.empty()) sortDeleted();
 	if (unsorted_ > 0 && unsorted_ <= SWAPSIZE) sortNew();
 	if (unsorted_ > SWAPSIZE) std::sort(begin(), end()); //else quicksort
+	assert(std::is_sorted(begin(), end()));
 	unsorted_ = 0;
 }
 
@@ -186,45 +187,49 @@ template<typename T>
 template<typename Sortable>
 void SortedDManager<T>::updateAll(sf::Time current, T::SortType base, Sortable& s, EntityUpdate& u) {
 	static_assert(std::same_as<T, DrawComponent>);
+	cout << "updating" << endl;
 	auto first = std::lower_bound(begin(), end(), base, lt_associated<T>);
 	auto dup = first;
 	bool dirty = false;
-	while (lt_associated(base, (*first).sortVal())) {
-		dirty = dirty || first->update(current, u, s);
+	while (!lt_associated(base, (*first).sortVal())) {
+		dirty = first->update(current, u, s) || dirty;
 		first++;
 	}
-	if (dirty) fixAll(dup, first);
+	if (dirty) fixAll(dup, first - 1);
 }
 
 //orig 10 20 30 40 50 60 70 80 90 100
-//update 10 20 30 40 15 16 17 80 90 100
+//call updateAll 10 20 30 40 15 16 17 80 90 100
+//call fixAll
 //copy to temp 15, 16, 17
 //iterate down 10 20 30 40 20 30 40 80 90 100
 //copy from temp 10 15 16 17 20 30 40 80 90 100
 template<typename T>
 void SortedDManager<T>::fixAll(std::array<T, S_MAX>::iterator first, std::array<T, S_MAX>::iterator last) {
+	cout << "fixing" << endl;
 	if (first != begin() && *first < *(first - 1)) {
 		std::vector<T> copies(last - first + 1);
-		std::copy(first, last, copies.begin());
+		std::copy(first, last + 1, copies.begin());
 		first--;
 		while (copies.back() < (*first) && first > begin() + copies.size()) {
 			*last = *first;
 			last--;
 			first--;
 		}
-		std::copy(copies.begin(), copies.end(), first - copies.size());
+		std::copy(copies.begin(), copies.end(), first + 1);
 	}
 	else if (last != end() && *(last + 1) < *last) {
-		std::vector<T> copies(last - first);
-		std::copy(first, last, copies.begin());
-		first++;
+		std::vector<T> copies(last - first + 1);
+		std::copy(first, last + 1, copies.begin());
+		last++;
 		while (*last < *copies.begin() && last < end() - copies.size()) {
 			*first = *last;
 			last++;
 			first++;
 		}
-
+		std::copy(copies.begin(), copies.end(), first);
 	}
+	assert(std::is_sorted(begin(), end()));
 }
 
 template<typename T>

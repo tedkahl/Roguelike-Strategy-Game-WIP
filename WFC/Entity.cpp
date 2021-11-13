@@ -33,7 +33,6 @@ bool Entity::update(sf::Time current) {
 		return true;
 	}
 	return false;
-
 }
 
 void Entity::set(object_type type, SortedDManager<DrawComponent>* m, DrawComponent* dcs, UnitComponent* uc, sf::Vector2i pos, Board& state, unsigned index) {

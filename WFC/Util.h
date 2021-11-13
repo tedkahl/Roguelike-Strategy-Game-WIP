@@ -26,21 +26,18 @@ static UnitComponent* makeUnit(DataManager<UnitComponent>& units, int team, obje
 	return nullptr;
 }
 
-static DrawComponent* getObjDC(SortedDManager<DrawComponent>& dcomponents, ResourceManager<sf::Texture>& tm, object_type t) {
-	auto search = Data<char>::d()->entityinfo.find(t);
-	if (search != Data<char>::d()->entityinfo.end()) {
-		auto& [path, offset, rect] = search->second;
-		return dcomponents.declareNew(tm.get(path), offset, 1 + isTall(t) * 49, rect);
-	}
-	return nullptr;
-}
 
-static DrawComponent* getObjDCBatched(SortedDManager<DrawComponent>& dcomponents, ResourceManager<sf::Texture>& tm, object_type t, unsigned batch) {
+static DrawComponent* getObjDC(SortedDManager<DrawComponent>& dcomponents, ResourceManager<sf::Texture>& tm, object_type t, unsigned batch = UINT_MAX) {
 	auto search = Data<char>::d()->entityinfo.find(t);
 	if (search != Data<char>::d()->entityinfo.end()) {
 		auto& [path, offset, rect] = search->second;
-		return dcomponents.declareNewBatched(tm.get(path), offset, 1 + isTall(t) * 49, rect, batch);
+		if (batch == UINT_MAX)
+			return dcomponents.declareNew(tm.get(path), offset, 1 + isTall(t) * 49, rect);
+		else
+			return dcomponents.declareNewBatched(tm.get(path), offset, 1 + isTall(t) * 49, rect, batch);
 	}
+	std::cerr << "sprite information not found";
+	assert(false);
 	return nullptr;
 }
 

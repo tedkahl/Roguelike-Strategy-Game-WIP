@@ -43,6 +43,6 @@ public:
 	inline const SortType sortVal() const { return std::tie(zval_, move_direction, square_height_, x, order_); }
 	DCSortable& sortable() { return *this; }
 	inline int batch() const { return batch_; }
-	inline sf::Vector2i coords() const { return { order_, zval_ - order_ }; }
+	inline sf::Vector2i coords() const { return { x, zval_ - x }; }
 };
 

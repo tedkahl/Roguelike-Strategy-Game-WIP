@@ -3,9 +3,10 @@
 enum class terrain_type {
 	GRASS, WATER, PAVEDSTONE, PAVEDSTONE_TALL, ROUGHSTONE, LAVA, SAND, TERRAIN_END
 };
-
+//status effects here temporarily
 enum class object_type {
 	NONE, MOVESELECT, ATTACKSELECT, DEFAULTSELECT,
+	POISON, PETRIFY, SLOW,
 	ROCK, CACTUS,
 	DUELIST, WOLF, OBJECT_END
 };

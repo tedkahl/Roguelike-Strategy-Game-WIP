@@ -148,6 +148,36 @@ Entity* Level::addEntity(object_type type, int team, sf::Vector2i coords)
 	return entity;
 }
 
+Entity* Level::addEntityTest(object_type type, int team, sf::Vector2i coords)
+{
+	UnitComponent* uc = nullptr;
+	assert(on_board(coords, state.board));
+	if (isUnit(type)) {
+		if (state.board.at(coords).unit()) {
+			std::cerr << "space already full\n";
+			return nullptr;
+		}
+		else {
+			uc = makeUnit(*units, team, type);
+		}
+	}
+	DrawComponent* dc = getObjDC(*dcomponents, *tm_, type);
+	Entity* entity = entities->declareNew(type, dcomponents.get(), dc, uc, coords, state);
+	addChildDC(object_type::POISON, dc);
+	return entity;
+}
+
+void Level::addChildDC(object_type type, DrawComponent* parent)
+{
+	auto search = Data<char>::d()->entityinfo.find(type);
+	if (search != Data<char>::d()->entityinfo.end()) {
+		auto& [path, offset, rect] = search->second;
+		auto dcp = dcomponents->declareNew(tm_->get(path), parent->getOffset(), 51, rect);
+		cout << "coords " << to_string(parent->coords()) << endl;
+		dcp->updateEntityPos(parent->coords(), state.heightmap);
+	}
+}
+
 
 unsigned Level::addTargeter(const pathsGrid& paths)
 {
@@ -160,7 +190,7 @@ unsigned Level::addTargeter(const pathsGrid& paths)
 				if (type == object_type::ATTACKSELECT) {
 					assert(paths.grid.at(i, j).attackable);
 				}
-				obj_dc = getObjDCBatched(*dcomponents, *tm_, type, batch); //add all dcomponents
+				obj_dc = getObjDC(*dcomponents, *tm_, type, batch); //add all dcomponents
 				//std::cout << "Adding target square at " << to_string(sf::Vector2i(i, j) + paths.offset) << std::endl;
 				obj_dc->updateEntityPos(sf::Vector2i(i, j) + paths.offset, state.heightmap);
 			}

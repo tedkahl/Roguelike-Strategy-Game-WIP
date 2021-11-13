@@ -43,7 +43,7 @@ std::optional<unit::move_state> AttackMove::execute(sf::Vector2i target, sf::Tim
 	unit::move_state ret;
 	if (move_path)
 	{
-		agent_->addRT(std::make_unique<GridMove>(move_path.value(), static_cast<object_type>(agent_->type()), sf::seconds(.2f), level->state));
+		agent_->addRT(std::make_unique<GridMove>(move_path.value(), static_cast<object_type>(agent_->type()), sf::seconds(2.2f), level->state));
 		ret = unit::move_state::HAS_MOVED;
 		p_state->setMoveState(agent_->uc(), ret);
 	}

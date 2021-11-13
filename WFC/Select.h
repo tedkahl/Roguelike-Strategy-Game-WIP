@@ -49,7 +49,7 @@ static void handleInput(Level& level, sf::RenderWindow& window, GameState& g, Pl
 		case sf::Keyboard::Key::U: {
 			if (auto coords = level.getCoords(window, sf::Mouse::getPosition(window))) {
 				auto& square = squares.at(coords.value());
-				level.addEntity(event.key.code == sf::Keyboard::Key::U ? object_type::DUELIST : object_type::WOLF, event.key.code != sf::Keyboard::Key::U, coords.value());
+				level.addEntityTest(event.key.code == sf::Keyboard::Key::U ? object_type::DUELIST : object_type::WOLF, event.key.code != sf::Keyboard::Key::U, coords.value());
 			}
 			break;
 		}

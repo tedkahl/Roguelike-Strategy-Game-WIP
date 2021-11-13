@@ -34,7 +34,7 @@ void DrawComponent::setTextureRect(const sf::IntRect& rect) {
 
 void DrawComponent::set(const sf::Texture& texture, const sf::Vector2f& offset, unsigned order, const sf::IntRect& rect, int batch)
 {
-	if (order_ != 10) health = -1.f;
+	if (order_ != 50) health = -1.f;
 	else {
 		outer.setFillColor(sf::Color::Black);
 		outer.setOutlineColor(sf::Color::Black);
@@ -59,17 +59,18 @@ void DrawComponent::setOwner(Square* owner) { owner_ = owner; }
 void DrawComponent::setOwner(Entity* owner) { owner_ = owner; }
 
 bool DrawComponent::update(const sf::Time& current, const EntityUpdate& update, DCSortable& ref) {
-	bool dirty;
-	if (update.move_dir_ == 0 && ref.move_dir() == 1) {
+	cout << "updating dc" << endl;
+	bool dirty = false;
+	if (update.move_dir_ == 0 && move_direction == 1) {
 		dirty = true;
 		//cout << "updating move dir" << endl;
 		setMoveDirection(0, ref);
 	}
 	if (update.animation_)
-		setAnimation(current, std::move(update.animation_.value()));
+		setAnimation(current, update.animation_.value());
 
 	if (update.coords_) {
-		if (static_cast<signed char>(order_) != update.coords_.value().x || static_cast<signed char>(zval_ - order_) != update.coords_.value().y)
+		if (static_cast<signed char>(x) != update.coords_.value().x || static_cast<signed char>(zval_ - x) != update.coords_.value().y)
 		{
 			updateCoords(update.coords_.value(), ref);
 			dirty = true;
@@ -83,12 +84,12 @@ bool DrawComponent::update(const sf::Time& current, const EntityUpdate& update, 
 
 	if (update.finished) {
 		std::cout << "Action finished" << std::endl;
-		if (ref.move_dir() != 1) {
+		if (move_direction != 1) {
 			setMoveDirection(update.move_dir_, ref);
 			dirty = true;
 		}
 	}
-	return dirty;
+	return true;
 }
 
 void DrawComponent::updateEntityPos(sf::Vector2i newpos, matrix<float>& heightmap) {
