@@ -14,6 +14,6 @@ sf::Vector2i UnitComponent::getPos() const { return owner_->getPos(); }
 
 bool UnitComponent::damage(int attack) {
 	current_hp -= attack;
-	getOwner()->dc()->setHealth(static_cast<float>(stats_.max_hp) / current_hp);
+	getOwner()->dc()->setHealth(static_cast<float>(current_hp) / stats_.max_hp);
 	return current_hp < 0;
 }
