@@ -35,17 +35,14 @@ public:
 	sf::Vector2i getPos() const;
 	Entity* getOwner() const;
 	//AIComponent* AI() const;
-	bool damage(int attack) {
-		current_hp -= attack;
-		return current_hp < 0;
-	}
+	bool damage(int attack);
 
 	object_type type() const { return getOwner()->type(); };
 	void setOwner(Entity* owner);
 	UnitStats const& stats() const { return stats_; };
 	UnitComponent() = default;
 	//UnitComponent(UnitStats stats, int team) :stats_(stats), team_(team), current_hp(stats_.max_hp), Managed(index) {}
-	void set(const UnitStats& stats, int team, unsigned index) { stats_ = stats; team_ = team; current_hp = stats_.max_hp; index_ = index; }
+	void set(const UnitStats& stats, int team, unsigned index) { stats_ = stats; team_ = team; current_hp = stats_.max_hp; index_ = index; movestate = unit::move_state::FREE; }
 	void updatePointers(UnitComponent& removed);
 };
 

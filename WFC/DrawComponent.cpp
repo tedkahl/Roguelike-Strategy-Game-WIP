@@ -34,7 +34,7 @@ void DrawComponent::setTextureRect(const sf::IntRect& rect) {
 
 void DrawComponent::set(const sf::Texture& texture, const sf::Vector2f& offset, unsigned order, const sf::IntRect& rect, int batch)
 {
-	if (order_ != 50) health = -1.f;
+	if (order == 50) health = 1.f;
 	else {
 		outer.setFillColor(sf::Color::Black);
 		outer.setOutlineColor(sf::Color::Black);
@@ -53,10 +53,6 @@ void DrawComponent::set(const sf::Texture& texture, const sf::Vector2f& offset, 
 	setMoveDirection(1, sortable());
 	batch_ = batch;
 }
-
-std::variant<Entity*, Square*> DrawComponent::getOwner() const { return owner_; }
-void DrawComponent::setOwner(Square* owner) { owner_ = owner; }
-void DrawComponent::setOwner(Entity* owner) { owner_ = owner; }
 
 bool DrawComponent::update(const sf::Time& current, const EntityUpdate& update, DCSortable& ref) {
 	cout << "updating dc" << endl;
@@ -89,7 +85,9 @@ bool DrawComponent::update(const sf::Time& current, const EntityUpdate& update, 
 			dirty = true;
 		}
 	}
-	return true;
+	assert(!lt_associated(ref.sortVal(), sortVal()));
+	assert(!lt_associated(sortVal(), ref.sortVal()));
+	return dirty;
 }
 
 void DrawComponent::updateEntityPos(sf::Vector2i newpos, matrix<float>& heightmap) {

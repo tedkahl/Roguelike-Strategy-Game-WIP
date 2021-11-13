@@ -25,9 +25,8 @@ private:
 	sf::Vector2f sprite_offset;
 	sf::Sprite sprite;
 	sf::IntRect default_rect;
-	std::variant<Entity*, Square*> owner_;
 	Animation animation;
-	float health = .8f;
+	float health = -1.f;
 public:
 	DrawComponent() = default;
 
@@ -40,10 +39,7 @@ public:
 		sprite.setPosition(position + sprite_offset);
 	}
 	inline void setTextureRect(const sf::IntRect& rect);
-
-	std::variant<Entity*, Square*> getOwner() const;
-	void setOwner(Square* owner);
-	void setOwner(Entity* owner);
+	inline void setHealth(const float new_health) { health = new_health; };
 
 	inline sf::Vector2f getOffset() { return sprite_offset; }
 

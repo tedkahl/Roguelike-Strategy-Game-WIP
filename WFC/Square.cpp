@@ -1,16 +1,10 @@
 #include "Square.h"
 #include "ResourceManager.h"
 #include "Entity.h"
-Square::Square(terrain_type terrain_t, SortedDManager<DrawComponent>* m, DrawComponent* dcs, sf::Vector2i newpos, matrix<float>& heightmap) : pos(newpos.x, newpos.y), manager(m), dc_(dcs->sortable()), type_(terrain_t), unit_(nullptr) {
-	dcs->setOwner(this);
+Square::Square(terrain_type terrain_t, DrawComponent* dcs, sf::Vector2i newpos, matrix<float>& heightmap) : pos(newpos.x, newpos.y), type_(terrain_t), unit_(nullptr) {
 	dcs->setSquarePos(newpos, heightmap);
-	dcs->updateCoords(newpos, dc_);
+	dcs->updateCoords(newpos, dcs->sortable());
 }
-const DCSortable& Square::dcSortable() const {
-	return dc_;
-}
-
-DrawComponent* Square::dc() const { return manager->get(dc_.sortVal()); }
 
 bool Square::removeE(Entity* e) {
 	std::cerr << "Removing entity at " << pos.x << " " << pos.y << std::endl;
