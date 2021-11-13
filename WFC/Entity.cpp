@@ -25,7 +25,7 @@ bool Entity::update(sf::Time current) {
 		coords_ = dc_.coords();
 		if (update.finished) {
 			std::cout << "Action finished" << std::endl;
-			if (coords_ != owner_->pos) {
+			if (coords_ != owner_->getPos()) {
 				rt_actions.front()->getBoard().moveEntity(this, coords_); //ugly
 			}
 			rt_actions.pop_front();
@@ -42,8 +42,7 @@ void Entity::set(object_type type, SortedDManager<DrawComponent>* m, DrawCompone
 	index_ = index;
 	rt_actions.clear();
 
-	//set component owners
-	dcs->setOwner(this);
+	//set component owner
 	if (uc_) uc_->setOwner(this);
 
 	//set position
@@ -69,7 +68,6 @@ void Entity::setPos(sf::Vector2i newpos, Board& state) {
 
 void Entity::updatePointers(Entity& removed) {
 	owner_->replaceE(&removed, this);
-	dc()->setOwner(this);
 	if (uc_) uc_->setOwner(this);
 }
 
@@ -79,6 +77,7 @@ void Entity::setOwner(Square* new_owner) { owner_ = new_owner; }
 Entity::Entity(Entity&& other) noexcept {
 	coords_ = std::move(other.coords_);
 	manager = std::move(other.manager);
+	owner_ = std::move(other.owner_);
 	dc_ = std::move(other.dc_);
 	uc_ = std::move(other.uc_);
 	type_ = other.type_;
@@ -87,6 +86,7 @@ Entity::Entity(Entity&& other) noexcept {
 Entity& Entity::operator=(Entity&& other) noexcept {
 	coords_ = std::move(other.coords_);
 	manager = std::move(other.manager);
+	owner_ = std::move(other.owner_);
 	dc_ = std::move(other.dc_);
 	uc_ = std::move(other.uc_);
 	type_ = other.type_;

@@ -39,7 +39,6 @@ public:
 		return type_;
 	};
 	DrawComponent* dc() const;
-	//DCAccessor& dcAccess();
 	void setDC(DCSortable& dc);
 	UnitComponent* uc() const;
 	void setUC(UnitComponent* dc);
