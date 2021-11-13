@@ -13,6 +13,7 @@
 #include "Select.h"
 #include "AI.h"
 
+#define TEST
 auto getOutput(matrix<char>& in, unsigned owidth, unsigned oheight, unsigned n, bool rotate = true, bool reflect = true) {
 	WFC<char> w(in, owidth, oheight, n, rotate, reflect);
 	return w.run();
@@ -41,11 +42,13 @@ int main()
 	AIPlayer main_enemy(level, 1);
 	cout << "ai player " << sizeof(AIPlayer);
 	bool blocked = false;
+#ifdef TEST
 	for (int i = 0;i < 10;i++) {
 		for (int j = 0;j < 10;j++) {
 			level.addEntityTest(object_type::DUELIST, 0, { i,j });
 		}
 	}
+#endif
 	while (window.isOpen())
 	{
 		g.now = clock.getElapsedTime();
