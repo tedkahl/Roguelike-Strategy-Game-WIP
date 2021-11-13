@@ -98,12 +98,14 @@ static pathsGrid pathFind(UnitComponent* u, Board& state, RangeFxn attackfxn) {
 	grid.resize(state.board.height(), state.board.width());
 	grid.at(curr_pos) = map_node(getMovesRem(u), sf::Vector2i(-1, -1), search_counter, true, false);
 
+	sf::Vector2i adj_pos;
+	int new_moves_left;
 	auto mark_attackable = [&](sf::Vector2i pos) {
 		grid.at(pos).attackable = true;
 		bind_min_max(minX, maxX, minY, maxY, pos);
 		if (grid.at(pos).search != search_counter || (!grid.at(pos).movable && (grid.at(pos).moves_left < grid.at(curr_pos).moves_left))) {
 			//cout << "In attack function: replacing " << to_string(pos) << " with: moves_l " << grid.at(curr_pos).moves_left << " prev " << to_string(curr_pos) << endl;
-			grid.at(pos) = map_node(grid.at(curr_pos).moves_left, curr_pos, search_counter, false, true);
+			grid.at(pos) = map_node(new_moves_left, adj_pos, search_counter, false, true);
 			return;
 		}
 		grid.at(pos).search = search_counter;
@@ -122,8 +124,8 @@ static pathsGrid pathFind(UnitComponent* u, Board& state, RangeFxn attackfxn) {
 			//if the square is where we came from or not on the board, continue
 			if (curr_pos + i == curr_node.prev || !on_board(curr_pos + i, state.board)) continue;
 
-			sf::Vector2i adj_pos = curr_pos + i;
-			int new_moves_left = curr_node.moves_left - getMoveCost(u, adj_pos, state);
+			adj_pos = curr_pos + i;
+			new_moves_left = curr_node.moves_left - getMoveCost(u, adj_pos, state);
 			//if the square is unreachable, continue
 			if (new_moves_left < 0) continue;
 			map_node& adj_node = grid.at(adj_pos);

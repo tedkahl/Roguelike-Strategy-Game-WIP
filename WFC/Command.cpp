@@ -21,16 +21,17 @@ AttackMove::AttackMove(Entity* agent, Level& board_) : Command(agent, board_), p
 
 std::optional<unit::move_state> AttackMove::execute(sf::Vector2i target, sf::Time now, Player* p_state) {
 	hideTargeter();
+	auto& board = level->state.board;
 	sf::Vector2i move_target = target;
 	bool attack = false;
 	cout << "target " << to_string(target) << endl;
 	cout << paths.is_attackable(target) << endl;
-	auto target_enmity = getEnmity(level->state.board.at(target), agent_->uc());
+	auto target_enmity = getEnmity(board.at(target), agent_->uc());
 	if (paths.is_attackable(target) && isNE(target_enmity)) {
 		move_target = paths.grid.at(target - paths.offset).prev;
 
 		//if move target taken, choose a new one automatically
-		if (!level->state.board.at(move_target).unit()) {
+		if (board.at(move_target).unit() && board.at(move_target).unit() != agent_) {
 			target = chooseNewTarget(getAttack(agent_->uc()->stats().attack_type), paths, target, level->state);
 			if (target.x == -1)
 				return std::nullopt;
