@@ -67,7 +67,7 @@ T* SortedDManager<T>::get(T::SortType a) {
 	auto start = std::lower_bound(begin(), end(), a);
 	return &*start;//error if lower bound == end is intentional
 }
-
+//#define TEST
 template<typename T>
 //requires accessible<T>
 void SortedDManager<T>::sort() {
@@ -75,7 +75,13 @@ void SortedDManager<T>::sort() {
 	if (!deactivated.empty()) sortDeleted();
 	if (unsorted_ > 0 && unsorted_ <= SWAPSIZE) sortNew();
 	if (unsorted_ > SWAPSIZE) std::sort(begin(), end()); //else quicksort
-	assert(std::is_sorted(begin(), end()));
+#ifdef TEST
+	for (int i = 1;i < active_;i++) {
+		if (data[i] < data[i - 1]) {
+			cout << "unsorted" << endl;
+		}
+	}
+#endif
 	unsorted_ = 0;
 }
 
@@ -112,7 +118,7 @@ void SortedDManager<T>::sortDeleted()
 	}
 	active_ -= deactivated.size();
 	deactivated.clear();
-	assert(std::is_sorted(begin(), end()));
+	//assert(std::is_sorted(begin(), end()));
 }
 
 //changes in zvalue should be small, so just bubble it up or down here
@@ -214,7 +220,13 @@ void SortedDManager<T>::fixAll(std::array<T, S_MAX>::iterator first, std::array<
 		}
 		std::copy(copies.begin(), copies.end(), first);
 	}
-	//assert(std::is_sorted(begin(), end()));
+#ifdef TEST
+	for (int i = 1;i < active_;i++) {
+		if (data[i].sortVal() <= data[i - 1].sortVal()) {
+			cout << "unsorted" << endl;
+		}
+	}
+#endif
 }
 
 template<typename T>

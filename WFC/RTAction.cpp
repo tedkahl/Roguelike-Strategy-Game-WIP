@@ -34,7 +34,7 @@ EntityUpdate Lunge::getUpdate(sf::Time current) {
 	fraction = .5f - std::abs(.5f - fraction);
 	auto true_dir = getTrueDir(dir);
 
-	update.coords_ = (dir.x < 0 || dir.y < 0) ? target_ - dir : target_;
+	update.coords_ = (dir.x < 0 || dir.y < 0 || update.finished) ? target_ - dir : target_;
 	update.sprite_position_ = start_pos + true_dir * fraction * lunge;
 
 	return EntityUpdate(update);
