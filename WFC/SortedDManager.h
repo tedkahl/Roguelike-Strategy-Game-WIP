@@ -48,6 +48,8 @@ public:
 	void sortDeleted();
 	void fixChangedVal(T* to_fix);
 	void deactivate(T::SortType to_deactivate);
+	void deactivateAll(T::SortType to_deactivate);
+
 
 	template<typename Sortable>
 	void updateAll(sf::Time current, T::SortType base, Sortable& s, EntityUpdate& u);
@@ -62,17 +64,8 @@ template<typename T>
 //requires accessible<T>
 T* SortedDManager<T>::get(T::SortType a) {
 	if (unsorted_ > 0) sort();
-	int start = 0;
-	int end = active_;
-	int mid;
-	while (start <= end) {
-		mid = (end + start) / 2;
-		if (data[mid] == a) return &data[mid];
-		else if (data[mid] < a) start = mid + 1;
-		else end = mid - 1;
-	}
-	assert(false); //should always find
-	return nullptr;
+	auto start = std::lower_bound(begin(), end(), a);
+	return &*start;//error if lower bound == end is intentional
 }
 
 template<typename T>
@@ -111,7 +104,7 @@ void SortedDManager<T>::sortDeleted()
 
 	unsigned count = 0;
 	for (unsigned i = 0;i < active_ - count;i++) {
-		if (count < deactivated.size() && i + count == deactivated[count]) {
+		while (count < deactivated.size() && i + count == deactivated[count]) {
 			count++;
 			//std::cout << "deleted element found at " << i + count << std::endl;
 		}
@@ -119,6 +112,7 @@ void SortedDManager<T>::sortDeleted()
 	}
 	active_ -= deactivated.size();
 	deactivated.clear();
+	assert(std::is_sorted(begin(), end()));
 }
 
 //changes in zvalue should be small, so just bubble it up or down here
@@ -172,22 +166,13 @@ T* SortedDManager<T>::declareNew(T_&&... args)
 	data[active_ - 1].set(std::forward<T_>(args)...);
 	return &data[active_ - 1];
 }
-//a less than comparison which returns false if a is less than, but close enough to be associated with, b
-template<typename T>
-static bool lt_associated(const T& first, const DCSortable::SortType& b) {
-	//assert(std::get<4>(a) == 50);
-	DCSortable::SortType a = first;
-	if (std::get<0>(a) == std::get<0>(b) && std::get<1>(a) == std::get<1>(b) && std::get<2>(a) == std::get<2>(b) && std::get<3>(a) == std::get<3>(b)) {
-		return std::get<4>(b) - std::get<4>(a) >= 25;
-	}
-	else return first < b;
-}
+
 
 template<typename T>
 template<typename Sortable>
 void SortedDManager<T>::updateAll(sf::Time current, T::SortType base, Sortable& s, EntityUpdate& u) {
 	static_assert(std::same_as<T, DrawComponent>);
-	cout << "updating" << endl;
+	static_assert(std::same_as<Sortable, DCSortable>);
 	auto first = std::lower_bound(begin(), end(), base, lt_associated<T>);
 	auto dup = first;
 	bool dirty = false;
@@ -229,7 +214,7 @@ void SortedDManager<T>::fixAll(std::array<T, S_MAX>::iterator first, std::array<
 		}
 		std::copy(copies.begin(), copies.end(), first);
 	}
-	assert(std::is_sorted(begin(), end()));
+	//assert(std::is_sorted(begin(), end()));
 }
 
 template<typename T>
@@ -244,7 +229,18 @@ T* SortedDManager<T>::declareNewBatched(T_&&... args) //add new and mark as late
 	data[active_ - 1].set(std::forward<T_>(args)...);
 	return &data[active_ - 1];
 }
-
+template<typename T>
+//requires accessible<T>
+void SortedDManager<T>::deactivateAll(T::SortType to_deactivate) {
+	auto first = std::lower_bound(begin(), end(), to_deactivate, lt_associated<T>);
+	int count = 0;
+	while (!lt_associated(to_deactivate, (*first).sortVal())) {
+		count++;
+		deactivated.push_back(first - begin());
+		first++;
+	}
+	assert(count == 2);
+}
 
 template<typename T>
 //requires accessible<T>
