@@ -41,6 +41,11 @@ int main()
 	AIPlayer main_enemy(level, 1);
 	cout << "ai player " << sizeof(AIPlayer);
 	bool blocked = false;
+	for (int i = 0;i < 10;i++) {
+		for (int j = 0;j < 10;j++) {
+			level.addEntityTest(object_type::DUELIST, 0, { i,j });
+		}
+	}
 	while (window.isOpen())
 	{
 		g.now = clock.getElapsedTime();

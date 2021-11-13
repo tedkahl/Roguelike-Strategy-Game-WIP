@@ -81,6 +81,7 @@ static matrix<dj_map_node>& djikstraMap(move_type type, int team, std::vector<ma
 */
 static pathsGrid pathFind(UnitComponent* u, Board& state, RangeFxn attackfxn) {
 	std::cout << "calling pathFind" << std::endl;
+	sf::Clock c;
 	static matrix<map_node> grid;
 	static uint8_t search_counter = 0;
 	auto [minX, minY] = u->getPos();
@@ -152,6 +153,7 @@ static pathsGrid pathFind(UnitComponent* u, Board& state, RangeFxn attackfxn) {
 			//cout << "Replacing " << to_string(adj_pos) << " with: moves_l " << new_moves_left << " prev " << to_string(curr_pos) << endl;
 		}
 	}
+	cout << "time for pathing: " << c.getElapsedTime().asMicroseconds() << endl;
 	return pathsGrid(grid, minX, minY, maxX, maxY, search_counter);
 }
 

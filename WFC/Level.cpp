@@ -38,7 +38,7 @@ bool Level::update(sf::Time current)
 }
 
 void Level::draw(sf::RenderWindow& window) {
-#ifdef DEBUG
+#ifdef BENCHMARK
 	static long double total = 0;
 	static int count = 0;
 	static int max;
@@ -51,7 +51,7 @@ void Level::draw(sf::RenderWindow& window) {
 		//if (i.getSprite().getGlobalBounds().intersects(v))
 		i.draw(&window);
 	}
-#ifdef DEBUG
+#ifdef BENCHMARK
 	auto elapsed = c.getElapsedTime().asMicroseconds();
 	total += elapsed;
 	count++;

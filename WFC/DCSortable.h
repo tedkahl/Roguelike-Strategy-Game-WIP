@@ -17,7 +17,7 @@ protected:
 	unsigned batch_;
 
 	inline void setMoveDirection(uint8_t dir, DCSortable& dc_ref) {
-		move_direction = dir && (order_>=25);
+		move_direction = dir && (order_ >= 25);
 		dc_ref.move_direction = move_direction;
 	}
 public:
@@ -46,3 +46,13 @@ public:
 	inline sf::Vector2i coords() const { return { x, zval_ - x }; }
 };
 
+//a less than comparison which returns false if a is less than, but close enough to be associated with, b
+template<typename T>
+static bool lt_associated(const T& first, const DCSortable::SortType& b) {
+	//assert(std::get<4>(a) == 50);
+	DCSortable::SortType a = first;
+	if (std::get<0>(a) == std::get<0>(b) && std::get<1>(a) == std::get<1>(b) && std::get<2>(a) == std::get<2>(b) && std::get<3>(a) == std::get<3>(b)) {
+		return std::get<4>(b) - std::get<4>(a) >= 25;
+	}
+	else return first < b;
+}
