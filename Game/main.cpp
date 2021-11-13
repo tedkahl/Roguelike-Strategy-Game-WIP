@@ -13,7 +13,7 @@
 #include "Select.h"
 #include "AI.h"
 
-#define TEST
+//#define TEST
 auto getOutput(matrix<char>& in, unsigned owidth, unsigned oheight, unsigned n, bool rotate = true, bool reflect = true) {
 	WFC<char> w(in, owidth, oheight, n, rotate, reflect);
 	return w.run();
