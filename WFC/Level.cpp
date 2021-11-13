@@ -6,9 +6,8 @@ Level::Level(std::shared_ptr<ResourceManager<sf::Texture>> tm) :tm_(tm), dcompon
 	cout << "data: " << sizeof(Data<char>::d()) << endl;
 	cout << "uc: " << sizeof(Animation) << endl;
 	cout << "e: " << sizeof(*entities) << endl;
+	cout << "tm: " << sizeof(*tm) << endl;
 }
-
-
 
 std::optional<sf::Vector2i> Level::getCoords(sf::RenderWindow& window, sf::Vector2i pixel) {
 	auto coords = window.mapPixelToCoords(pixel);
@@ -39,13 +38,30 @@ bool Level::update(sf::Time current)
 }
 
 void Level::draw(sf::RenderWindow& window) {
+#ifdef DEBUG
+	static long double total = 0;
+	static int count = 0;
+	static int max;
+	sf::Clock c;
+#endif
 	auto& view = window.getView();
 	sf::FloatRect v(view.getCenter() - view.getSize() / 2.0f, view.getSize());
 	dcomponents->sort();
 	for (auto& i : *dcomponents) {
-		if (i.getSprite().getGlobalBounds().intersects(v))
-			i.draw(&window);
+		//if (i.getSprite().getGlobalBounds().intersects(v))
+		i.draw(&window);
 	}
+#ifdef DEBUG
+	auto elapsed = c.getElapsedTime().asMicroseconds();
+	total += elapsed;
+	count++;
+	max = std::max(max, static_cast<int>(elapsed));
+	//cout << total / count << endl;
+	if (count > 200) {
+		total = 0;
+		count = 0;
+	}
+#endif
 }
 //renderBatch::~renderBatch() {
 //	DCManager.deleteBatch(batch);
@@ -86,6 +102,11 @@ void Level::draw(sf::RenderWindow& window) {
 //this is pretty goofy. Probably just looping through entities is faster.
 Entity* Level::entityClickedOn(const sf::RenderWindow& window, sf::Vector2i coords, sf::Vector2i pixel_, bool prefer_team, int team)
 {
+	for (auto& i : *units) {
+		assert(i.getPos() == i.getOwner()->getPos());
+		assert(i.getPos() == i.getOwner()->dc()->coords());
+		assert(i.getPos() == i.getOwner()->getOwner()->getPos());
+	}
 	sf::Vector2f pixel = window.mapPixelToCoords(pixel_);
 	std::vector<sf::Vector2i> cols{ sf::Vector2i(0,0), sf::Vector2i(1,0), sf::Vector2i(0,1) };
 
@@ -173,7 +194,6 @@ void Level::addChildDC(object_type type, DrawComponent* parent)
 	if (search != Data<char>::d()->entityinfo.end()) {
 		auto& [path, offset, rect] = search->second;
 		auto dcp = dcomponents->declareNew(tm_->get(path), parent->getOffset(), 51, rect);
-		cout << "coords " << to_string(parent->coords()) << endl;
 		dcp->updateEntityPos(parent->coords(), state.heightmap);
 	}
 }
@@ -214,9 +234,13 @@ void Level::killUnit(UnitComponent* killer, Entity* target)
 bool Level::removeEntity(Entity* e)
 {
 	if (state.board.at(e->getPos()).removeE(e)) {
-		dcomponents->deactivate(e->dc()->sortVal());
+		dcomponents->deactivateAll(e->dc()->sortVal());
 		if (e->uc()) units->deactivate(e->uc()->index());
 		entities->deactivate(e->index());
+		for (auto& i : *units) {
+			assert(i.getPos() == i.getOwner()->getPos());
+			assert(i.getPos() == i.getOwner()->getOwner()->getPos());
+		}
 		return true;
 	}
 	return false;
@@ -233,7 +257,7 @@ void Level::setSquares(matrix<char>& WFCOutput)
 			auto [terrain_t, entity_t] = Data<char>::d()->glyphs.at(val);
 			auto& [path, offset, rect] = Data<char>::d()->squareinfo.at(terrain_t);
 			state.heightmap.at(x, y) = offset.y;
-			state.board.at(x, y) = Square(terrain_t, dcomponents.get(), dcomponents->declareNew(tm_->get(path), offset, 0, rect), sf::Vector2i(x, y), state.heightmap);
+			state.board.at(x, y) = Square(terrain_t, dcomponents->declareNew(tm_->get(path), offset, 0, rect), sf::Vector2i(x, y), state.heightmap);
 			if (entity_t != object_type::NONE) {
 				e = addEntity(entity_t, 2, sf::Vector2i(x, y));
 			}

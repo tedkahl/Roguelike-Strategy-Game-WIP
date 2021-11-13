@@ -16,8 +16,9 @@ template<typename T>
 requires SFResource<T>
 class ResourceManager {
 private:
-	std::map<std::string, std::unique_ptr<T>> resources;
-	//std::vector<unique_ptr<T>> resources_;
+	std::map<std::string, size_t> resources;
+	std::array<T, 100> resources_;
+	int index = 0;
 public:
 	ResourceManager() {};
 	T& get(std::string name);
@@ -29,14 +30,14 @@ requires SFResource<T>
 T& ResourceManager<T>::get(std::string name) {
 	auto search = resources.find(name);
 	if (search == resources.end()) {
-		std::unique_ptr<T> resource(new T());
-		if (!resource->loadFromFile(name)) std::cerr << "error loading " << name << std::endl;
+		index++;
+		if (!resources_[index].loadFromFile(name)) std::cerr << "error loading " << name << std::endl;
 
-		auto inserted = resources.emplace(std::make_pair(name, std::move(resource)));
+		auto inserted = resources.emplace(std::make_pair(name, index));
 		assert(inserted.second);
-		return *inserted.first->second;
+		return resources_.data()[index];
 	}
-	return *search->second;
+	return resources_.data()[((*search).second)];
 }
 
 template<typename T>
