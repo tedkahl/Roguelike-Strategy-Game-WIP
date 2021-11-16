@@ -71,6 +71,7 @@ Data<T>::Data()
 	entityinfo.emplace(std::make_pair(object_type::CACTUS, std::make_tuple("./textures/orig.png", sf::Vector2f(22, -40), sf::IntRect(211, 1579, 44, 66))));
 	entityinfo.emplace(std::make_pair(object_type::MOVESELECT, std::make_tuple("./textures/moveselect.png", sf::Vector2f(), sf::IntRect())));
 	entityinfo.emplace(std::make_pair(object_type::ATTACKSELECT, std::make_tuple("./textures/attackselect.png", sf::Vector2f(), sf::IntRect())));
+	entityinfo.emplace(std::make_pair(object_type::DEFAULTSELECT, std::make_tuple("./textures/opaqueselect.png", sf::Vector2f(), sf::IntRect())));
 	entityinfo.emplace(std::make_pair(object_type::DUELIST, std::make_tuple("./textures/duelist_sheet.png", sf::Vector2f(6, -33), sf::IntRect(0, 0, 72, 72))));
 	entityinfo.emplace(std::make_pair(object_type::WOLF, std::make_tuple("./textures/direwolf.png", sf::Vector2f(6, -33), sf::IntRect())));
 	entityinfo.emplace(std::make_pair(object_type::POISON, std::make_tuple("./textures/misc/poisoned.png", sf::Vector2f(0, 0), sf::IntRect())));

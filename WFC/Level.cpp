@@ -1,5 +1,6 @@
 #include "Level.h"
-Level::Level(std::shared_ptr<ResourceManager<sf::Texture>> tm) :tm_(tm), dcomponents(new SortedDManager<DrawComponent >), units(new UnitManager), entities(new DataManager<Entity>) {
+#define TEST
+Level::Level(std::unique_ptr<ResourceManager<sf::Texture>>&& tm, std::unique_ptr<ResourceManager<sf::Font>>&& fm) :tm_(std::move(tm)), fm_(std::move(fm)), dcomponents(new SortedDManager<DrawComponent >), units(new UnitManager), entities(new DataManager<Entity>) {
 	cout << "dc: " << sizeof(*dcomponents) << endl;
 	cout << "uc: " << sizeof(*units) << endl;
 	cout << "e: " << sizeof(*entities) << endl;
@@ -62,51 +63,61 @@ void Level::draw(sf::RenderWindow& window) {
 		count = 0;
 	}
 #endif
+	sf::Font& roboto = fm_->get("./Roboto/Roboto-Regular.ttf");
+	auto ftext = sf::Text("", roboto, 16);
+	ftext.setFillColor(sf::Color::Black);
+	for (int y = 0;y < test_display_nums.height();y++) {
+		for (int x = 0;x < test_display_nums.width();x++) {
+			ftext.setPosition(squarePosFromCoords({ x,y }, state.board.width()) + sf::Vector2f{ 20.f, 10.f });
+			ftext.setString(std::to_string(test_display_nums.at(x, y)));
+			window.draw(ftext);
+		}
+	}
 }
-//renderBatch::~renderBatch() {
-//	DCManager.deleteBatch(batch);
-//}
-//
-//renderBatch::renderBatch(int b, std::vector<sf::RenderTexture>&& txt, SortedDManager<DrawComponent>& dcomponents) : batch(b), textures(txt), DCManager(dcomponents) {}
 
-//void Level::displayDJ(dj_map& test) {
-//	static std::unique_ptr<renderBatch> b;
-//	if (b != nullptr) {
-//		b = nullptr;
-//		return;
-//	}
-//	float max_score = 0;
-//	int batch = dcomponents->addBatch();
-//	for (auto& i : test.map) {
-//		max_score = std::max(max_score, i.score);
-//	}
-//	sf::Font roboto;
-//	roboto.loadFromFile("./Roboto/Roboto-Regular.ttf");
-//	DrawComponent* obj_dc;
-//	std::vector<sf::RenderTexture> spare_textures;
-//	for (unsigned y = 0;y < test.map.height();y++) {
-//		for (unsigned x = 0;x < test.map.width();x++) {
-//			auto normalized_score = std::min(1.0f, 2 * test.map.at(x, y).score / max_score);
-//			auto type = normalized_score < .3 ? object_type::MOVESELECT : object_type::ATTACKSELECT;
-//			spare_textures.push_back(get_DJ_Square(roboto, normalized_score, *tm_, type));
-//			obj_dc = dcomponents->declareNewBatched(spare_textures.back().getTexture(), sf::Vector2f(), 1, sf::IntRect(), batch);
-//
-//			//std::cout << "Adding target square at " << to_string(sf::Vector2i(i, j) + paths.offset) << std::endl;
-//			obj_dc->updateEntityPos(sf::Vector2i(x, y), state.heightmap);
-//		}
-//	}
-//	b = std::make_unique<renderBatch>(batch, std::move(spare_textures), *dcomponents);
-//}
+void Level::displayDJ(matrix<float>&& test) {
+	static int batch = -1;
+	if (batch != -1) {
+		dcomponents->deleteBatch(batch);
+	}
+
+	float max_score = 0;
+	batch = dcomponents->addBatch();
+	for (auto& i : test) {
+		max_score = std::max(max_score, i);
+	}
+
+	DrawComponent* obj_dc;
+	test_display_nums.resize(state.board.width(), state.board.height());
+	for (unsigned y = 0;y < test.height();y++) {
+		for (unsigned x = 0;x < test.width();x++) {
+			auto normalized_score = test.at(x, y) / max_score;
+
+			auto search = Data<char>::d()->entityinfo.find(object_type::DEFAULTSELECT);
+			assert(search != Data<char>::d()->entityinfo.end());
+			auto& [path, offset, rect] = search->second;
+
+			obj_dc = dcomponents->declareNewBatched(tm_->get(path), sf::Vector2f(), 2, sf::IntRect(), batch);
+			obj_dc->setColor({ static_cast<uint8_t>(255 * normalized_score), 0,static_cast<uint8_t>(255 * (1 - normalized_score)), 150 });
+
+			//std::cout << "Adding target square at " << to_string(sf::Vector2i(i, j) + paths.offset) << std::endl;
+			obj_dc->updateEntityPos(sf::Vector2i(x, y), state.heightmap);
+			test_display_nums.at(x, y) = static_cast<int>(normalized_score * 100);
+		}
+	}
+}
 
 
 //this is pretty goofy. Probably just looping through entities is faster.
 Entity* Level::entityClickedOn(const sf::RenderWindow& window, sf::Vector2i coords, sf::Vector2i pixel_, bool prefer_team, int team)
 {
+#ifdef TEST
 	for (auto& i : *units) {
 		assert(i.getPos() == i.getOwner()->getPos());
 		assert(i.getPos() == i.getOwner()->dc()->coords());
 		assert(i.getPos() == i.getOwner()->getOwner()->getPos());
 	}
+#endif
 	sf::Vector2f pixel = window.mapPixelToCoords(pixel_);
 	std::vector<sf::Vector2i> cols{ sf::Vector2i(0,0), sf::Vector2i(1,0), sf::Vector2i(0,1) };
 
@@ -237,10 +248,12 @@ bool Level::removeEntity(Entity* e)
 		dcomponents->deactivateAll(e->dc()->sortVal());
 		if (e->uc()) units->deactivate(e->uc()->index());
 		entities->deactivate(e->index());
+#ifdef TEST
 		for (auto& i : *units) {
 			assert(i.getPos() == i.getOwner()->getPos());
 			assert(i.getPos() == i.getOwner()->getOwner()->getPos());
 		}
+#endif
 		return true;
 	}
 	return false;

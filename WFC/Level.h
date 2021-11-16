@@ -34,15 +34,16 @@ struct Board;
 class Level
 {
 private:
-	std::shared_ptr<ResourceManager<sf::Texture>> tm_;
-	std::shared_ptr<ResourceManager<sf::Font>> fm_;
-	std::unique_ptr<SortedDManager<DrawComponent>> dcomponents;
+	std::unique_ptr<ResourceManager<sf::Texture>> tm_;
+	std::unique_ptr<ResourceManager<sf::Font>> fm_;
+	std::unique_ptr<DCManager> dcomponents;
+	matrix<int> test_display_nums;
 public:
 	std::unique_ptr < DataManager<Entity>> entities;
 	std::unique_ptr < UnitManager> units;
 	Board state;
 	explicit Level() {}
-	Level(std::shared_ptr<ResourceManager<sf::Texture>> tm);
+	Level(std::unique_ptr<ResourceManager<sf::Texture>>&&, std::unique_ptr<ResourceManager<sf::Font>>&&);
 	Entity* addEntity(object_type t, int team, sf::Vector2i coords);
 	Entity* addEntityTest(object_type t, int team, sf::Vector2i coords);
 	void addChildDC(object_type type, DrawComponent* parent);
@@ -54,7 +55,7 @@ public:
 	bool update(sf::Time current);
 	void draw(sf::RenderWindow& window);
 	void killUnit(UnitComponent* killer, Entity* target);
-	void displayDJ(dj_map& test);
+	void displayDJ(matrix<float>&& test);
 
 	std::optional < sf::Vector2i> getCoords(sf::RenderWindow& window, sf::Vector2i pixel);
 };
