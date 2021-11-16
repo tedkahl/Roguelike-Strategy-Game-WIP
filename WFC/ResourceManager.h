@@ -20,14 +20,14 @@ private:
 	std::array<T, 100> resources_;
 	int index = 0;
 public:
-	ResourceManager() {};
-	T& get(std::string name);
-	T& make(std::string name, T&& resource);
+	ResourceManager() :resources() {};
+	T& get(const std::string& name);
+	T& make(const std::string& name, const T&& resource);
 };
 
 template<typename T>
 requires SFResource<T>
-T& ResourceManager<T>::get(std::string name) {
+T& ResourceManager<T>::get(const std::string& name) {
 	auto search = resources.find(name);
 	if (search == resources.end()) {
 		index++;
@@ -42,7 +42,7 @@ T& ResourceManager<T>::get(std::string name) {
 
 template<typename T>
 requires SFResource<T>
-T& ResourceManager<T>::make(std::string name, T&& resource) {
+T& ResourceManager<T>::make(const std::string& name, const T&& resource) {
 	auto search = resources.find(name);
 	if (search == resources.end()) {
 		assert(!resources.contains(name));

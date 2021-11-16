@@ -1,15 +1,14 @@
 #pragma once
 #include <SFML/Graphics.hpp>
+#include "ResourceManager.h"
 class FrameCounter {
 private:
 	int frames = 0;
-	sf::Font roboto;
 	sf::Text ftext;
 	sf::Time prev;
 public:
-	FrameCounter() {
-		roboto.loadFromFile("./Roboto/Roboto-Regular.ttf");
-		ftext = sf::Text("60", roboto, 16);
+	FrameCounter(sf::Font& font) {
+		ftext = sf::Text("60", font, 16);
 		ftext.setPosition(0, 0);
 		ftext.setFillColor(sf::Color::White);
 		ftext.setOutlineColor(sf::Color::Black);

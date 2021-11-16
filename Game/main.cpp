@@ -26,8 +26,11 @@ int main()
 
 	sf::RenderWindow window(sf::VideoMode(1200, 800), "Dungeon Delve");
 
-	auto tm = std::make_shared<ResourceManager<sf::Texture>>();
-	Level level(tm);
+	auto tm = std::make_unique<ResourceManager<sf::Texture>>();
+	auto fm = std::make_unique<ResourceManager<sf::Font>>();
+	FrameCounter fc(fm->get("./Roboto/Roboto-Regular.ttf"));
+
+	Level level(std::move(tm), std::move(fm));
 	Player p_state(level, 0);
 	cout << "level " << sizeof(level);
 	auto& squares = level.state.board;
@@ -36,7 +39,6 @@ int main()
 	window.setFramerateLimit(300);
 
 	float lastX = -1., lastY = -1.;
-	FrameCounter fc;
 	GameState g;
 	//AI stuff, placeholder
 	AIPlayer main_enemy(level, 1);
@@ -77,8 +79,6 @@ int main()
 		sf::Event event;
 		while (window.pollEvent(event))
 		{
-
-
 			switch (event.type) {
 			case sf::Event::Closed:
 			{
