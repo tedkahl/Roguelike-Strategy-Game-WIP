@@ -14,13 +14,12 @@ private:
 	int turn;
 	std::map<preference_type, dj_map> maps;
 	sf::Vector2i target;
-	void printMap(preference_type type);
+	void targetFromMap(Entity* me, pathsGrid& paths);
 public:
 	void getMaps(UnitComponent* unit);
 	dj_map& peekMap();
 	bool hasSelection();
 	virtual bool selectNext();
 	virtual void executeSelected(sf::Time now);
-	//void decideFinalTarget(Entity* e, matrix<dj_map_node>& dj_map, std::vector<sf::Vector2i>& move_targets);
 	using Player::Player;
 };

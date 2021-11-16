@@ -25,7 +25,7 @@ public:
 	Command(Entity* agent, Level& level_);
 	virtual void showTargeter() = 0;
 	virtual void hideTargeter() = 0;
-	virtual std::optional<unit::move_state> execute(sf::Vector2i target, sf::Time now, Player* p_state) = 0; //target can be changed to its own class if necessary
+	virtual std::optional<unit::move_state> execute(sf::Vector2i, sf::Time, Player*) = 0; //target can be changed to its own class if necessary
 	virtual pathsGrid& getPaths() = 0;
 	virtual ~Command() {}
 };
@@ -34,7 +34,8 @@ class AttackMove :public Command {
 private:
 	pathsGrid paths;
 public:
-	AttackMove(Entity* agent, Level& level_);
+	AttackMove(Entity* agent, Level&);
+	AttackMove(Entity* agent, Level&, pathsGrid&& known_paths);
 	virtual void showTargeter() override;
 	virtual void hideTargeter() override;
 	virtual std::optional<unit::move_state> execute(sf::Vector2i target, sf::Time now, Player* p_state) override;

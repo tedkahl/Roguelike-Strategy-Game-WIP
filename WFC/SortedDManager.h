@@ -17,7 +17,7 @@ using std::cout;
 using std::endl;
 static const size_t S_MAX = 3000;
 class DrawComponent;
-
+#define CHECKSORTED
 template<typename T>
 //requires accessible<T>
 class SortedDManager {
@@ -75,9 +75,9 @@ void SortedDManager<T>::sort() {
 	if (!deactivated.empty()) sortDeleted();
 	if (unsorted_ > 0 && unsorted_ <= SWAPSIZE) sortNew();
 	if (unsorted_ > SWAPSIZE) std::sort(begin(), end()); //else quicksort
-#ifdef TEST
+#ifdef CHECKSORTED
 	for (int i = 1;i < active_;i++) {
-		if (data[i] < data[i - 1]) {
+		if (data[i].sortVal() <= data[i - 1].sortVal()) {
 			cout << "unsorted" << endl;
 		}
 	}
@@ -109,8 +109,8 @@ void SortedDManager<T>::sortDeleted()
 	std::sort(deactivated.begin(), deactivated.end());
 
 	unsigned count = 0;
-	for (unsigned i = 0;i < active_ - count;i++) {
-		while (count < deactivated.size() && i + count == deactivated[count]) {
+	for (unsigned i = deactivated[0];i < active_ - count;i++) {
+		while (count < deactivated.size() && (i + count) == deactivated[count]) {
 			count++;
 			//std::cout << "deleted element found at " << i + count << std::endl;
 		}
@@ -179,6 +179,7 @@ template<typename Sortable>
 void SortedDManager<T>::updateAll(sf::Time current, T::SortType base, Sortable& s, EntityUpdate& u) {
 	static_assert(std::same_as<T, DrawComponent>);
 	static_assert(std::same_as<Sortable, DCSortable>);
+	sort();
 	auto first = std::lower_bound(begin(), end(), base, lt_associated<T>);
 	auto dup = first;
 	bool dirty = false;
@@ -220,7 +221,7 @@ void SortedDManager<T>::fixAll(std::array<T, S_MAX>::iterator first, std::array<
 		}
 		std::copy(copies.begin(), copies.end(), first);
 	}
-#ifdef TEST
+#ifdef CHECKSORTED
 	for (int i = 1;i < active_;i++) {
 		if (data[i].sortVal() <= data[i - 1].sortVal()) {
 			cout << "unsorted" << endl;

@@ -5,6 +5,7 @@
 #include "Actions.h"
 Command::Command(Entity* agent, Level& level_) :agent_(agent), level(&level_) {}
 
+
 void AttackMove::showTargeter() {
 	if (!targeter)
 	{
@@ -15,8 +16,9 @@ void AttackMove::hideTargeter() {
 	delete targeter.release(); //release ownership of Targeter and delete underlying pointer
 }
 
-AttackMove::AttackMove(Entity* agent, Level& board_) : Command(agent, board_), paths(pathFind(agent_->uc(), level->state, getAttack(agent->uc()->stats().attack_type))) {
+AttackMove::AttackMove(Entity* agent, Level& level_) : Command(agent, level_), paths(pathFind(agent_->uc(), level->state, getAttack(agent->uc()->stats().attack_type))) {
 }
+AttackMove::AttackMove(Entity* agent, Level& level_, pathsGrid&& known_paths) : Command(agent, level_), paths(std::move(known_paths)) {}
 
 
 std::optional<unit::move_state> AttackMove::execute(sf::Vector2i target, sf::Time now, Player* p_state) {
@@ -24,8 +26,8 @@ std::optional<unit::move_state> AttackMove::execute(sf::Vector2i target, sf::Tim
 	auto& board = level->state.board;
 	sf::Vector2i move_target = target;
 	bool attack = false;
+	cout << "my loc " << to_string(agent_->getPos()) << endl;
 	cout << "target " << to_string(target) << endl;
-	cout << paths.is_attackable(target) << endl;
 	auto target_enmity = getEnmity(board.at(target), agent_->uc());
 	if (paths.is_attackable(target) && isNE(target_enmity)) {
 		move_target = paths.grid.at(target - paths.offset).prev;
@@ -41,6 +43,7 @@ std::optional<unit::move_state> AttackMove::execute(sf::Vector2i target, sf::Tim
 	}
 
 	auto move_path = paths.getPath(move_target);
+	if (!move_path) return std::nullopt;
 	unit::move_state ret;
 	if (move_path)
 	{
