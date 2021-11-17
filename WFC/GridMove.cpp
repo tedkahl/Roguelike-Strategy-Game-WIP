@@ -3,7 +3,7 @@
 #include "Board.h"
 #include "DrawComponent.h"
 #include "AnimationManager.h"
-SimpleMove::SimpleMove(sf::Vector2i start, sf::Vector2i end, object_type type, sf::Time speed, Board& board) : SimpleRT(type, anim_state::WALKING, speed, board), start_(start), end_(end) {}
+SimpleMove::SimpleMove(sf::Vector2i start, sf::Vector2i end, object_type type, anim_state a, sf::Time speed, Board& board) : SimpleRT(type, a, speed, board), start_(start), end_(end) {}
 
 
 std::optional<sf::Vector2f> SimpleMove::getSpritePos(float fraction) {
@@ -37,7 +37,7 @@ EntityUpdate SimpleMove::getUpdate(sf::Time current) {
 // if path is 1,2,3,4,5 : added as 4->5, 3->4, 2->3, 1->2 : read back to front
 GridMove::GridMove(const std::vector<sf::Vector2i>& path, object_type type, sf::Time speed, Board& board) :CompositeRT(board) {
 	for (unsigned i = path.size() - 1;i > 0;i--) {
-		moves.emplace_back(std::make_unique<SimpleMove>(path[i - 1], path[i], type, speed, board));
+		moves.emplace_back(std::make_unique<SimpleMove>(path[i - 1], path[i], type, anim_state::WALKING, speed, board));
 	}
 	std::cout << "Path established: " << std::endl;
 	for (auto& i : path) {

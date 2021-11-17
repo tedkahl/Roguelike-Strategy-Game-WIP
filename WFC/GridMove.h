@@ -19,6 +19,6 @@ private:
 	std::optional<sf::Vector2f> getSpritePos(float fraction);
 public:
 	SimpleMove() = default;
-	SimpleMove(sf::Vector2i start, sf::Vector2i end, object_type type, sf::Time speed, Board& board);
+	SimpleMove(sf::Vector2i start, sf::Vector2i end, object_type, anim_state, sf::Time speed, Board& board);
 	virtual EntityUpdate getUpdate(sf::Time current) override;
 };
