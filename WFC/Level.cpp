@@ -11,16 +11,11 @@ Level::Level(std::unique_ptr<ResourceManager<sf::Texture>>&& tm, std::unique_ptr
 }
 
 std::optional<sf::Vector2i> Level::getCoords(sf::RenderWindow& window, sf::Vector2i pixel) {
-	auto coords = window.mapPixelToCoords(pixel);
+	auto pos = gridPosFromScreenCoords(window.mapPixelToCoords(pixel), state.board.height());
 
-	double x_pos = coords.y + (.5 * coords.x);
-	double y_pos = coords.y - (.5 * coords.x);
-	x_pos = x_pos / sq::square_h - (float)state.board.height() / 2;
-	y_pos = y_pos / sq::square_h + (float)state.board.height() / 2;
-
-	std::cout << "xy: " << x_pos << " " << y_pos << std::endl;
-	if (0 <= x_pos && x_pos < state.board.width() && 0 <= y_pos && y_pos < state.board.height())
-		return sf::Vector2i(static_cast<int>(x_pos), static_cast<int>(y_pos));
+	std::cout << "xy: " << pos.x << " " << pos.y << std::endl;
+	if (0 <= pos.x && pos.x < state.board.width() && 0 <= pos.y && pos.y < state.board.height())
+		return sf::Vector2i(pos);
 	return std::nullopt;
 }
 
@@ -166,7 +161,7 @@ Entity* Level::addEntity(object_type type, int team, sf::Vector2i coords)
 {
 	UnitComponent* uc = nullptr;
 	assert(on_board(coords, state.board));
-	if (isUnit(type)) {
+	if (isUnitOrObj(type)) {
 		if (state.board.at(coords).unit()) {
 			std::cerr << "space already full\n";
 			return nullptr;
@@ -208,28 +203,6 @@ void Level::addChildDC(object_type type, DrawComponent* parent)
 		dcp->updateEntityPos(parent->coords(), state.heightmap);
 	}
 }
-
-
-unsigned Level::addTargeter(const pathsGrid& paths)
-{
-	unsigned batch = dcomponents->addBatch();
-	DrawComponent* obj_dc;
-	for (unsigned i = 0;i < paths.grid.width();i++) {
-		for (unsigned j = 0;j < paths.grid.height();j++) {
-			if (paths.grid.at(i, j).search == paths.search) {
-				auto type = paths.grid.at(i, j).movable ? object_type::MOVESELECT : object_type::ATTACKSELECT;
-				if (type == object_type::ATTACKSELECT) {
-					assert(paths.grid.at(i, j).attackable);
-				}
-				obj_dc = getObjDC(*dcomponents, *tm_, type, batch); //add all dcomponents
-				//std::cout << "Adding target square at " << to_string(sf::Vector2i(i, j) + paths.offset) << std::endl;
-				obj_dc->updateEntityPos(sf::Vector2i(i, j) + paths.offset, state.heightmap);
-			}
-		}
-	}
-	return batch;
-}
-
 
 void Level::removeBatch(unsigned batch)
 {

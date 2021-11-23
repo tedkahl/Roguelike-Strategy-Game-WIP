@@ -39,6 +39,8 @@ private:
 	std::unique_ptr<DCManager> dcomponents;
 	matrix<int> test_display_nums;
 public:
+	inline DCManager& getDCManager() const { return *dcomponents; }
+	inline ResourceManager<sf::Texture>& getTM() const { return *tm_; }
 	std::unique_ptr < DataManager<Entity>> entities;
 	std::unique_ptr < UnitManager> units;
 	Board state;
@@ -47,7 +49,7 @@ public:
 	Entity* addEntity(object_type t, int team, sf::Vector2i coords);
 	Entity* addEntityTest(object_type t, int team, sf::Vector2i coords);
 	void addChildDC(object_type type, DrawComponent* parent);
-	unsigned addTargeter(const pathsGrid& grid);
+
 	bool removeEntity(Entity* e);
 	void removeBatch(unsigned batch);
 	Entity* entityClickedOn(const sf::RenderWindow& window, sf::Vector2i coords, sf::Vector2i pixel, bool prefer_team = false, int team = 0);
