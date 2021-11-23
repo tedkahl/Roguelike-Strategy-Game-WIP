@@ -22,3 +22,14 @@ public:
 	SimpleMove(sf::Vector2i start, sf::Vector2i end, object_type, anim_state, sf::Time speed, Board& board);
 	virtual EntityUpdate getUpdate(sf::Time current) override;
 };
+
+class ProjectileMove :public SimpleRT {
+private:
+	sf::Vector2i start_;
+	sf::Vector2i end_;
+	sf::Vector2f getSpritePos(float fraction);
+public:
+	ProjectileMove() = default;
+	ProjectileMove(sf::Vector2i start, sf::Vector2i end, object_type, anim_state, sf::Time speed, Board& board, entity_action&& a = actions::null_action);
+	virtual EntityUpdate getUpdate(sf::Time current) override;
+};

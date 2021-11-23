@@ -47,17 +47,32 @@ GridMove::GridMove(const std::vector<sf::Vector2i>& path, object_type type, sf::
 }
 
 
-/*std::optional<sf::Vector2f> GridMove::getSpritePos(float pos, unsigned index) {
-	unsigned end_index = std::min(index + 1, path_.size() - 1);
-	sf::Vector2f startcoords = squarePosFromCoords(path_[index], board_->board.width());
-	sf::Vector2f endcoords = squarePosFromCoords(path_[end_index], board_->board.width());
 
-	float start_h = board_->heightmap.at(path_[index]);
-	float end_h = board_->heightmap.at(path_[end_index]);
-	float fraction = (pos - index);
+ProjectileMove::ProjectileMove(sf::Vector2i start, sf::Vector2i end, object_type type, anim_state a_type, sf::Time speed, Board& board, entity_action&& action) :
+	SimpleRT(type, a_type, speed, board, std::move(action)), start_(start), end_(end) {}
+
+sf::Vector2f ProjectileMove::getSpritePos(float fraction) {
+	sf::Vector2f startcoords = squarePosFromCoords(start_, board_->board.width());
+	sf::Vector2f endcoords = squarePosFromCoords(end_, board_->board.width());
+
 	startcoords = startcoords + (endcoords - startcoords) * fraction;
-	startcoords.y += (fraction >= .5 ? end_h : start_h);
 
-	//cout << "getting sprite pos " << startcoords.x << " " << startcoords.y << endl;
 	return startcoords;
-}*/
+}
+
+EntityUpdate ProjectileMove::getUpdate(sf::Time current) {
+	std::optional<Animation> sent_anim;
+	//cout << "updating move" << endl;
+	if (isFirst(current)) {
+		sent_anim = anim;
+	}
+	float fraction = (current - start_time) / speed_;
+	cout << fraction << " " << getSpritePos(fraction).x << " " << getSpritePos(fraction).y << endl;
+	sf::Vector2f grid_pos = static_cast<sf::Vector2f>(start_) + static_cast<sf::Vector2f>(end_ - start_) * fraction;
+
+	sf::Vector2i coords_ = static_cast<sf::Vector2i>(grid_pos) + sf::Vector2i{ 1, 1 };
+	if (fraction >= 1.f) {//finished
+		return EntityUpdate(true, 1, end_, std::nullopt, std::nullopt, std::move(action));
+	}
+	return EntityUpdate(false, 0, coords_, getSpritePos(fraction), std::move(sent_anim));
+}
