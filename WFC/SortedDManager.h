@@ -17,7 +17,7 @@ using std::cout;
 using std::endl;
 static const size_t S_MAX = 3000;
 class DrawComponent;
-#define CHECKSORTED
+//#define CHECKSORTED
 template<typename T>
 //requires accessible<T>
 class SortedDManager {
@@ -59,6 +59,9 @@ public:
 	typedef std::array<T, S_MAX>::iterator iterator;
 	iterator begin() { return data.begin(); }
 	iterator end() { return data.begin() + active_; }
+	SortedDManager() = default;
+	SortedDManager(const SortedDManager<T>& other) = delete;
+	SortedDManager<T>& operator=(const SortedDManager<T>& other) = delete;
 };
 template<typename T>
 //requires accessible<T>
@@ -252,7 +255,7 @@ void SortedDManager<T>::deactivateAll(T::SortType to_deactivate) {
 		deactivated.push_back(first - begin());
 		first++;
 	}
-	assert(count == 2);
+	//assert(count == 2);
 }
 
 template<typename T>

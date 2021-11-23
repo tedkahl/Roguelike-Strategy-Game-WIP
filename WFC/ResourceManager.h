@@ -21,6 +21,8 @@ private:
 	int index = 0;
 public:
 	ResourceManager() :resources() {};
+	ResourceManager(const ResourceManager<T>& other) = delete;
+	ResourceManager& operator=(const ResourceManager<T>& other) = delete;
 	T& get(const std::string& name);
 	T& make(const std::string& name, const T&& resource);
 };
