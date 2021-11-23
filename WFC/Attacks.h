@@ -14,7 +14,48 @@ static void melee(sf::Vector2i pos, Board& board, const std::function<void(sf::V
 		}
 	}
 }
+/*
+	auto pos = agent_->getPos();
+	auto& board = level_->state;
+	for (auto& dir : dir2) {
+		if (!on_board(pos + dir, board.board)) continue;
+		targets.abs_at(pos + dir) = target_t::ATTACK_TGT;
 
+		if (isKickable(board.board.at(pos).unit_uc(), board.board.at(pos + dir).unit())) {
+			for (int j = 2;j <= dist;j++) {
+				//if height change, stop at previous square
+				if (board.heightmap.at(pos + dir * j) != board.heightmap.at(pos + dir * (j - 1))) break;
+				targets.abs_at(pos + dir) = target_t::ATTACK_NO_TGT;
+				//if blocking unit, stop at current square
+				if (board.board.at(pos + j * dir).unit_uc() != nullptr) break;
+			}
+		}
+	}
+*/
+static bool isKickable(UnitComponent* me, Entity* target) {
+	if (target == nullptr) return false;
+	return (target->type() == object_type::ROCK) || getEnmity(me, target->uc()) == enmity_t::SAME_TEAM;
+}
+
+static auto kick_r(int range, sf::Vector2i pos, Board& board)
+{
+	return [=](sf::Vector2i pos, Board& board, const std::function<void(sf::Vector2i)>& protocol) {
+		for (auto& dir : dir2) {
+			if (!on_board(pos + dir, board.board)) continue;
+			protocol(pos + dir);
+
+			if (isKickable(board.board.at(pos).unit_uc(), board.board.at(pos + dir).unit())) {
+				for (int j = 2;j <= range;j++) {
+					//if height change, stop at previous square
+					if (board.heightmap.at(pos + dir * j) != board.heightmap.at(pos + dir * (j - 1))) break;
+					protocol(pos + j * dir);
+					//if blocking unit, stop at current square
+					if (board.board.at(pos + j * dir).unit_uc() != nullptr) break;
+				}
+			}
+		}
+	};
+}
 template<unsigned inner, unsigned outer>
 static void arrow(sf::Vector2i pos, Board& board, const std::function<void(sf::Vector2i)>& protocol)
 {
@@ -32,11 +73,14 @@ static void arrow(sf::Vector2i pos, Board& board, const std::function<void(sf::V
 		if (y == pos.y) grow_dir = -1;
 	}
 }
+
+
 //very placeholder
 static bool blocking(Square& sq) {
 	return sq.unit() && (sq.unit()->type() == object_type::ROCK);
 }
-//template<unsigned inner, unsigned outer>
+
+
 //static void beam(sf::Vector2i pos, Board& board, const std::function<void(sf::Vector2i)>& protocol)
 //{
 //	sf::Vector2i temp_pos;
