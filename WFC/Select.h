@@ -1,8 +1,10 @@
 #pragma once
+#include <memory>
 #include "UnitComponent.h"
 #include "Command.h"
 #include "Player.h"
 #include "AI.h"
+#include "Ability.h"
 #include "GameState.h"
 static void handleEsc(Player& p_state) {
 	if (p_state.command) p_state.deSelect();
@@ -18,7 +20,7 @@ static void handleInput(Level& level, sf::RenderWindow& window, GameState& g, Pl
 			sf::Vector2i coords = ret.value();
 			if (p_state.command) {
 				std::cout << "executing command" << std::endl;
-				auto new_state = p_state.command->execute(coords, g.now, &p_state);
+				p_state.command->execute(coords, g.now, &p_state);
 				p_state.deSelect();
 				p_state.deleteCommand();
 			}
@@ -65,10 +67,15 @@ static void handleInput(Level& level, sf::RenderWindow& window, GameState& g, Pl
 				p_state.startTurn();
 			}
 			break;
-		}/*
-		case sf::Keyboard::Key::J: {
-			level.displayDJ(enemy.peekMap());
-		}*/
+		}
+		case sf::Keyboard::Key::K: {
+			if (auto unit = p_state.selected) {
+				auto coords = level.getCoords(window, sf::Mouse::getPosition(window));
+				p_state.switchCommand(new Kick(unit, level));
+				p_state.command->showTargeter();
+			}
+			break;
+		}
 		case sf::Keyboard::Key::D: {
 			if (auto coords = level.getCoords(window, sf::Mouse::getPosition(window))) {
 				auto& square = squares.at(coords.value());

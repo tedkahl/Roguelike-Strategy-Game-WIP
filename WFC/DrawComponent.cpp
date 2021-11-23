@@ -55,7 +55,7 @@ void DrawComponent::set(const sf::Texture& texture, const sf::Vector2f& offset, 
 }
 
 bool DrawComponent::update(const sf::Time& current, const EntityUpdate& update, DCSortable& ref) {
-	cout << "updating dc" << endl;
+	//cout << "updating dc" << endl;
 	bool dirty = false;
 	if (update.move_dir_ == 0 && move_direction == 1) {
 		dirty = true;
@@ -71,7 +71,7 @@ bool DrawComponent::update(const sf::Time& current, const EntityUpdate& update, 
 			updateCoords(update.coords_.value(), ref);
 			dirty = true;
 		}
-		cout << "updating coords" << endl << to_string(update.coords_.value()) << endl;
+		//cout << "updating coords" << endl << to_string(update.coords_.value()) << endl;
 	}
 	if (update.sprite_position_) {
 		//cout << "setting sprite pos " << to_string(update.sprite_position_.value()) << endl;
