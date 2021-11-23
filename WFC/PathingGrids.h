@@ -24,14 +24,49 @@ struct dj_map {
 	std::vector<map_target> targets;
 };
 
-struct pathsGrid {
-	matrix<map_node> grid;
-	sf::Vector2i offset; //position of upper left corner on full grid
+template<typename T>
+struct subGrid {
+	matrix<T> grid;
+	sf::Vector2i offset;
+	T& rel_at(sf::Vector2i rel_loc) {
+		return grid.at(rel_loc);
+	}
+	T& abs_at(sf::Vector2i abs_loc) {
+		return grid.at(abs_loc - offset);
+	}
+	const T& rel_at(sf::Vector2i rel_loc) const {
+		return grid.at(rel_loc);
+	}
+	const T& abs_at(sf::Vector2i abs_loc) const {
+		return grid.at(abs_loc - offset);
+	}
+	subGrid(matrix<T>&& s_grid, sf::Vector2i off_s) :grid(std::move(s_grid)), offset(off_s) {}
+};
+
+struct pathsGrid : public subGrid<map_node> {
+	//matrix<map_node> grid;
+	//sf::Vector2i offset; //position of upper left corner on full grid
 	unsigned search;
 	std::optional<std::vector<sf::Vector2i>> getPath(sf::Vector2i& dest);
-	//std::optional<Square> getSquare(sf::Vector2i& loc) { if (on_board(loc - offset, grid)) return grid.at(loc - offset); else return std::nullopt; };
-	bool is_movable(sf::Vector2i loc) { return on_board(loc - offset, grid) && grid.at(loc - offset).search == search && grid.at(loc - offset).movable && !grid.at(loc - offset).has_ally; }
-	bool is_attackable(sf::Vector2i loc) { return  on_board(loc - offset, grid) && grid.at(loc - offset).search == search && grid.at(loc - offset).attackable; }
-	pathsGrid(matrix<map_node>& g, unsigned minX, unsigned minY, unsigned maxX, unsigned maxY, unsigned search_) :grid(subMatrix(g, minX, minY, maxX - minX + 1, maxY - minY + 1)), offset(minX, minY), search(search_) {}
-	pathsGrid() :grid(), search(0) {}
+	bool is_movable(sf::Vector2i abs_loc) { return on_board(abs_loc - offset, grid) && abs_at(abs_loc).search == search && abs_at(abs_loc).movable && !abs_at(abs_loc).has_ally; }
+	bool is_attackable(sf::Vector2i abs_loc) { return  on_board(abs_loc - offset, grid) && abs_at(abs_loc).search == search && abs_at(abs_loc).attackable; }
+	pathsGrid(matrix<map_node>& g, int minX, int minY, int maxX, int maxY, int search_) :subGrid(subMatrix(g, minX, minY, maxX - minX + 1, maxY - minY + 1), { minX, minY }), search(search_) {}
+	//pathsGrid() :subGrid(), search(0) {}
 };
+
+static object_type getTarget(const pathsGrid& grid, sf::Vector2i rel_loc) {
+	if (grid.rel_at(rel_loc).search != grid.search) return object_type::NONE;
+	else return grid.rel_at(rel_loc).movable ? object_type::MOVESELECT : object_type::ATTACKSELECT;
+}
+/*
+object_type getTarget(const subGrid<target_t>& grid, sf::Vector2i rel_loc) {
+	switch (grid.rel_at(rel_loc))
+	{
+		using enum target_t;
+	case NONE: return object_type::NONE;
+		break;
+	case MOVE_TGT: return object_type::MOVESELECT;
+		break;
+	default: return object_type::ATTACKSELECT;
+	}
+}*/
