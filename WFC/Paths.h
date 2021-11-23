@@ -79,7 +79,7 @@ static matrix<dj_map_node>& djikstraMap(move_type type, int team, std::vector<ma
 
 /*What to do: a modified djikstras. We maintain a second board array of "map locations", with the current cost to that square and the previous node of the shortest path. BFS through these
 */
-static pathsGrid pathFind(UnitComponent* u, Board& state, RangeFxn attackfxn) {
+static pathsGrid pathFind(UnitComponent* u, Board& state, RangeFxn attackfxn, bool attack_only = false) {
 	std::cout << "calling pathFind" << std::endl;
 	sf::Clock c;
 	static matrix<map_node> grid;
@@ -96,7 +96,8 @@ static pathsGrid pathFind(UnitComponent* u, Board& state, RangeFxn attackfxn) {
 	}
 	sf::Vector2i curr_pos = u->getPos();
 	grid.resize(state.board.height(), state.board.width());
-	grid.at(curr_pos) = map_node(getMovesRem(u), sf::Vector2i(-1, -1), search_counter, true, false);
+	auto moves_rem = attack_only ? 0 : getMovesRem(u);
+	grid.at(curr_pos) = map_node(moves_rem, sf::Vector2i(-1, -1), search_counter, true, false);
 
 	sf::Vector2i adj_pos;
 	int new_moves_left;
@@ -110,6 +111,8 @@ static pathsGrid pathFind(UnitComponent* u, Board& state, RangeFxn attackfxn) {
 		}
 		grid.at(pos).search = search_counter;
 	};
+
+	attackfxn(curr_pos, state, mark_attackable);
 
 	//works as a heap so that duplicate locations will be processed at the same time, cutting off processing of the slower path 
 	std::vector<sf::Vector2i> to_process(1, curr_pos);
@@ -136,7 +139,7 @@ static pathsGrid pathFind(UnitComponent* u, Board& state, RangeFxn attackfxn) {
 			}
 			else {
 				//if we haven't moved to this node before, mark if it contains an allied unit
-				adj_node.has_ally = (state.board.at(adj_pos).unit() && state.board.at(adj_pos).unit_uc() != u);
+				adj_node.has_ally = (state.board.at(adj_pos).unit() != nullptr);
 				//then if not, get attack range from that square
 				if (!adj_node.has_ally)
 					attackfxn(adj_pos, state, mark_attackable);
