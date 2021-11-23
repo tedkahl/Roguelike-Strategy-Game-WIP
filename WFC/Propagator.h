@@ -14,7 +14,7 @@
 class Propagator
 {
 public:
-	Propagator(const WFCOptions& options, const std::vector<unsigned>& pattern_weights_, std::pair<std::vector<std::array<std::vector<bool>, 4>>, std::vector<std::array<unsigned, 4>>>&& overlap_rules);
+	Propagator(const WFCOptions& options, const std::vector<unsigned>& pattern_weights_, std::pair<std::vector<std::array<std::vector<uint8_t>, 4>>, std::vector<std::array<unsigned, 4>>>&& overlap_rules);
 
 	size_t collapse(std::pair<size_t, size_t> coords);
 	std::optional<std::pair<size_t, size_t>> findLowestEntropy();
@@ -35,7 +35,7 @@ private:
 	std::vector<unsigned> pattern_weights;
 	std::vector<double> pattern_wlogw;
 	matrix<double> entropy;
-	std::vector<std::array<std::vector<bool>, 4>> rules;
+	std::vector<std::array<std::vector<uint8_t>, 4>> rules;
 	matrix<std::vector<std::array<unsigned, 4>>> valid;
 	std::stack<std::tuple<int, int, size_t>> pstack;
 
@@ -45,7 +45,7 @@ private:
 };
 
 
-Propagator::Propagator(const WFCOptions& options, const std::vector<unsigned>& pattern_weights_, std::pair<std::vector<std::array<std::vector<bool>, 4>>, std::vector<std::array<unsigned, 4>>>&& overlap_rules) :
+Propagator::Propagator(const WFCOptions& options, const std::vector<unsigned>& pattern_weights_, std::pair<std::vector<std::array<std::vector<uint8_t>, 4>>, std::vector<std::array<unsigned, 4>>>&& overlap_rules) :
 	numpatterns(pattern_weights_.size()), pattern_weights(pattern_weights_), wave(options.owidth - options.n + 1, options.oheight - options.n + 1, std::vector<uint8_t>(numpatterns, 1)), pattern_wlogw(), entropy(), rules(std::move(overlap_rules.first)),
 	valid(wave.width(), wave.height(), overlap_rules.second), collapsed(wave.width(), wave.height())
 {
@@ -172,13 +172,12 @@ void Propagator::checkNeighbors(const std::tuple<int, int, size_t> removed)
 	std::optional<std::pair<int, int>> next;
 	int remaining;
 	size_t x, y;
-
-	std::vector<unsigned> to_remove;
-	std::vector<unsigned> temp;
+	auto p = std::get<2>(removed);
 	for (auto dir : directions) //for each direction from the removed pattern
 	{
 		if ((next = getCoords(std::get<0>(removed), std::get<1>(removed), wave, dir)).has_value()) //get the adjacent square in the direction
 		{
+
 			x = next.value().first;
 			y = next.value().second;
 			if (entropy.at(x, y) == 0) continue;
@@ -186,7 +185,7 @@ void Propagator::checkNeighbors(const std::tuple<int, int, size_t> removed)
 			{
 				if (!wave.at(x, y)[j])
 					continue;
-				if (rules[std::get<2>(removed)][dir][j]) //if pattern was compatible with removed pattern
+				if (rules[p][dir][j]) //if pattern was compatible with removed pattern
 				{
 					remaining = --valid.at(x, y)[j][oppositeDir(dir)]; //decrease number of valid patterns in the opposite direction
 					if (remaining == 0)

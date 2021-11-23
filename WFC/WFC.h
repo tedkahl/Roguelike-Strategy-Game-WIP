@@ -169,9 +169,9 @@ template<typename T>
 requires hashable<T>
 auto WFC<T>::getOverlapRules()
 {
-	std::vector<bool> empty(patterns.size());
-	std::vector<std::array<std::vector< bool >, 4 > > rules(patterns.size(),
-		std::array<std::vector<bool>, 4>({ empty,empty,empty,empty }));
+	std::vector<uint8_t> empty(patterns.size());
+	std::vector<std::array<std::vector< uint8_t >, 4 > > rules(patterns.size(),
+		std::array<std::vector<uint8_t>, 4>({ empty,empty,empty,empty }));
 	std::vector<std::array<unsigned, 4>> valid(patterns.size());
 
 	for (size_t i = 0; i < patterns.size(); i++) {
