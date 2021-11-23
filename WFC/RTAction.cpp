@@ -9,7 +9,7 @@ static sf::Vector2f getTrueDir(sf::Vector2i dir) {
 	return { (2.f / 3.f) * (dir.x - dir.y), (1.f / 3.f) * (dir.x | dir.y) };
 }
 //speed unused in SimpleRT right now
-Lunge::Lunge(sf::Vector2i pos, sf::Vector2i target, object_type type, anim_state a_state, Board& board, entity_action& a) : SimpleRT(type, a_state, sf::milliseconds(0), board, a), start_pos(squarePosFromCoords(pos, board_->board.width())), target_(target), dir(target - pos),
+Lunge::Lunge(sf::Vector2i pos, sf::Vector2i target, object_type type, anim_state a_state, Board& board, entity_action&& a) : SimpleRT(type, a_state, sf::milliseconds(0), board, std::move(a)), start_pos(squarePosFromCoords(pos, board_->board.width())), target_(target), dir(target - pos),
 action(a) {}
 
 EntityUpdate SimpleRT::getUpdate(sf::Time current) {
@@ -39,6 +39,6 @@ EntityUpdate Lunge::getUpdate(sf::Time current) {
 
 	return EntityUpdate(update);
 }
-SimpleRT::SimpleRT(object_type type, anim_state a_state, sf::Time speed, Board& board, const entity_action& a, float delay) : RealTime(board, speed), anim(animation_manager::instance()->get_basic_anim(type, a_state, speed.asMilliseconds())), action(a), delay_(delay) {}
+SimpleRT::SimpleRT(object_type type, anim_state a_state, sf::Time speed, Board& board, entity_action&& a, float delay) : RealTime(board, speed), anim(animation_manager::instance()->get_basic_anim(type, a_state, speed.asMilliseconds())), action(std::move(a)), delay_(delay) {}
 
 
