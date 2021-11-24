@@ -45,7 +45,7 @@ public:
 	void setOwner(Square* new_owner);
 	Square* getOwner() const;
 	void addRT(std::unique_ptr<RealTime>&& rt);
-	bool update(sf::Time current);
+	uint8_t update(sf::Time current);
 	void updatePointers(Entity& removed);
 	void set(object_type type, SortedDManager<DrawComponent>* m, DrawComponent* dcs, UnitComponent* uc, sf::Vector2i newpos, Board& state, unsigned index); //datamanager
 	inline sf::Vector2i getPos() const { return coords_; }

@@ -13,26 +13,32 @@ void Entity::setUC(UnitComponent* uc) { uc_ = uc; }
 void Entity::addRT(std::unique_ptr<RealTime>&& rt) {
 	rt_actions.push_back(std::move(rt));
 }
-bool Entity::update(sf::Time current) {
-	bool dirty = false;
+//0 no active action
+//1 current active action
+//2 action finished, delete this entity after updates
+uint8_t Entity::update(sf::Time current) {
 	if (!rt_actions.empty()) {
+		uint8_t ret = 1;
 		//cout << "performing action" << endl;
 
 		auto update = rt_actions.front()->getUpdate(current);
-		if (update.action)
-			update.action.value()(this);
 		manager->updateAll(current, dc_.sortVal(), dc_, update);
 		coords_ = dc_.coords();
 		if (update.finished) {
-			std::cout << "Action finished" << std::endl;
+			std::cout << "Action finished " << (int)update.finished << " queue size: " << rt_actions.size() << std::endl;
 			if (coords_ != owner_->getPos()) {
 				rt_actions.front()->getBoard().moveEntity(this, coords_); //ugly
 			}
+			std::cout << " queue size: " << rt_actions.size() << std::endl;
 			rt_actions.pop_front();
+			if (update.finished == 2) ret = 2; //deactivate
+			else ret = 0;
 		}
-		return true;
+		if (update.action)
+			update.action.value()(this);
+		return ret;
 	}
-	return false;
+	return 0;
 }
 
 void Entity::set(object_type type, SortedDManager<DrawComponent>* m, DrawComponent* dcs, UnitComponent* uc, sf::Vector2i pos, Board& state, unsigned index) {

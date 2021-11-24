@@ -24,9 +24,16 @@ bool Level::update(sf::Time current)
 {
 	//cout << current.asMilliseconds() << endl;
 	bool block = false;
-	for (auto& i : *entities) {
-		block = block || i.update(current);
+	uint8_t status;
+	for (size_t i = 0;i < entities->active();i++) {
+		status = (*entities)[i].update(current);
+		if (status == 2) {
+			cout << "status 2, deleting!" << endl;
+			removeEntity(&(*entities)[i]);
+		}
+		block = block || status;
 	}
+	entities->fix();
 	for (auto& i : *dcomponents) {
 		i.updateAnimation(current);
 	}
@@ -212,21 +219,18 @@ void Level::removeBatch(unsigned batch)
 
 void Level::killUnit(UnitComponent* killer, Entity* target)
 {
+	cout << "killing " << static_cast<int>(target->type());
 	removeEntity(target);
 }
 
 bool Level::removeEntity(Entity* e)
 {
+	cout << "removing " << static_cast<int>(e->type());
 	if (state.board.at(e->getPos()).removeE(e)) {
 		dcomponents->deactivateAll(e->dc()->sortVal());
 		if (e->uc()) units->deactivate(e->uc()->index());
-		entities->deactivate(e->index());
-#ifdef TEST
-		for (auto& i : *units) {
-			assert(i.getPos() == i.getOwner()->getPos());
-			assert(i.getPos() == i.getOwner()->getOwner()->getPos());
-		}
-#endif
+		entities->deactivateLater(e->index());
+
 		return true;
 	}
 	return false;

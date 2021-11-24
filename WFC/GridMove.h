@@ -25,11 +25,13 @@ public:
 
 class ProjectileMove :public SimpleRT {
 private:
+	bool del_when_done_;
 	sf::Vector2i start_;
 	sf::Vector2i end_;
+	sf::Time total_t;
 	sf::Vector2f getSpritePos(float fraction);
 public:
 	ProjectileMove() = default;
-	ProjectileMove(sf::Vector2i start, sf::Vector2i end, object_type, anim_state, sf::Time speed, Board& board, entity_action&& a = actions::null_action);
+	ProjectileMove(sf::Vector2i start, sf::Vector2i end, object_type, anim_state, sf::Time speed, Board& board, entity_action&& a = actions::null_action, bool del_when_done = true);
 	virtual EntityUpdate getUpdate(sf::Time current) override;
 };

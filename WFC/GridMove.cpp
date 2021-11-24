@@ -3,6 +3,7 @@
 #include "Board.h"
 #include "DrawComponent.h"
 #include "AnimationManager.h"
+#include "vec2i_util.h"
 SimpleMove::SimpleMove(sf::Vector2i start, sf::Vector2i end, object_type type, anim_state a, sf::Time speed, Board& board) : SimpleRT(type, a, speed, board), start_(start), end_(end) {}
 
 
@@ -21,7 +22,7 @@ std::optional<sf::Vector2f> SimpleMove::getSpritePos(float fraction) {
 
 EntityUpdate SimpleMove::getUpdate(sf::Time current) {
 	std::optional<Animation> sent_anim;
-	//cout << "updating move" << endl;
+	cout << "updating move" << endl;
 	if (isFirst(current)) {
 		sent_anim = anim;
 	}
@@ -48,8 +49,8 @@ GridMove::GridMove(const std::vector<sf::Vector2i>& path, object_type type, sf::
 
 
 
-ProjectileMove::ProjectileMove(sf::Vector2i start, sf::Vector2i end, object_type type, anim_state a_type, sf::Time speed, Board& board, entity_action&& action) :
-	SimpleRT(type, a_type, speed, board, std::move(action)), start_(start), end_(end) {}
+ProjectileMove::ProjectileMove(sf::Vector2i start, sf::Vector2i end, object_type type, anim_state a_type, sf::Time speed, Board& board, entity_action&& action, bool del_when_done) :
+	SimpleRT(type, a_type, speed, board, std::move(action)), start_(start), end_(end), total_t(speed* static_cast<float>(sqrt(sumSq(end - start)))), del_when_done_(del_when_done) {}
 
 sf::Vector2f ProjectileMove::getSpritePos(float fraction) {
 	sf::Vector2f startcoords = squarePosFromCoords(start_, board_->board.width());
@@ -66,13 +67,14 @@ EntityUpdate ProjectileMove::getUpdate(sf::Time current) {
 	if (isFirst(current)) {
 		sent_anim = anim;
 	}
-	float fraction = (current - start_time) / speed_;
-	cout << fraction << " " << getSpritePos(fraction).x << " " << getSpritePos(fraction).y << endl;
+	float fraction = (current - start_time) / total_t;
 	sf::Vector2f grid_pos = static_cast<sf::Vector2f>(start_) + static_cast<sf::Vector2f>(end_ - start_) * fraction;
 
 	sf::Vector2i coords_ = static_cast<sf::Vector2i>(grid_pos) + sf::Vector2i{ 1, 1 };
-	if (fraction >= 1.f) {//finished
-		return EntityUpdate(true, 1, end_, std::nullopt, std::nullopt, std::move(action));
+	if (fraction >= 1.f) {//reached target
+		//if bounce is false, delete the corresponding entity. Else leave in "moving" state and count on the next RT to finish
+		return EntityUpdate(1 + del_when_done_, 0, std::nullopt, std::nullopt, std::nullopt, std::move(action));
+
 	}
 	return EntityUpdate(false, 0, coords_, getSpritePos(fraction), std::move(sent_anim));
 }
