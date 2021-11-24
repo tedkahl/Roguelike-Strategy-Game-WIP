@@ -8,7 +8,7 @@
 
 static sf::Vector2i chooseNewTarget(RangeFxn attack, pathsGrid& paths, sf::Vector2i loc, Board& board) {
 	sf::Vector2i target{ -1,-1 };
-	auto checkLoc = [&](sf::Vector2i new_loc) {
+	auto checkLoc = [&](sf::Vector2i new_loc, target_t t) {
 		if (paths.is_movable(new_loc))
 			target = new_loc;
 	};
@@ -97,18 +97,18 @@ static pathsGrid pathFind(UnitComponent* u, Board& state, RangeFxn attackfxn, bo
 	sf::Vector2i curr_pos = u->getPos();
 	grid.resize(state.board.height(), state.board.width());
 	auto moves_rem = attack_only ? 0 : getMovesRem(u);
-	grid.at(curr_pos) = map_node(moves_rem, sf::Vector2i(-1, -1), search_counter, true, false);
+	grid.at(curr_pos) = map_node(moves_rem, sf::Vector2i(-1, -1), search_counter, true, target_t::NONE);
 
 	sf::Vector2i adj_pos;
 	int new_moves_left;
-	auto mark_attackable = [&](sf::Vector2i pos) {
-		grid.at(pos).attackable = true;
+	auto mark_attackable = [&](sf::Vector2i pos, target_t type) ->void {
 		bind_min_max(minX, maxX, minY, maxY, pos);
 		if (grid.at(pos).search != search_counter || (!grid.at(pos).movable && (grid.at(pos).moves_left < grid.at(curr_pos).moves_left))) {
 			//cout << "In attack function: replacing " << to_string(pos) << " with: moves_l " << grid.at(curr_pos).moves_left << " prev " << to_string(curr_pos) << endl;
-			grid.at(pos) = map_node(new_moves_left, adj_pos, search_counter, false, true);
+			grid.at(pos) = map_node(new_moves_left, adj_pos, search_counter, false, type);
 			return;
 		}
+		grid.at(pos).attackable = type;
 		grid.at(pos).search = search_counter;
 	};
 

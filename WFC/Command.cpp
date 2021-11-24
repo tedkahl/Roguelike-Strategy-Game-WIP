@@ -4,10 +4,10 @@
 #include "PathingGrids.h"
 #include "RealTime.h"
 #include "Actions.h"
-Command::Command(Entity* agent, Level& level) :agent_(agent), level_(&level) {}
+Command::Command(Entity* agent, Level& level, pathsGrid&& paths_) :agent_(agent), level_(&level), paths(std::move(paths_)) {}
 
 
-void AttackMove::showTargeter() {
+void Command::showTargeter() {
 	if (!targeter)
 	{
 		targeter = std::make_unique<Targeter>(paths, level_);
@@ -17,9 +17,9 @@ void Command::hideTargeter() {
 	delete targeter.release(); //release ownership of Targeter and delete underlying pointer
 }
 
-AttackMove::AttackMove(Entity* agent, Level& level) : Command(agent, level), paths(pathFind(agent_->uc(), level_->state, getAttack(agent->uc()->stats().attack_type))) {
+AttackMove::AttackMove(Entity* agent, Level& level) : Command(agent, level, pathFind(agent->uc(), level.state, getAttack(agent->uc()->stats().attack_type))) {
 }
-AttackMove::AttackMove(Entity* agent, Level& level, pathsGrid&& known_paths) : Command(agent, level), paths(std::move(known_paths)) {}
+AttackMove::AttackMove(Entity* agent, Level& level, pathsGrid&& known_paths) : Command(agent, level, std::move(known_paths)) {}
 
 
 std::optional<unit::move_state> AttackMove::execute(sf::Vector2i target, sf::Time now, Player* p_state) {
@@ -74,9 +74,7 @@ Targeter::Targeter(const T& targets, Level* level) :batch_(-1), level_(level)
 		for (unsigned x = 0;x < targets.grid.width();x++) {
 			if (targets.grid.at(x, y).search == targets.search) {
 				auto type = getTarget(targets, { static_cast<int>(x), static_cast<int>(y) });
-				/*if (type == target_t::ATTACK_TGT) {
-					assert(paths.grid.at(x, y).attackable);
-				}*/
+
 				obj_dc = getObjDC(level_->getDCManager(), level_->getTM(), type, batch_);
 				obj_dc->updateEntityPos(targets.offset + sf::Vector2i{ static_cast<int>(x), static_cast<int>(y) }, level_->state.heightmap);
 			}
@@ -88,6 +86,6 @@ Targeter::~Targeter() {
 	level_->removeBatch(batch_);
 }
 
-pathsGrid& AttackMove::getPaths() {
+pathsGrid& Command::getPaths() {
 	return paths;
 }

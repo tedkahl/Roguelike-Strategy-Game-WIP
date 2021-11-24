@@ -21,27 +21,23 @@ public:
 class Command {
 protected:
 	Level* level_;
-
 	Entity* agent_;
+	pathsGrid paths;
 	std::unique_ptr<Targeter> targeter;
 public:
-	Command(Entity* agent, Level&);
-	virtual void showTargeter() = 0;
-	virtual void hideTargeter();
+	Command(Entity* agent, Level&, pathsGrid&&);
+	void showTargeter();
+	void hideTargeter();
 	virtual std::optional<unit::move_state> execute(sf::Vector2i, sf::Time, Player*) = 0; //target can be changed to its own class if necessary
-	virtual pathsGrid& getPaths() = 0;
+	pathsGrid& getPaths();
 	virtual ~Command() {}
 };
 
 class AttackMove :public Command {
-private:
-	pathsGrid paths;
 public:
 	AttackMove(Entity* agent, Level&);
 	AttackMove(Entity* agent, Level&, pathsGrid&& known_paths);
-	virtual void showTargeter() override;
 	virtual std::optional<unit::move_state> execute(sf::Vector2i target, sf::Time now, Player* p_state) override;
-	virtual pathsGrid& getPaths();
 };
 
 

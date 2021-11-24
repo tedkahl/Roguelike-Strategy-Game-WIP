@@ -31,7 +31,7 @@ void AIPlayer::targetFromMap(Entity* me, pathsGrid& paths) {
 				sq = sf::Vector2i{ x,y } + paths.offset;
 				auto new_score = (getCompositeScore(state, maps, sq));
 				if ((paths.grid.at(x, y).movable ||
-					paths.grid.at(x, y).attackable &&
+					paths.grid.at(x, y).attackable == target_t::TARGET &&
 					isNE(getEnmity(level_.state.board.at(sf::Vector2i{ x,y } + paths.offset),
 						me->uc()))) && new_score < min_score) {
 					target = sq;

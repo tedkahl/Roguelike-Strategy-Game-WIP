@@ -3,12 +3,12 @@
 struct map_node {
 	int moves_left;
 	sf::Vector2i prev;
-	bool attackable;
+	target_t attackable;
 	uint8_t search;
 	uint8_t has_ally;
 	uint8_t movable;
-	map_node() :moves_left(0), prev(), search(0), attackable(false), has_ally(false), movable(false) {}
-	map_node(int moves_l, sf::Vector2i prev_, uint8_t search_, uint8_t movable_, uint8_t attackable_) :moves_left(moves_l), prev(prev_), attackable(attackable_), search(search_), movable(movable_), has_ally(false) {
+	map_node() :moves_left(0), prev(), search(0), attackable(target_t::NONE), has_ally(false), movable(false) {}
+	map_node(int moves_l, sf::Vector2i prev_, uint8_t search_, uint8_t movable_, target_t attackable_) :moves_left(moves_l), prev(prev_), attackable(attackable_), search(search_), movable(movable_), has_ally(false) {
 	}
 };
 
@@ -49,7 +49,8 @@ struct pathsGrid : public subGrid<map_node> {
 	unsigned search;
 	std::optional<std::vector<sf::Vector2i>> getPath(sf::Vector2i& dest);
 	bool is_movable(sf::Vector2i abs_loc) { return on_board(abs_loc - offset, grid) && abs_at(abs_loc).search == search && abs_at(abs_loc).movable && !abs_at(abs_loc).has_ally; }
-	bool is_attackable(sf::Vector2i abs_loc) { return  on_board(abs_loc - offset, grid) && abs_at(abs_loc).search == search && abs_at(abs_loc).attackable; }
+	bool is_attackable(sf::Vector2i abs_loc) { return  on_board(abs_loc - offset, grid) && abs_at(abs_loc).search == search && abs_at(abs_loc).attackable == target_t::TARGET; }
+	bool is_display(sf::Vector2i abs_loc) { return  on_board(abs_loc - offset, grid) && abs_at(abs_loc).search == search && static_cast<int>(abs_at(abs_loc).attackable) >= static_cast<int>(target_t::DISPLAY); }
 	pathsGrid(matrix<map_node>& g, int minX, int minY, int maxX, int maxY, int search_) :subGrid(subMatrix(g, minX, minY, maxX - minX + 1, maxY - minY + 1), { minX, minY }), search(search_) {}
 	//pathsGrid() :subGrid(), search(0) {}
 };
