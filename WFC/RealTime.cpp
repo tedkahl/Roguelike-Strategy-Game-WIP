@@ -27,9 +27,12 @@ EntityUpdate CompositeRT::getUpdate(sf::Time current) {
 	ret = moves.back()->getUpdate(current);
 	if (ret.finished) {
 		if (moves.size() > 1) {
-			start_time += moves.back()->speed();
+			auto a = std::move(ret.action);
+			//start_time += moves.back()->speed();
 			moves.pop_back();
-			ret = moves.back()->getUpdate(start_time);
+			ret = moves.back()->getUpdate(current);
+			assert(!ret.action);
+			ret.action = std::move(a);
 		}
 		else moves.pop_back();
 	}
