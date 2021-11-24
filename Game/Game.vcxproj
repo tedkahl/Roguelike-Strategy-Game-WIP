@@ -90,7 +90,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <AdditionalIncludeDirectories>C:\Users\Ted\source\libraries\SFML-2.5.1\include;$(MSBuildThisFileDirectory)../WFC</AdditionalIncludeDirectories>
-      <Optimization>MaxSpeed</Optimization>
+      <Optimization>Disabled</Optimization>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
       <BufferSecurityCheck>true</BufferSecurityCheck>
     </ClCompile>
@@ -112,6 +112,7 @@
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <AdditionalIncludeDirectories>C:\Users\Ted\source\libraries\SFML-2.5.1\include;$(MSBuildThisFileDirectory)../WFC</AdditionalIncludeDirectories>
       <BufferSecurityCheck>true</BufferSecurityCheck>
+      <Optimization>Disabled</Optimization>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

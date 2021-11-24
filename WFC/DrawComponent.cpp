@@ -34,8 +34,8 @@ void DrawComponent::setTextureRect(const sf::IntRect& rect) {
 
 void DrawComponent::set(const sf::Texture& texture, const sf::Vector2f& offset, unsigned order, const sf::IntRect& rect, int batch)
 {
-	if (order == 50) health = 1.f;
-	else {
+	health = (order == 50) ? 1.f : -1.f;
+	if (outer.getFillColor() != sf::Color::Black) {
 		outer.setFillColor(sf::Color::Black);
 		outer.setOutlineColor(sf::Color::Black);
 		outer.setOutlineThickness(2.f);
