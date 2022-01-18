@@ -19,30 +19,12 @@ static void melee(sf::Vector2i pos, Board& board, const A_Protocol& protocol) {
 		}
 	}
 }
-/*
-	auto pos = agent_->getPos();
-	auto& board = level_->state;
-	for (auto& dir : dir2) {
-		if (!on_board(pos + dir, board.board)) continue;
-		targets.abs_at(pos + dir) = target_t::ATTACK_TGT;
-
-		if (isKickable(board.board.at(pos).unit_uc(), board.board.at(pos + dir).unit())) {
-			for (int j = 2;j <= dist;j++) {
-				//if height change, stop at previous square
-				if (board.heightmap.at(pos + dir * j) != board.heightmap.at(pos + dir * (j - 1))) break;
-				targets.abs_at(pos + dir) = target_t::ATTACK_NO_TGT;
-				//if blocking unit, stop at current square
-				if (board.board.at(pos + j * dir).unit_uc() != nullptr) break;
-			}
-		}
-	}
-*/
 static bool isKickable(UnitComponent* me, Entity* target) {
 	if (target == nullptr) return false;
 	return (target->type() == object_type::ROCK) || getEnmity(me, target->uc()) == enmity_t::SAME_TEAM;
 }
 
-static auto kick_r(int range, sf::Vector2i pos, Board& board)
+static auto kick_r(int range)
 {
 	return [=](sf::Vector2i pos, Board& board, const A_Protocol& protocol) {
 		for (auto& dir : dir2) {
@@ -50,7 +32,7 @@ static auto kick_r(int range, sf::Vector2i pos, Board& board)
 			protocol(pos + dir, target_t::TARGET);
 
 			if (isKickable(board.board.at(pos).unit_uc(), board.board.at(pos + dir).unit())) {
-				for (int j = 2;j <= range;j++) {
+				for (int j = 2;j <= range && on_board(pos + dir * j, board.board);j++) {
 					//if height change, stop at previous square
 					if (board.heightmap.at(pos + dir * j) != board.heightmap.at(pos + dir * (j - 1))) break;
 					protocol(pos + j * dir, target_t::DISPLAY);
@@ -61,24 +43,42 @@ static auto kick_r(int range, sf::Vector2i pos, Board& board)
 		}
 	};
 }
-template<unsigned inner, unsigned outer>
-static void arrow(sf::Vector2i pos, Board& board, const A_Protocol& protocol)
+static auto arrow_r(unsigned inner, unsigned outer)
 {
-	size_t width = 0;
-	int grow_dir = 1;
+	return [=](sf::Vector2i pos, Board& board, const A_Protocol& protocol) {
+		size_t width = 0;
+		int grow_dir = 1;
 
-	for (int y = std::max(static_cast<int>(pos.y - outer), 0);y <= std::min(outer + pos.y, board.board.height());y++)
-	{
-		for (int x = std::max(static_cast<int>(pos.x - width), 0);x <= std::min(width + pos.x, board.board.width());x++)
+		for (int y = std::max(static_cast<int>(pos.y - outer), 0);y < std::min(outer + pos.y + 1, board.board.height());y++)
 		{
-			if (sumSq(pos - sf::Vector2i{ x, y }) < inner * inner) continue;
-			protocol(pos + sf::Vector2i{ x, y }, target_t::TARGET);
+			for (int x = std::max(static_cast<int>(pos.x - width), 0);x < std::min(width + pos.x + 1, board.board.width());x++)
+			{
+				if (abs(pos.x - x) + abs(pos.y - y) < inner) continue;
+				protocol(sf::Vector2i{ x, y }, target_t::TARGET);
+			}
+			if (y == pos.y) grow_dir = -1;
+			width += grow_dir;
 		}
-		width += grow_dir;
-		if (y == pos.y) grow_dir = -1;
-	}
+	};
 }
 
+//confusion: if we're marking squares as TARGET vs DISPLAY here, why do targets have to be checked later for the presence of an enemy, and only in some cases?
+//they shouldn't be I think.
+static auto dash_r(int range)
+{
+	return [=](sf::Vector2i pos, Board& board, const A_Protocol& protocol) {
+		for (auto& dir : dir2) {
+			for (int i = 0; i < range;i++) {
+				if (!on_board(pos + dir * i, board.board)) break;
+				//if height change, stop at previous square
+				if (board.heightmap.at(pos + dir * i) > board.heightmap.at(pos + dir * (i - 1))) break;
+				if (board.board.at(pos + dir * i).unit_uc())
+					protocol(pos + dir * i, target_t::TARGET);
+				else protocol(pos + dir * i, target_t::DISPLAY);
+			}
+		}
+	};
+}
 
 //very placeholder
 static bool blocking(Square& sq) {
@@ -106,7 +106,7 @@ static RangeFxn getAttack(attack_type type) {
 		return melee;
 		break;
 	case attack_type::RANGED_ARROW:
-		return arrow<3, 5>;
+		return arrow_r(3, 5);
 		break;
 	default:
 		assert(false);//always find

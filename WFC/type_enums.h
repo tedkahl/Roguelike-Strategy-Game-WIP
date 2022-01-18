@@ -7,6 +7,7 @@ enum class terrain_type {
 enum class object_type {
 	NONE, MOVESELECT, ATTACKSELECT, DEFAULTSELECT,
 	POISON, PETRIFY, SLOW,
+	ARROW,
 	ROCK, CACTUS,
 	DUELIST, WOLF, OBJECT_END
 };
@@ -24,6 +25,7 @@ enum class anim_state {
 };
 
 enum obj_height { SQUARE, FLAT, TALL };
+constexpr int firstproj = static_cast<int>(object_type::ARROW);
 constexpr int firstunit = static_cast<int>(object_type::DUELIST);
 constexpr int firstobj = static_cast<int>(object_type::ROCK);
 static constexpr int unitIndex(object_type u) {
@@ -38,6 +40,10 @@ static constexpr bool isUnitOrObj(object_type t) {
 static constexpr bool isObj(object_type t) {
 	return isUnitOrObj(t) && !isUnit(t);
 }
-static constexpr bool isTall(object_type t) {
-	return t >= object_type::ROCK;
+
+static constexpr int getDefaultOrder(object_type t) {
+	if (t >= object_type::ROCK) return 50;
+	else if (t >= object_type::ARROW) return 76;
+	else if (t >= object_type::POISON) return 51 - static_cast<int>(object_type::POISON) + static_cast<int>(t);
+	else return 1;
 }

@@ -51,7 +51,7 @@ static void handleInput(Level& level, sf::RenderWindow& window, GameState& g, Pl
 		case sf::Keyboard::Key::U: {
 			if (auto coords = level.getCoords(window, sf::Mouse::getPosition(window))) {
 				auto& square = squares.at(coords.value());
-				level.addEntityTest(event.key.code == sf::Keyboard::Key::U ? object_type::DUELIST : object_type::WOLF, event.key.code != sf::Keyboard::Key::U, coords.value());
+				level.addEntity(event.key.code == sf::Keyboard::Key::U ? object_type::DUELIST : object_type::WOLF, event.key.code != sf::Keyboard::Key::U, coords.value());
 			}
 			break;
 		}
@@ -70,8 +70,14 @@ static void handleInput(Level& level, sf::RenderWindow& window, GameState& g, Pl
 		}
 		case sf::Keyboard::Key::K: {
 			if (auto unit = p_state.selected) {
-				auto coords = level.getCoords(window, sf::Mouse::getPosition(window));
 				p_state.switchCommand(new Kick(unit, level));
+				p_state.command->showTargeter();
+			}
+			break;
+		}
+		case sf::Keyboard::Key::R: {
+			if (auto unit = p_state.selected) {
+				p_state.switchCommand(new PoisonArrow(unit, level));
 				p_state.command->showTargeter();
 			}
 			break;

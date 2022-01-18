@@ -22,7 +22,7 @@ auto getOutput(matrix<char>& in, unsigned owidth, unsigned oheight, unsigned n, 
 int main()
 {
 	sf::Clock clock;
-	auto output = getOutput(input0, 20, 20, 3, true, true);
+	auto output = getOutput(input2, 20, 20, 3, true, true);
 
 	sf::RenderWindow window(sf::VideoMode(1200, 800), "Dungeon Delve");
 
@@ -36,7 +36,7 @@ int main()
 	auto& squares = level.state.board;
 	window.setView(sf::View(sf::FloatRect(0.f, 0.f, (float)window.getSize().x / 2, (float)window.getSize().y / 2)));
 	level.setSquares(output);
-	//window.setFramerateLimit(300);
+	window.setFramerateLimit(200);
 
 	float lastX = -1., lastY = -1.;
 	GameState g;

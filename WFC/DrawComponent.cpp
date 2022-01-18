@@ -93,7 +93,6 @@ bool DrawComponent::update(const sf::Time& current, const EntityUpdate& update, 
 void DrawComponent::updateEntityPos(sf::Vector2i newpos, matrix<float>& heightmap) {
 	updateCoords(newpos, sortable());
 	float sq_h = heightmap.at(newpos);
-	square_height_ = static_cast<uint8_t>(-sq_h + 10);
 
 	sf::Vector2f pos = squarePosFromCoords(newpos, heightmap.width());
 	setSpritePos(sf::Vector2f(pos.x, pos.y + sq_h));
@@ -101,7 +100,6 @@ void DrawComponent::updateEntityPos(sf::Vector2i newpos, matrix<float>& heightma
 
 void DrawComponent::setSquarePos(sf::Vector2i newpos, matrix<float>& heightmap) {
 	updateCoords(newpos, sortable());
-	square_height_ = static_cast<uint8_t>(-(sprite_offset.y) + 10);
 	setSpritePos(squarePosFromCoords(newpos, heightmap.width()));
 }
 

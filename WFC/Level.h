@@ -48,7 +48,7 @@ public:
 	Level(std::unique_ptr<ResourceManager<sf::Texture>>&&, std::unique_ptr<ResourceManager<sf::Font>>&&);
 	Entity* addEntity(object_type t, int team, sf::Vector2i coords);
 	Entity* addEntityTest(object_type t, int team, sf::Vector2i coords);
-	void addChildDC(object_type type, DrawComponent* parent);
+	void addChildDC(object_type type, DrawComponent* parent, uint8_t order);
 
 	bool removeEntity(Entity* e);
 	void removeBatch(unsigned batch);

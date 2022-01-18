@@ -28,10 +28,14 @@ private:
 	bool del_when_done_;
 	sf::Vector2i start_;
 	sf::Vector2i end_;
-	sf::Time total_t;
-	sf::Vector2f getSpritePos(float fraction);
+	double dist;
+	double h_speed; //in squares/second
+	double v_speed; //in squares/second
+	double g_ = 0;
+	sf::Vector2f getSpritePos(float fraction, double vertical);
 public:
 	ProjectileMove() = default;
-	ProjectileMove(sf::Vector2i start, sf::Vector2i end, object_type, anim_state, sf::Time speed, Board& board, entity_action&& a = actions::null_action, bool del_when_done = true);
+	ProjectileMove(sf::Vector2i start, sf::Vector2i end, object_type, anim_state, sf::Time speed, Board& board, entity_action&& a = actions::null_action, bool del_when_done = false);
+	void set_arcing(double theta, double g, double delta_h);
 	virtual EntityUpdate getUpdate(sf::Time current) override;
 };

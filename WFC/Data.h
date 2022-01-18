@@ -77,4 +77,5 @@ Data<T>::Data()
 	entityinfo.emplace(std::make_pair(object_type::POISON, std::make_tuple("./textures/misc/poisoned.png", sf::Vector2f(0, 0), sf::IntRect())));
 	entityinfo.emplace(std::make_pair(object_type::PETRIFY, std::make_tuple("./textures/misc/petrified.png", sf::Vector2f(0, 0), sf::IntRect())));
 	entityinfo.emplace(std::make_pair(object_type::SLOW, std::make_tuple("./textures/misc/slowed.png", sf::Vector2f(0, 0), sf::IntRect())));
+	entityinfo.emplace(std::make_pair(object_type::ARROW, std::make_tuple("./textures/arrow.png", sf::Vector2f(45, 0), sf::IntRect(0, 0, 20, 10))));
 }

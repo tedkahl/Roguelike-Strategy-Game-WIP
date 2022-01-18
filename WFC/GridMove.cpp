@@ -22,7 +22,6 @@ std::optional<sf::Vector2f> SimpleMove::getSpritePos(float fraction) {
 
 EntityUpdate SimpleMove::getUpdate(sf::Time current) {
 	std::optional<Animation> sent_anim;
-	cout << "updating move" << endl;
 	if (isFirst(current)) {
 		sent_anim = anim;
 	}
@@ -50,14 +49,16 @@ GridMove::GridMove(const std::vector<sf::Vector2i>& path, object_type type, sf::
 
 
 ProjectileMove::ProjectileMove(sf::Vector2i start, sf::Vector2i end, object_type type, anim_state a_type, sf::Time speed, Board& board, entity_action&& action, bool del_when_done) :
-	SimpleRT(type, a_type, speed, board, std::move(action)), start_(start), end_(end), total_t(speed* static_cast<float>(sqrt(sumSq(end - start)))), del_when_done_(del_when_done) {}
+	SimpleRT(type, a_type, speed, board, std::move(action)), start_(start), end_(end), h_speed(1 / speed.asSeconds()), v_speed(0), dist(static_cast<float>(sqrt(sumSq(end - start)))), del_when_done_(del_when_done) {}
 
-sf::Vector2f ProjectileMove::getSpritePos(float fraction) {
+
+sf::Vector2f ProjectileMove::getSpritePos(float fraction, double vertical) {
 	sf::Vector2f startcoords = squarePosFromCoords(start_, board_->board.width());
 	sf::Vector2f endcoords = squarePosFromCoords(end_, board_->board.width());
 
 	startcoords = startcoords + (endcoords - startcoords) * fraction;
-
+	startcoords.y -= vertical * sq::square_h;
+	//cout << "vertical " << vertical << endl;
 	return startcoords;
 }
 
@@ -67,14 +68,33 @@ EntityUpdate ProjectileMove::getUpdate(sf::Time current) {
 	if (isFirst(current)) {
 		sent_anim = anim;
 	}
-	float fraction = (current - start_time) / total_t;
+	auto t = (current - start_time).asSeconds();
+
+	float fraction = static_cast<float>((t * (h_speed / dist)));
 	sf::Vector2f grid_pos = static_cast<sf::Vector2f>(start_) + static_cast<sf::Vector2f>(end_ - start_) * fraction;
 
+	double vertical = (t * v_speed - .5 * g_ * pow(t, 2));
+	//cout << "amount moved due to initial velocity " << t * v_speed << endl;
+	//cout << "amount moved due to g " << .5 * g_ * pow(t, 2) << endl;
 	sf::Vector2i coords_ = static_cast<sf::Vector2i>(grid_pos) + sf::Vector2i{ 1, 1 };
 	if (fraction >= 1.f) {//reached target
 		//if bounce is false, delete the corresponding entity. Else leave in "moving" state and count on the next RT to finish
 		return EntityUpdate(1 + del_when_done_, 0, std::nullopt, std::nullopt, std::nullopt, std::move(action));
 
 	}
-	return EntityUpdate(false, 0, coords_, getSpritePos(fraction), std::move(sent_anim));
+	return EntityUpdate(false, 0, coords_, getSpritePos(fraction, vertical), std::move(sent_anim));
+}
+
+void ProjectileMove::set_arcing(double theta, double g, double delta_h)
+{
+	g_ = g;
+
+	auto t = sqrt((delta_h / sq::square_h + (sin(theta) * dist / cos(theta))) * 2 / g);
+	h_speed = (dist / t);
+	v_speed = (dist / t) * sin(theta) / cos(theta);
+	if ((start_ - end_).x - (start_ - end_).y > 0) {
+		anim.starting.left = anim.starting.left + anim.starting.width;
+		anim.starting.width = -anim.starting.width;
+	}
+	anim.loop_length = static_cast<uint16_t>(t * 1000);
 }

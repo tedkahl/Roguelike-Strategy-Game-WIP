@@ -29,6 +29,7 @@ protected:
 	std::vector<unsigned> deactivated;
 	unsigned active_ = 0;
 	unsigned unsorted_ = 0;
+	uint16_t tiebreaker = 0;
 
 public:
 	T* get(T::SortType a);
@@ -173,9 +174,25 @@ T* SortedDManager<T>::declareNew(T_&&... args)
 	unsorted_++;
 	assert(active_ <= S_MAX);
 	data[active_ - 1].set(std::forward<T_>(args)...);
+	data[active_ - 1].setTiebreaker(tiebreaker);
+	tiebreaker++;
 	return &data[active_ - 1];
 }
 
+template<typename T>
+//requires accessible<T>
+template<typename ...T_>
+T* SortedDManager<T>::declareNewBatched(T_&&... args) //add new and mark as latest batch
+{
+	assert(!batches.empty());
+	active_++;
+	unsorted_++;
+	assert(active_ <= S_MAX);
+	data[active_ - 1].set(std::forward<T_>(args)...);
+	data[active_ - 1].setTiebreaker(tiebreaker);
+	tiebreaker++;
+	return &data[active_ - 1];
+}
 
 template<typename T>
 template<typename Sortable>
@@ -233,18 +250,6 @@ void SortedDManager<T>::fixAll(std::array<T, S_MAX>::iterator first, std::array<
 #endif
 }
 
-template<typename T>
-//requires accessible<T>
-template<typename ...T_>
-T* SortedDManager<T>::declareNewBatched(T_&&... args) //add new and mark as latest batch
-{
-	assert(!batches.empty());
-	active_++;
-	unsorted_++;
-	assert(active_ <= S_MAX);
-	data[active_ - 1].set(std::forward<T_>(args)...);
-	return &data[active_ - 1];
-}
 template<typename T>
 //requires accessible<T>
 void SortedDManager<T>::deactivateAll(T::SortType to_deactivate) {

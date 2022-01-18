@@ -25,16 +25,15 @@ static UnitComponent* makeUnit(DataManager<UnitComponent>& units, int team, obje
 	}
 	return nullptr;
 }
-
-
+//this is asking for bugs. Manager must automatically handle duplicates. 
 static DrawComponent* getObjDC(SortedDManager<DrawComponent>& dcomponents, ResourceManager<sf::Texture>& tm, object_type t, unsigned batch = UINT_MAX) {
 	auto search = Data<char>::d()->entityinfo.find(t);
 	if (search != Data<char>::d()->entityinfo.end()) {
 		auto& [path, offset, rect] = search->second;
 		if (batch == UINT_MAX)
-			return dcomponents.declareNew(tm.get(path), offset, 1 + isTall(t) * 49, rect);
+			return dcomponents.declareNew(tm.get(path), offset, getDefaultOrder(t), rect);
 		else
-			return dcomponents.declareNewBatched(tm.get(path), offset, 1 + isTall(t) * 49, rect, batch);
+			return dcomponents.declareNewBatched(tm.get(path), offset, getDefaultOrder(t), rect, batch);
 	}
 	std::cerr << "sprite information not found";
 	assert(false);

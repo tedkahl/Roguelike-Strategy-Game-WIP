@@ -51,8 +51,8 @@ void Level::draw(sf::RenderWindow& window) {
 	sf::FloatRect v(view.getCenter() - view.getSize() / 2.0f, view.getSize());
 	dcomponents->sort();
 	for (auto& i : *dcomponents) {
-		//if (i.getSprite().getGlobalBounds().intersects(v))
-		i.draw(&window);
+		if (i.getSprite().getGlobalBounds().intersects(v))
+			i.draw(&window);
 	}
 #ifdef BENCHMARK
 	auto elapsed = c.getElapsedTime().asMicroseconds();
@@ -197,16 +197,16 @@ Entity* Level::addEntityTest(object_type type, int team, sf::Vector2i coords)
 	}
 	DrawComponent* dc = getObjDC(*dcomponents, *tm_, type);
 	Entity* entity = entities->declareNew(type, dcomponents.get(), dc, uc, coords, state);
-	addChildDC(object_type::POISON, dc);
+	addChildDC(object_type::POISON, dc, 51);
 	return entity;
 }
 
-void Level::addChildDC(object_type type, DrawComponent* parent)
+void Level::addChildDC(object_type type, DrawComponent* parent, uint8_t order)
 {
 	auto search = Data<char>::d()->entityinfo.find(type);
 	if (search != Data<char>::d()->entityinfo.end()) {
 		auto& [path, offset, rect] = search->second;
-		auto dcp = dcomponents->declareNew(tm_->get(path), parent->getOffset(), 51, rect);
+		auto dcp = dcomponents->declareNew(tm_->get(path), parent->getOffset(), order, rect);
 		dcp->updateEntityPos(parent->coords(), state.heightmap);
 	}
 }
